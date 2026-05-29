@@ -1,8 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
 
-// Boids flocking simulation — separation, alignment, cohesion
-const NUM_BIRDS = 55;
+const NUM_BIRDS = 60;
 const SPEED = 1.6;
 const PERCEPTION = 90;
 const SEPARATION_DIST = 28;
@@ -10,6 +9,10 @@ const EDGE_MARGIN = 80;
 
 function randomBetween(a, b) {
   return a + Math.random() * (b - a);
+}
+
+function clamp(val, min, max) {
+  return Math.max(min, Math.min(max, val));
 }
 
 class Boid {
@@ -22,12 +25,11 @@ class Boid {
   }
 
   edges(w, h) {
-    // Soft steering away from edges
     const turn = 0.18;
-    if (this.x < EDGE_MARGIN)  this.vx += turn;
-    if (this.x > w - EDGE_MARGIN) this.vx -= turn;
-    if (this.y < EDGE_MARGIN)  this.vy += turn;
-    if (this.y > h - EDGE_MARGIN) this.vy -= turn;
+    if (this.x < EDGE_MARGIN)      this.vx += turn;
+    if (this.x > w - EDGE_MARGIN)  this.vx -= turn;
+    if (this.y < EDGE_MARGIN)      this.vy += turn;
+    if (this.y > h - EDGE_MARGIN)  this.vy -= turn;
   }
 
   flock(boids) {
@@ -58,13 +60,11 @@ class Boid {
     const maxForce = 0.04;
 
     if (count > 0) {
-      // Alignment
       alignX = alignX / count - this.vx;
       alignY = alignY / count - this.vy;
       this.vx += clamp(alignX, -maxForce, maxForce) * 1.0;
       this.vy += clamp(alignY, -maxForce, maxForce) * 1.0;
 
-      // Cohesion
       cohX = (cohX / count - this.x) * 0.001;
       cohY = (cohY / count - this.y) * 0.001;
       this.vx += clamp(cohX, -maxForce, maxForce);
@@ -78,7 +78,6 @@ class Boid {
       this.vy += clamp(sepY * 0.05, -maxForce * 1.5, maxForce * 1.5);
     }
 
-    // Limit speed
     const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
     if (speed > SPEED) {
       this.vx = (this.vx / speed) * SPEED;
@@ -103,26 +102,17 @@ class Boid {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(angle);
-
-    // Simple bird silhouette: two arced wings + body
     ctx.beginPath();
-    // Left wing
     ctx.moveTo(0, 0);
     ctx.quadraticCurveTo(-size * 0.6, -size * 0.5, -size, 0);
-    // Right wing
     ctx.moveTo(0, 0);
     ctx.quadraticCurveTo(size * 0.6, -size * 0.5, size, 0);
-
-    ctx.strokeStyle = 'rgba(246, 130, 31, 0.55)';
+    ctx.strokeStyle = 'rgba(246, 130, 31, 0.5)';
     ctx.lineWidth = 1.2;
     ctx.lineCap = 'round';
     ctx.stroke();
     ctx.restore();
   }
-}
-
-function clamp(val, min, max) {
-  return Math.max(min, Math.min(max, val));
 }
 
 export default function Birds() {
