@@ -35,6 +35,10 @@ export default function Hero() {
 
   return (
     <section id="hero" className="hero" ref={ref}>
+      <div
+        className="hero-bg-photo"
+        style={{ backgroundImage: `url(${process.env.PUBLIC_URL}/hero-bg.jpg)` }}
+      />
       <Birds />
       <motion.div className="hero-content" style={{ y, opacity }}>
         <motion.p

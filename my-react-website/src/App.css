@@ -113,14 +113,26 @@ a { color: inherit; text-decoration: none; }
   overflow: hidden;
 }
 
+.hero-bg-photo {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center 60%;
+  background-repeat: no-repeat;
+  opacity: 0.18;
+  pointer-events: none;
+  z-index: 0;
+}
+
 .hero::before {
   content: '';
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 60% 50% at 70% 40%, rgba(246,130,31,0.07) 0%, transparent 70%),
-    radial-gradient(ellipse 40% 60% at 20% 80%, rgba(246,130,31,0.04) 0%, transparent 60%);
+    linear-gradient(to bottom, rgba(10,10,10,0.55) 0%, rgba(10,10,10,0.3) 50%, rgba(10,10,10,0.85) 100%),
+    radial-gradient(ellipse 60% 50% at 70% 40%, rgba(246,130,31,0.06) 0%, transparent 70%);
   pointer-events: none;
+  z-index: 0;
 }
 
 .hero-content {
@@ -211,6 +223,36 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ─── About ────────────────────────────────────────────────────── */
+.about-top {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 3.5rem;
+  align-items: start;
+  margin-bottom: 3rem;
+}
+
+.about-headshot-wrap {
+  position: relative;
+}
+
+.about-headshot {
+  width: 100%;
+  aspect-ratio: 3/4;
+  object-fit: cover;
+  object-position: top;
+  border-radius: 12px;
+  filter: grayscale(20%);
+  display: block;
+  border: 1px solid var(--border);
+}
+
+.about-intro {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* override existing about-grid for the lower half */
 .about {
   padding: 8rem 0;
   background: var(--bg2);
@@ -274,6 +316,160 @@ a { color: inherit; text-decoration: none; }
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
+
+/* ─── Photography ──────────────────────────────────────────────── */
+.photos-section {
+  padding: 8rem 0;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+}
+
+.photos-sub {
+  font-size: 1.05rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-top: -1.5rem;
+  margin-bottom: 3rem;
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.photo-card {
+  cursor: pointer;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--bg2);
+}
+
+.photo-card-img-wrap {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4/3;
+}
+
+.photo-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+.photo-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0);
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 1rem;
+  transition: background 0.3s;
+}
+
+.photo-card:hover .photo-card-overlay {
+  background: rgba(0,0,0,0.3);
+}
+
+.photo-card-expand {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: white;
+  letter-spacing: 0.06em;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.25s, transform 0.25s;
+}
+
+.photo-card:hover .photo-card-expand {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.photo-card-meta {
+  padding: 0.9rem 1.1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.photo-card-caption {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.photo-card-location {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-family: var(--mono);
+}
+
+/* Lightbox */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0,0,0,0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  cursor: pointer;
+}
+
+.lightbox-inner {
+  position: relative;
+  max-width: 1100px;
+  width: 100%;
+  cursor: default;
+}
+
+.lightbox-img {
+  width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: 8px;
+  display: block;
+}
+
+.lightbox-caption {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.lightbox-location {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--accent);
+}
+
+.lightbox-close {
+  position: absolute;
+  top: -1rem;
+  right: -1rem;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.lightbox-close:hover { background: var(--accent); color: #000; }
 
 /* ─── Experience ───────────────────────────────────────────────── */
 .experience {
@@ -477,6 +673,12 @@ a { color: inherit; text-decoration: none; }
   .hero { padding: 0 1.25rem; }
   .section-inner { padding: 0 1.25rem; }
 
+  .about-top {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  .about-headshot-wrap { max-width: 200px; }
+
   .about-grid {
     grid-template-columns: 1fr;
     gap: 3rem;
@@ -485,6 +687,8 @@ a { color: inherit; text-decoration: none; }
     position: static;
     grid-template-columns: 1fr 1fr;
   }
+
+  .photo-grid { grid-template-columns: 1fr; }
 
   .exp-timeline {
     grid-template-columns: 2px 1fr;

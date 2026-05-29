@@ -50,15 +50,40 @@ export default function About() {
           About
         </motion.p>
 
-        <div className="about-grid" ref={ref}>
-          <div className="about-text">
-            {lines.map((line, i) => (
+        <div className="about-top" ref={ref}>
+          <motion.div
+            className="about-headshot-wrap"
+            initial={{ opacity: 0, x: -30 }}
+            animate={inView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <img src="/photos/photo4.jpg" alt="Burke Ruder" className="about-headshot" />
+          </motion.div>
+
+          <div className="about-intro">
+            {lines.slice(0, 2).map((line, i) => (
               <motion.p
                 key={i}
                 className={i === 0 ? 'about-lead' : 'about-body'}
                 initial={{ opacity: 0, y: 24 }}
                 animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.7, delay: i * 0.13, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0.7, delay: 0.1 + i * 0.13, ease: [0.22, 1, 0.36, 1] }}
+              >
+                {line}
+              </motion.p>
+            ))}
+          </div>
+        </div>
+
+        <div className="about-grid">
+          <div className="about-text">
+            {lines.slice(2).map((line, i) => (
+              <motion.p
+                key={i}
+                className="about-body"
+                initial={{ opacity: 0, y: 24 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.7, delay: 0.35 + i * 0.13, ease: [0.22, 1, 0.36, 1] }}
               >
                 {line}
               </motion.p>

@@ -1,7 +1,7 @@
 import { motion, useScroll, useMotionValueEvent } from 'motion/react';
 import { useState } from 'react';
 
-const links = ['About', 'Experience', 'Contact'];
+const links = ['About', 'Experience', 'Photos', 'Contact'];
 
 export default function Nav() {
   const [hidden, setHidden] = useState(false);
