@@ -1,0 +1,32 @@
+{
+    "name": "burkeruder-homepage",
+    "version": "1.0.0",
+    "description": "burkeruder",
+    "scripts": {
+      "start": "react-scripts start",
+      "build": "react-scripts build",
+      "test": "react-scripts test",
+      "eject": "react-scripts eject",
+      "prettier": "prettier --write .",
+      "lint": "eslint src --ext .js,.jsx,.ts,.tsx"
+    },
+    "keywords": [],
+    "author": "Takuya Matsuyama",
+    "license": "MIT",
+    "dependencies": {
+      "@chakra-ui/icons": "^2.1.1",
+      "@chakra-ui/react": "^2.8.1",
+      "@emotion/react": "^11.11.1",
+      "@emotion/styled": "^11.11.0",
+      "framer-motion": "^10.16.4",
+      "react": "^18.2.0",
+      "react-dom": "^18.2.0",
+      "react-icons": "^4.11.0",
+      "three": "^0.157.0"
+    },
+    "devDependencies": {
+      "eslint": "^8.52.0",
+      "eslint-config-react-app": "^7.0.1",
+      "prettier": "^3.0.3"
+    }
+  }     
