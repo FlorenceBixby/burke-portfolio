@@ -1,5 +1,6 @@
 import { motion, useScroll, useTransform } from 'motion/react';
 import { useRef } from 'react';
+import Birds from './Birds';
 
 const words = ['Sales.', 'Operations.', 'Technology.', 'Leadership.'];
 
@@ -34,6 +35,7 @@ export default function Hero() {
 
   return (
     <section id="hero" className="hero" ref={ref}>
+      <Birds />
       <motion.div className="hero-content" style={{ y, opacity }}>
         <motion.p
           className="hero-eyebrow"
