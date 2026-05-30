@@ -92,22 +92,272 @@ a { color: inherit; text-decoration: none; }
 }
 .hero-accent { color: var(--accent); }
 
-/* ─── Birds Canvas ─────────────────────────────────────────────── */
-.birds-canvas {
+/* ─── Nav Dropdown ─────────────────────────────────────────────── */
+.nav-item-portfolio {
+  position: relative;
+  cursor: default;
+}
+.nav-link-text {
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  transition: color 0.2s;
+  cursor: default;
+  user-select: none;
+}
+.nav-item-portfolio:hover .nav-link-text,
+.nav-link-text.nav-active { color: var(--text); }
+
+.nav-dropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(12,12,12,0.96);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  min-width: 160px;
+  z-index: 200;
+}
+.nav-dropdown-item {
+  display: block;
+  padding: 0.7rem 1.2rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  transition: color 0.15s, background 0.15s;
+  border-bottom: 1px solid var(--border);
+}
+.nav-dropdown-item:last-child { border-bottom: none; }
+.nav-dropdown-item:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+
+/* ═══════════════════════════════════════════════════════════════
+   SLIDESHOW HOME
+══════════════════════════════════════════════════════════════ */
+.slideshow {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background: #000;
+  cursor: default;
+}
+
+/* Each slide */
+.slide {
   position: absolute;
   inset: 0;
-  width: 100%;
+}
+.slide-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  will-change: transform, opacity;
+}
+.slide-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.08) 0%,
+    rgba(0,0,0,0.05) 40%,
+    rgba(0,0,0,0.55) 80%,
+    rgba(0,0,0,0.82) 100%
+  );
+}
+
+/* Text overlay */
+.slide-name {
+  position: absolute;
+  bottom: 4rem;
+  left: 2.5rem;
+  z-index: 10;
+}
+.slide-location {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+  margin-bottom: 0.5rem;
+}
+.slide-title {
+  font-size: clamp(2.4rem, 5vw, 4.2rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+.slide-tagline {
+  font-size: 0.95rem;
+  color: rgba(255,255,255,0.45);
+  font-style: italic;
+}
+
+/* Arrows */
+.slide-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.7);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
+  backdrop-filter: blur(8px);
+}
+.slide-arrow:hover { background: rgba(255,255,255,0.15); color: #fff; }
+.slide-arrow--prev { left: 1.5rem; }
+.slide-arrow--next { right: 1.5rem; }
+
+/* Dots */
+.slide-dots {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  gap: 0.5rem;
+}
+.slide-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.3);
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.2s, transform 0.2s;
+}
+.slide-dot--active {
+  background: #fff;
+  transform: scale(1.4);
+}
+
+/* Progress bar */
+.slide-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgba(255,255,255,0.08);
+  z-index: 10;
+}
+.slide-progress-fill {
   height: 100%;
-  pointer-events: none;
-  z-index: 1;
+  background: rgba(255,255,255,0.5);
+  transform-origin: left;
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   HOME PAGE
+   GALLERY PAGE (Downtown Austin)
 ══════════════════════════════════════════════════════════════ */
+.gallery-page {
+  padding-top: 64px;
+  min-height: 100vh;
+}
+.gallery-header {
+  padding: 4rem 2.5rem 2.5rem;
+  max-width: var(--max-w);
+  margin: 0 auto;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2rem;
+}
+.gallery-title {
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+.gallery-count {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+}
+.gallery-grid {
+  padding: 0 2.5rem 4rem;
+  max-width: var(--max-w);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+.gallery-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+  cursor: pointer;
+  aspect-ratio: 3/2;
+  background: #111;
+}
+.gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.45s ease;
+}
+.gallery-item-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  color: white;
+}
 
-/* Hero */
+/* ═══════════════════════════════════════════════════════════════
+   (old home hero — replaced by slideshow, kept for reference safety)
+══════════════════════════════════════════════════════════════ */
+/* Home footer */
+.home-footer {
+  background: #000;
+  padding: 1.5rem 2.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+.home-footer-links { display: flex; gap: 1.5rem; }
+.home-footer-links a { color: var(--text-muted); transition: color 0.2s; }
+.home-footer-links a:hover { color: var(--text); }
+
+/* (keeping old hero styles stub so About page hero still works) */
 .home-hero {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ABOUT PAGE
+══════════════════════════════════════════════════════════════ */
+.about-page { padding-top: 64px; }
+
+.about-hero {
   position: relative;
   height: 100vh;
   min-height: 600px;
