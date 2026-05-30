@@ -22,7 +22,7 @@ const socials = [
     ),
   },
   {
-    href: 'https://twitter.com/burkeruder',
+    href: 'https://x.com/home',
     label: 'Twitter / X',
     icon: (
       <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
@@ -31,7 +31,7 @@ const socials = [
     ),
   },
   {
-    href: 'https://discord.com/users/burkeruder',
+    href: 'https://discord.com/users/Mr.Bixby',
     label: 'Discord',
     icon: (
       <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
