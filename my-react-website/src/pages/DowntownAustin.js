@@ -1,5 +1,5 @@
-import { motion, useInView, AnimatePresence } from 'motion/react';
-import { useRef, useState } from 'react';
+import { motion, useScroll, useTransform } from 'motion/react';
+import { useRef } from 'react';
 
 const photos = [
   '/photos/3R2A5320.jpg', '/photos/3R2A5322.jpg', '/photos/3R2A5327.jpg',
@@ -18,93 +18,44 @@ const photos = [
   '/photos/3R2A5403.jpg', '/photos/3R2A5406.jpg',
 ];
 
-function PhotoItem({ src, index, onClick }) {
+function PhotoRow({ src, index }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: '-40px' });
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start end', 'end start'],
+  });
+
+  const y = useTransform(scrollYProgress, [0, 1], ['6%', '-6%']);
+  const opacity = useTransform(scrollYProgress, [0, 0.12, 0.88, 1], [0, 1, 1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.15], [0.97, 1]);
 
   return (
     <motion.div
       ref={ref}
-      className="gallery-item"
-      initial={{ opacity: 0, y: 20 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.6, delay: (index % 4) * 0.06, ease: [0.22, 1, 0.36, 1] }}
-      onClick={() => onClick(index)}
-      whileHover="hover"
+      className="scroll-photo-row"
+      style={{ opacity, scale }}
     >
-      <motion.img
-        src={src}
-        alt=""
-        loading="lazy"
-        variants={{ hover: { scale: 1.04 } }}
-        transition={{ duration: 0.45 }}
-      />
-      <motion.div
-        className="gallery-item-overlay"
-        variants={{ hover: { opacity: 1 } }}
-        initial={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
-      >
-        <span>↗</span>
-      </motion.div>
+      <div className="scroll-photo-label">
+        <span className="scroll-photo-num">{String(index + 1).padStart(2, '0')}</span>
+        <span className="scroll-photo-city">Downtown Austin</span>
+      </div>
+
+      <div className="scroll-photo-frame">
+        <motion.img
+          src={src}
+          alt=""
+          loading="lazy"
+          className="scroll-photo-img"
+          style={{ y }}
+        />
+      </div>
     </motion.div>
   );
 }
 
-function Lightbox({ index, onClose, onPrev, onNext }) {
-  const photo = index !== null ? photos[index] : null;
-  return (
-    <AnimatePresence>
-      {photo && (
-        <motion.div
-          className="lightbox"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          onClick={onClose}
-        >
-          <motion.div
-            className="lightbox-inner"
-            initial={{ scale: 0.93, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.95, opacity: 0 }}
-            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-            onClick={e => e.stopPropagation()}
-          >
-            <AnimatePresence mode="wait">
-              <motion.img
-                key={photo}
-                src={photo}
-                alt=""
-                className="lightbox-img"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.18 }}
-              />
-            </AnimatePresence>
-            <div className="lightbox-caption">
-              <span className="lightbox-location">Downtown Austin</span>
-              <span>{index + 1} / {photos.length}</span>
-            </div>
-            <button className="lightbox-close" onClick={onClose}>✕</button>
-            <button className="lightbox-prev" onClick={onPrev}>←</button>
-            <button className="lightbox-next" onClick={onNext}>→</button>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-}
-
 export default function DowntownAustin() {
-  const [selected, setSelected] = useState(null);
-  const prev = () => setSelected(i => (i - 1 + photos.length) % photos.length);
-  const next = () => setSelected(i => (i + 1) % photos.length);
-
   return (
-    <div className="gallery-page">
+    <div className="scroll-gallery-page">
       <div className="gallery-header">
         <motion.p
           className="section-label"
@@ -128,22 +79,19 @@ export default function DowntownAustin() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.5 }}
         >
-          {photos.length} photographs
+          {photos.length} photographs — scroll to explore
         </motion.p>
       </div>
 
-      <div className="gallery-grid">
+      <div className="scroll-photo-feed">
         {photos.map((src, i) => (
-          <PhotoItem key={src} src={src} index={i} onClick={setSelected} />
+          <PhotoRow key={src} src={src} index={i} />
         ))}
       </div>
 
-      <Lightbox
-        index={selected}
-        onClose={() => setSelected(null)}
-        onPrev={prev}
-        onNext={next}
-      />
+      <div className="footer" style={{ textAlign: 'center' }}>
+        © {new Date().getFullYear()} Burke Ruder · All rights reserved
+      </div>
     </div>
   );
 }
