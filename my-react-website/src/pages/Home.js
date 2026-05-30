@@ -52,9 +52,9 @@ export default function Home() {
   }, [prev, next]);
 
   const variants = {
-    enter: (dir) => ({ opacity: 0, scale: 1.015, x: dir > 0 ? 30 : -30 }),
-    center: { opacity: 1, scale: 1, x: 0 },
-    exit: (dir) => ({ opacity: 0, scale: 0.99, x: dir > 0 ? -30 : 30 }),
+    enter: () => ({ opacity: 0, scale: 1.06 }),
+    center: { opacity: 1, scale: 1 },
+    exit: () => ({ opacity: 0, scale: 0.96 }),
   };
 
   return (
@@ -73,7 +73,7 @@ export default function Home() {
           initial="enter"
           animate="center"
           exit="exit"
-          transition={{ duration: 1.1, ease: [0.4, 0, 0.2, 1] }}
+          transition={{ duration: 2.2, ease: [0.4, 0, 0.2, 1] }}
         >
           <div
             className="slide-bg"
@@ -131,16 +131,6 @@ export default function Home() {
         ))}
       </div>
 
-      {/* Progress bar */}
-      <div className="slide-progress">
-        <motion.div
-          key={`${current}-progress`}
-          className="slide-progress-fill"
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: paused ? undefined : 1 }}
-          transition={{ duration: INTERVAL / 1000, ease: 'linear' }}
-        />
-      </div>
     </div>
   );
 }
