@@ -875,7 +875,9 @@ a { color: inherit; text-decoration: none; }
   .section-inner { padding: 0 1.25rem; }
 
   /* Slideshow */
-  .slide-name { bottom: 3rem; left: 1.25rem; }
+  .slideshow { height: 75vw; }
+  .slide-bg { background-position: center; }
+  .slide-name { bottom: 2rem; left: 1.25rem; }
   .slide-title { font-size: clamp(1.8rem, 8vw, 3rem); }
   .slide-arrow { width: 38px; height: 38px; font-size: 0.9rem; }
   .slide-arrow--prev { left: 0.75rem; }
