@@ -8,7 +8,6 @@ import {
   useMotionValue,
   useSpring,
   animate,
-  stagger,
 } from 'motion/react';
 
 /* ── Animated counter ─────────────────────────────────────── */
