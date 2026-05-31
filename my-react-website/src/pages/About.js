@@ -1,227 +1,265 @@
-import { Link } from 'react-router-dom';
-import { motion } from 'motion/react';
+import { motion, useScroll, useTransform, useSpring } from 'motion/react';
+import { useRef } from 'react';
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 28 },
-  visible: (i = 0) => ({
-    opacity: 1, y: 0,
-    transition: { duration: 0.7, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] },
-  }),
-};
-
-const values = [
-  { icon: '🔍', title: 'Transparency First', desc: 'We always tell you what we know, what we don\'t, and why we\'re recommending what we are.' },
-  { icon: '🤝', title: 'Long-Term Relationships', desc: 'We\'re not transactional. We build partnerships that last the lifetime of your technology agreements.' },
-  { icon: '⚖️', title: 'Vendor Neutral', desc: 'We work with 200+ vendors so we can always match the right solution to your specific needs.' },
-  { icon: '🚀', title: 'Speed & Efficiency', desc: 'Our process cuts months of RFP cycles down to days, without sacrificing diligence.' },
-  { icon: '🛡️', title: 'Accountability', desc: 'We stay engaged after contracts are signed — managing escalations, renewals, and optimization.' },
-  { icon: '💡', title: 'Strategic Thinking', desc: 'We bring a 20+ year enterprise technology perspective to every engagement.' },
+const experience = [
+  {
+    company: 'Cloudflare',
+    role: 'Senior Account Executive',
+    years: '2021 – Present',
+    color: '#F6821F',
+    bullets: [
+      'Consistently exceeded quota — 100%+ attainment each year',
+      'Progressed from BDR → Channel → AE → Sr. AE',
+      'Focused on enterprise security, networking, and edge solutions',
+    ],
+  },
+  {
+    company: 'Paycor',
+    role: 'Account Executive',
+    years: '2020 – 2021',
+    color: '#4A9EFF',
+    bullets: [
+      'Sold HCM and payroll solutions to mid-market and enterprise',
+      'Built pipeline from ground up in new territory',
+    ],
+  },
+  {
+    company: 'Vercara',
+    role: 'Account Executive',
+    years: '2019 – 2020',
+    color: '#9B59B6',
+    bullets: [
+      'Sold DNS, DDoS, and web security solutions',
+      'Managed strategic accounts across financial services vertical',
+    ],
+  },
+  {
+    company: 'Lighthouse Solar',
+    role: 'Director of Procurement',
+    years: '2016 – 2021',
+    color: '#F1C40F',
+    bullets: [
+      'Managed $50M+ in procurement across projects',
+      'Led sourcing strategy and vendor negotiations',
+      'Built and scaled procurement operations from scratch',
+    ],
+  },
+  {
+    company: 'UPS',
+    role: 'Multiple Roles',
+    years: '2004 – 2016',
+    color: '#8B6914',
+    bullets: [
+      'Grew from Package Handler to Operations Supervisor',
+      'Managed teams of 30+ across peak seasons',
+      'Developed deep expertise in logistics and process optimization',
+    ],
+  },
 ];
 
+const stats = [
+  { value: '20+', label: 'Years of Experience' },
+  { value: '$50M+', label: 'Procurement Managed' },
+  { value: '4×', label: 'Top Performer' },
+  { value: '100%+', label: 'Quota Attainment' },
+];
+
+function StatCounter({ value, label, i }) {
+  return (
+    <motion.div
+      className="about-stat"
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={{ y: -4 }}
+    >
+      <motion.span
+        className="about-stat-value"
+        initial={{ opacity: 0, scale: 0.8 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5, delay: i * 0.1 + 0.2, ease: [0.22, 1, 0.36, 1] }}
+      >
+        {value}
+      </motion.span>
+      <span className="about-stat-label">{label}</span>
+    </motion.div>
+  );
+}
+
+function ExpCard({ item, i }) {
+  return (
+    <motion.div
+      className="exp-card"
+      style={{ '--card-color': item.color }}
+      initial={{ opacity: 0, x: i % 2 === 0 ? -30 : 30 }}
+      whileInView={{ opacity: 1, x: 0 }}
+      viewport={{ once: true, margin: '-60px' }}
+      transition={{ duration: 0.7, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={{ y: -6, transition: { duration: 0.22 } }}
+    >
+      <div className="exp-card-header">
+        <div>
+          <div className="exp-company">{item.company}</div>
+          <div className="exp-role">{item.role}</div>
+        </div>
+        <span className="exp-years">{item.years}</span>
+      </div>
+      <ul className="exp-bullets">
+        {item.bullets.map((b, j) => (
+          <motion.li
+            key={j}
+            initial={{ opacity: 0, x: -10 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: i * 0.07 + j * 0.05 + 0.2 }}
+          >
+            {b}
+          </motion.li>
+        ))}
+      </ul>
+    </motion.div>
+  );
+}
+
 export default function About() {
+  const heroRef = useRef(null);
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
+  const heroY = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
+  const smoothHeroY = useSpring(heroY, { stiffness: 40, damping: 18 });
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
+
   return (
     <div className="about-page">
 
       {/* Hero */}
-      <section className="about-hero-section">
-        <div className="container">
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
+      <div ref={heroRef} className="about-hero">
+        <motion.div
+          className="about-hero-bg"
+          style={{
+            backgroundImage: `url(${process.env.PUBLIC_URL}/hero-bg.jpg)`,
+            y: smoothHeroY,
+          }}
+        />
+        <div className="about-hero-overlay" />
+        <motion.div className="about-hero-content" style={{ opacity: heroOpacity }}>
+          <motion.p
+            className="section-label"
+            initial={{ opacity: 0, x: -16 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
           >
-            <motion.div variants={fadeUp}><div className="label">About Us</div></motion.div>
-            <motion.h1 className="about-hero-h1" variants={fadeUp}>
-              We're Technology Advisors<br />Who Work for You
-            </motion.h1>
-            <motion.p className="about-hero-sub" variants={fadeUp}>
-              The Interesting Group is an independent technology solutions advisory firm based in Austin, TX. We help businesses navigate the complex landscape of telecom, cloud, cybersecurity, and IT services — at no cost to you.
+            About
+          </motion.p>
+          <motion.h1
+            className="about-hero-name"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+          >
+            Burke Ruder
+          </motion.h1>
+          <motion.p
+            className="about-hero-sub"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.55 }}
+          >
+            Sales leader. Procurement strategist. Photographer.
+          </motion.p>
+        </motion.div>
+      </div>
+
+      {/* Stats bar */}
+      <div className="about-stats-bar">
+        {stats.map((s, i) => <StatCounter key={s.label} {...s} i={i} />)}
+      </div>
+
+      {/* Bio */}
+      <section className="about-bio">
+        <motion.div
+          className="about-bio-inner"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-60px' }}
+          variants={{ visible: { transition: { staggerChildren: 0.12 } } }}
+        >
+          {[
+            "Twenty years across logistics, renewable energy, cybersecurity, and SaaS have given me one consistent edge: I know how to find the right solution at the right price and get deals done.",
+            "At UPS I learned operations from the ground up — managing teams, optimizing processes, and delivering under pressure. At Lighthouse Solar I took that discipline into procurement, overseeing $50M+ in sourcing decisions for large-scale solar projects.",
+            "Since 2019 I've been in enterprise technology sales — Vercara, Paycor, and now Cloudflare — building pipelines from scratch, navigating complex deals, and consistently hitting and exceeding quota.",
+            "Outside of work, I'm usually behind a camera. Austin's streets, the light at golden hour, the energy of a city that never quite sits still — that's where I find my reset.",
+          ].map((p, i) => (
+            <motion.p
+              key={i}
+              className="about-bio-para"
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } },
+              }}
+            >
+              {p}
             </motion.p>
-          </motion.div>
+          ))}
+        </motion.div>
+      </section>
+
+      {/* Experience timeline */}
+      <section className="about-experience">
+        <motion.div
+          className="about-exp-header"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          <p className="section-label">Career</p>
+          <h2 className="about-exp-title">Experience</h2>
+        </motion.div>
+        <div className="exp-grid">
+          {experience.map((item, i) => <ExpCard key={item.company} item={item} i={i} />)}
         </div>
       </section>
 
-      {/* Mission */}
-      <section className="about-mission">
-        <div className="container">
-          <div className="about-mission-grid">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: '-80px' }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <div className="label">Our Mission</div>
-              <blockquote className="about-mission-quote">
-                "Technology should accelerate your business, not distract from it. Our job is to make sure you're always running on the right infrastructure — at the right price."
-              </blockquote>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: '-80px' }}
-              transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            >
-              {[
-                'Most businesses end up with the wrong technology because the process of evaluating vendors is slow, opaque, and tilted in the vendors\' favor.',
-                'The Interesting Group exists to level the playing field. As an independent advisor, we bring deep market knowledge, vendor relationships, and a structured evaluation process to every engagement.',
-                'Because our compensation comes from the vendors — not you — our interests are fully aligned with getting you the best outcome.',
-              ].map((p, i) => (
-                <motion.p
-                  key={i}
-                  className="about-mission-body"
-                  initial={{ opacity: 0, y: 16 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: i * 0.1 }}
-                >{p}</motion.p>
-              ))}
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Values */}
-      <section className="about-values">
-        <div className="container">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-60px' }}
-            variants={fadeUp}
+      {/* Contact */}
+      <motion.section
+        className="about-contact"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+      >
+        <motion.h2
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          Let's Connect
+        </motion.h2>
+        <div className="about-contact-links">
+          <motion.a
+            href="https://linkedin.com/in/burkeruder"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="about-contact-btn"
+            whileHover={{ scale: 1.05, y: -3 }}
+            whileTap={{ scale: 0.95 }}
           >
-            <div className="label">Our Values</div>
-            <h2 className="section-title">What Guides<br /><span>Everything We Do</span></h2>
-          </motion.div>
-          <motion.div
-            className="about-values-grid"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-60px' }}
-            variants={{ visible: { transition: { staggerChildren: 0.07 } } }}
+            LinkedIn
+          </motion.a>
+          <motion.a
+            href="mailto:burke.ruder@gmail.com"
+            className="about-contact-btn about-contact-btn--outline"
+            whileHover={{ scale: 1.05, y: -3 }}
+            whileTap={{ scale: 0.95 }}
           >
-            {values.map((v, i) => (
-              <motion.div
-                key={v.title}
-                className="about-value-card"
-                variants={fadeUp}
-                custom={i}
-                whileHover={{ y: -6, transition: { duration: 0.2 } }}
-              >
-                <div className="about-value-num">0{i + 1}</div>
-                <div className="about-value-icon">{v.icon}</div>
-                <div className="about-value-title">{v.title}</div>
-                <div className="about-value-desc">{v.desc}</div>
-              </motion.div>
-            ))}
-          </motion.div>
+            Email Me
+          </motion.a>
         </div>
-      </section>
+      </motion.section>
 
-      {/* Sandler */}
-      <section className="about-sandler">
-        <div className="container">
-          <div className="about-sandler-inner">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-            >
-              <div className="label">Our Partnership</div>
-              <h2 className="section-title">Powered by<br /><span>Sandler Partners</span></h2>
-              {[
-                'The Interesting Group operates under a partnership agreement with Sandler Partners — one of the largest technology advisory organizations in the United States.',
-                'This gives us access to every major carrier, cloud provider, and technology vendor, backed by proven procurement infrastructure and supplier relationships.',
-                'What this means for you: the reach of a national advisory firm with the attention of a dedicated local partner.',
-              ].map((p, i) => (
-                <motion.p
-                  key={i}
-                  className="about-mission-body"
-                  style={{ marginTop: i === 0 ? '1.5rem' : 0 }}
-                  initial={{ opacity: 0, y: 16 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 + 0.2, duration: 0.6 }}
-                >{p}</motion.p>
-              ))}
-              <motion.div
-                style={{ marginTop: '2rem' }}
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.5 }}
-              >
-                <Link to="/contact">
-                  <motion.span className="btn-primary" whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-                    Work With Us →
-                  </motion.span>
-                </Link>
-              </motion.div>
-            </motion.div>
-            <motion.div
-              className="about-sandler-stat-grid"
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
-            >
-              {[
-                { num: '200+', label: 'Technology Vendors' },
-                { num: '8',    label: 'Solution Categories' },
-                { num: '#1',   label: 'Master Agent in US' },
-                { num: '$0',   label: 'Cost to You' },
-              ].map((s) => (
-                <motion.div
-                  key={s.label}
-                  className="about-sandler-stat"
-                  variants={{ hidden: { opacity: 0, scale: 0.92 }, visible: { opacity: 1, scale: 1, transition: { duration: 0.5, ease: [0.16,1,0.3,1] } } }}
-                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                >
-                  <div className="about-sandler-stat-num">{s.num}</div>
-                  <div className="about-sandler-stat-label">{s.label}</div>
-                </motion.div>
-              ))}
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="cta-band">
-        <div className="cta-band-glow" />
-        <div className="container" style={{ position: 'relative' }}>
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-          >
-            <div className="label" style={{ justifyContent: 'center' }}>Let's Talk</div>
-            <h2 className="section-title" style={{ textAlign: 'center', maxWidth: 560, margin: '0 auto 1rem' }}>
-              Ready to Simplify Your<br /><span>Technology Stack?</span>
-            </h2>
-            <p className="section-sub" style={{ textAlign: 'center', margin: '0 auto 3rem' }}>
-              Free 30-minute technology assessment. No sales pressure — just an honest conversation about your environment and your options.
-            </p>
-            <div className="cta-actions">
-              <Link to="/contact">
-                <motion.span className="btn-primary" whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-                  Schedule a Free Assessment →
-                </motion.span>
-              </Link>
-              <Link to="/solutions">
-                <motion.span className="btn-outline" whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-                  View All Solutions
-                </motion.span>
-              </Link>
-            </div>
-          </motion.div>
-        </div>
-      </section>
     </div>
   );
 }
