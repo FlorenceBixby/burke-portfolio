@@ -5,6 +5,6 @@
   "description": "Burke Ruder personal website",
   "scripts": {
     "start": "npm start --prefix my-react-website",
-    "build": "npm run build --prefix my-react-website"
+    "build": "npm install --prefix my-react-website && npm run build --prefix my-react-website"
   }
 }
