@@ -1,130 +1,110 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { motion, useScroll, useMotionValueEvent, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 
-const solutionLinks = [
-  { label: 'Network & Voice',        path: '/solutions/network-voice' },
-  { label: 'Unified Communications', path: '/solutions/unified-communications' },
-  { label: 'Contact Center',         path: '/solutions/contact-center' },
-  { label: 'Cybersecurity',          path: '/solutions/cybersecurity' },
-  { label: 'Cloud Computing',        path: '/solutions/cloud-computing' },
-  { label: 'Mobility & IoT & AI',    path: '/solutions/mobility-iot-ai' },
-  { label: 'Managed Services',       path: '/solutions/managed-services' },
-  { label: 'SD-WAN',                 path: '/solutions/sd-wan' },
+const solutions = [
+  { label: 'Network & Voice',          path: '/solutions/network-voice',           icon: '📡' },
+  { label: 'Unified Communications',   path: '/solutions/unified-communications',  icon: '💬' },
+  { label: 'Contact Center',           path: '/solutions/contact-center',          icon: '🎧' },
+  { label: 'Cybersecurity',            path: '/solutions/cybersecurity',           icon: '🔒' },
+  { label: 'Cloud Computing',          path: '/solutions/cloud-computing',         icon: '☁️' },
+  { label: 'Mobility & IoT & AI',      path: '/solutions/mobility-iot-ai',         icon: '📱' },
+  { label: 'Managed Services',         path: '/solutions/managed-services',        icon: '⚙️' },
+  { label: 'SD-WAN',                   path: '/solutions/sd-wan',                  icon: '🌐' },
 ];
 
 export default function Nav() {
-  const [hidden, setHidden]           = useState(false);
-  const [atTop, setAtTop]             = useState(true);
-  const [solutionsOpen, setSolutions] = useState(false);
-  const { scrollY } = useScroll();
-  const location    = useLocation();
+  const [scrolled, setScrolled] = useState(false);
+  const [dropOpen, setDropOpen] = useState(false);
+  const location = useLocation();
 
-  useMotionValueEvent(scrollY, 'change', (latest) => {
-    const prev = scrollY.getPrevious() ?? 0;
-    setHidden(latest > prev && latest > 100);
-    setAtTop(latest < 40);
-  });
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
-  const transparent = atTop && location.pathname === '/';
+  useEffect(() => { setDropOpen(false); }, [location]);
+
+  const isActive = (path) =>
+    location.pathname === path || location.pathname.startsWith(path + '/');
 
   return (
     <motion.nav
-      className={`nav ${transparent ? 'nav-overlay' : 'nav-solid'}`}
-      animate={{ y: hidden ? -80 : 0 }}
-      transition={{ duration: 0.35, ease: 'easeInOut' }}
+      className={`nav ${scrolled ? 'nav--solid' : 'nav--transparent'}`}
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
     >
-      {/* Logo */}
-      <motion.div
-        initial={{ opacity: 0, x: -12 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      >
-        <Link to="/" className="nav-logo">
-          <motion.span
-            className="nav-logo-dot"
-            animate={{ boxShadow: ['0 0 0px var(--accent)', '0 0 10px var(--accent)', '0 0 0px var(--accent)'] }}
-            transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
-          />
-          The Interesting Group
-        </Link>
-      </motion.div>
+      <Link to="/" className="nav-logo">
+        <motion.span
+          className="nav-logo-dot"
+          animate={{ boxShadow: ['0 0 6px #52b788', '0 0 14px #52b788', '0 0 6px #52b788'] }}
+          transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        The Interesting Group
+      </Link>
 
-      {/* Links */}
-      <motion.ul
-        className="nav-links"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.25, duration: 0.5 }}
-      >
-        {/* Solutions dropdown */}
-        <li
-          className="nav-item-dropdown"
-          onMouseEnter={() => setSolutions(true)}
-          onMouseLeave={() => setSolutions(false)}
+      <div className="nav-links">
+        <Link to="/" className={location.pathname === '/' ? 'nav-active' : ''}>Home</Link>
+
+        <div
+          className="nav-drop-wrap"
+          onMouseEnter={() => setDropOpen(true)}
+          onMouseLeave={() => setDropOpen(false)}
         >
-          <span className={`nav-link-text ${location.pathname.startsWith('/solutions') ? 'nav-active' : ''}`}>
-            Solutions ∨
-          </span>
+          <button
+            className={`nav-drop-trigger${isActive('/solutions') ? ' nav-active' : ''}`}
+            onClick={() => setDropOpen(!dropOpen)}
+          >
+            Solutions ▾
+          </button>
           <AnimatePresence>
-            {solutionsOpen && (
+            {dropOpen && (
               <motion.div
-                className="nav-dropdown nav-dropdown-wide"
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.18 }}
+                className="nav-dropdown"
+                initial={{ opacity: 0, y: -8, scale: 0.97 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -8, scale: 0.97 }}
+                transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
               >
-                <Link to="/solutions" className="nav-dropdown-all" onClick={() => setSolutions(false)}>
-                  All Solutions →
-                </Link>
-                <div className="nav-dropdown-grid">
-                  {solutionLinks.map((s, i) => (
-                    <motion.div
-                      key={s.path}
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.03 }}
-                    >
-                      <Link
-                        to={s.path}
-                        className="nav-dropdown-item"
-                        onClick={() => setSolutions(false)}
-                      >
-                        {s.label}
-                      </Link>
-                    </motion.div>
-                  ))}
-                </div>
+                <Link to="/solutions">All Solutions</Link>
+                {solutions.map((s, i) => (
+                  <motion.div
+                    key={s.path}
+                    initial={{ opacity: 0, x: -6 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.03, duration: 0.2 }}
+                  >
+                    <Link to={s.path}>
+                      <span className="nav-dropdown-icon">{s.icon}</span>
+                      {s.label}
+                    </Link>
+                  </motion.div>
+                ))}
               </motion.div>
             )}
           </AnimatePresence>
-        </li>
+        </div>
 
-        <li>
-          <Link to="/about" className={location.pathname === '/about' ? 'nav-active' : ''}>
-            About
-          </Link>
-        </li>
+        <Link to="/about"   className={isActive('/about')   ? 'nav-active' : ''}>About</Link>
+        <Link to="/contact" className={isActive('/contact') ? 'nav-active' : ''}>Contact</Link>
 
-        <li>
-          <Link to="/contact" className={location.pathname === '/contact' ? 'nav-active' : ''}>
-            Contact
-          </Link>
-        </li>
+        <Link to="/contact" className="nav-cta">
+          <motion.span
+            className="btn-primary"
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
+            style={{ display: 'inline-flex', alignItems: 'center' }}
+          >
+            Get Started
+          </motion.span>
+        </Link>
+      </div>
 
-        <li>
-          <Link to="/contact">
-            <motion.span
-              className="nav-cta"
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
-            >
-              Free Assessment
-            </motion.span>
-          </Link>
-        </li>
-      </motion.ul>
+      <button className="nav-hamburger" aria-label="Menu">
+        <span /><span /><span />
+      </button>
     </motion.nav>
   );
 }

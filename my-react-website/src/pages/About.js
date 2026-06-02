@@ -10,12 +10,12 @@ const fadeUp = {
 };
 
 const values = [
-  { icon: '🔍', title: 'Transparency First',      desc: 'We always tell you what we know, what we don\'t, and why we\'re recommending what we are.' },
-  { icon: '🤝', title: 'Long-Term Relationships',  desc: 'We\'re not transactional. We build partnerships that last the lifetime of your technology agreements.' },
-  { icon: '⚖️', title: 'Vendor Neutral',           desc: 'We work with 200+ vendors so we can always match the right solution to your specific needs.' },
-  { icon: '🚀', title: 'Speed & Efficiency',       desc: 'Our process cuts months of RFP cycles down to days, without sacrificing diligence.' },
-  { icon: '🛡️', title: 'Accountability',           desc: 'We stay engaged after contracts are signed — managing escalations, renewals, and optimization.' },
-  { icon: '💡', title: 'Strategic Thinking',       desc: 'We bring a 20+ year enterprise technology perspective to every engagement.' },
+  { icon: '🔍', title: 'Transparency First', desc: 'We always tell you what we know, what we don\'t, and why we\'re recommending what we are.' },
+  { icon: '🤝', title: 'Long-Term Relationships', desc: 'We\'re not transactional. We build partnerships that last the lifetime of your technology agreements.' },
+  { icon: '⚖️', title: 'Vendor Neutral', desc: 'We work with 200+ vendors so we can always match the right solution to your specific needs.' },
+  { icon: '🚀', title: 'Speed & Efficiency', desc: 'Our process cuts months of RFP cycles down to days, without sacrificing diligence.' },
+  { icon: '🛡️', title: 'Accountability', desc: 'We stay engaged after contracts are signed — managing escalations, renewals, and optimization.' },
+  { icon: '💡', title: 'Strategic Thinking', desc: 'We bring a 20+ year enterprise technology perspective to every engagement.' },
 ];
 
 export default function About() {
