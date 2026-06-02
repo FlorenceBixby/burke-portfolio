@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import VinylRecord from '../components/VinylRecord';
 
 /* ── Marquee items ────────────────────────────────────────── */
 const marqueeItems = [
@@ -45,16 +44,6 @@ export default function Home() {
 
       {/* ── Hero ──────────────────────────────────────────────── */}
       <section className="hero">
-
-        {/* Full turntable — top-right, fully visible */}
-        <div style={{
-          position: 'absolute',
-          top: '-24px',
-          right: '-32px',
-          zIndex: 0, pointerEvents: 'none',
-        }}>
-          <VinylRecord size={380} opacity={0.15} />
-        </div>
 
         <div className="hero-inner">
           <motion.span
