@@ -1,97 +1,6 @@
-import { useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import VinylRecord from '../components/VinylRecord';
-
-/* ── Constellation / orb canvas background ────────────────── */
-function HeroCanvas() {
-  const canvasRef = useRef(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let raf;
-    let W, H;
-
-    const DOTS = 55;
-    const CONN_DIST = 160;
-    const dots = [];
-
-    function resize() {
-      W = canvas.width  = canvas.offsetWidth;
-      H = canvas.height = canvas.offsetHeight;
-    }
-
-    function init() {
-      dots.length = 0;
-      for (let i = 0; i < DOTS; i++) {
-        dots.push({
-          x: Math.random() * W,
-          y: Math.random() * H,
-          vx: (Math.random() - 0.5) * 0.35,
-          vy: (Math.random() - 0.5) * 0.35,
-          r: Math.random() * 2 + 1.5,
-        });
-      }
-    }
-
-    function draw() {
-      ctx.clearRect(0, 0, W, H);
-
-      // connections
-      for (let i = 0; i < dots.length; i++) {
-        for (let j = i + 1; j < dots.length; j++) {
-          const dx = dots[i].x - dots[j].x;
-          const dy = dots[i].y - dots[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < CONN_DIST) {
-            const alpha = (1 - dist / CONN_DIST) * 0.18;
-            ctx.beginPath();
-            ctx.moveTo(dots[i].x, dots[i].y);
-            ctx.lineTo(dots[j].x, dots[j].y);
-            ctx.strokeStyle = `rgba(74,124,89,${alpha})`;
-            ctx.lineWidth = 1;
-            ctx.stroke();
-          }
-        }
-      }
-
-      // dots
-      for (const d of dots) {
-        ctx.beginPath();
-        ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(74,124,89,0.35)';
-        ctx.fill();
-      }
-    }
-
-    function tick() {
-      for (const d of dots) {
-        d.x += d.vx;
-        d.y += d.vy;
-        if (d.x < 0 || d.x > W) d.vx *= -1;
-        if (d.y < 0 || d.y > H) d.vy *= -1;
-      }
-      draw();
-      raf = requestAnimationFrame(tick);
-    }
-
-    resize();
-    init();
-    tick();
-
-    const ro = new ResizeObserver(() => { resize(); init(); });
-    ro.observe(canvas);
-
-    return () => {
-      cancelAnimationFrame(raf);
-      ro.disconnect();
-    };
-  }, []);
-
-  return <canvas ref={canvasRef} className="hero-canvas" style={{ width: '100%', height: '100%' }} />;
-}
 
 /* ── Marquee items ────────────────────────────────────────── */
 const marqueeItems = [
@@ -136,14 +45,15 @@ export default function Home() {
 
       {/* ── Hero ──────────────────────────────────────────────── */}
       <section className="hero">
-        <HeroCanvas />
 
-        {/* Vinyl record — right side, partially cropped */}
+        {/* Full-hero vinyl record background — centred, large, subtle */}
         <div style={{
-          position: 'absolute', right: '-80px', top: '50%',
-          transform: 'translateY(-50%)', zIndex: 1, pointerEvents: 'none',
+          position: 'absolute',
+          top: '50%', left: '50%',
+          transform: 'translate(-50%, -50%)',
+          zIndex: 0, pointerEvents: 'none',
         }}>
-          <VinylRecord size={560} opacity={0.12} />
+          <VinylRecord size={Math.min(window.innerWidth, 900)} opacity={0.09} />
         </div>
 
         <div className="hero-inner">
@@ -237,9 +147,9 @@ export default function Home() {
 
           <div className="steps-grid">
             {[
-              { n: '01', title: 'Tell us what you need', body: 'A 15-minute call to understand your tech environment, your goals, and where you\'re feeling pain.' },
-              { n: '02', title: 'We do the work', body: 'We evaluate vendors, run the comparison, negotiate pricing, and bring you a clear recommendation.' },
-              { n: '03', title: 'We stay with you', body: 'After you\'re live, we manage the vendor relationship — escalations, renewals, and optimization.' },
+              { n: '01', title: 'Tell us what you need',    body: 'A 15-minute call to understand your tech environment, your goals, and where you\'re feeling pain.' },
+              { n: '02', title: 'We do the work',           body: 'We evaluate vendors, run the comparison, negotiate pricing, and bring you a clear recommendation.' },
+              { n: '03', title: 'We stay with you',         body: 'After you\'re live, we manage the vendor relationship — escalations, renewals, and optimization.' },
             ].map((s, i) => (
               <motion.div
                 key={s.n}
@@ -311,11 +221,7 @@ export default function Home() {
               >
                 <div className="p-card-icon">{card.icon}</div>
                 <h3>{card.title}</h3>
-                <ul>
-                  {card.bullets.map((b) => (
-                    <li key={b}>{b}</li>
-                  ))}
-                </ul>
+                <ul>{card.bullets.map(b => <li key={b}>{b}</li>)}</ul>
               </motion.div>
             ))}
           </div>
@@ -350,29 +256,22 @@ export default function Home() {
           </motion.h2>
           <motion.p
             className="body-lg mt-md"
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.1 }}
+            initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.1 }}
           >
             If your business runs on technology — and every business does — we can help. We work with companies across construction, healthcare, logistics, legal, finance, retail, manufacturing, and beyond.
           </motion.p>
           <motion.p
             className="body-lg mt-md"
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.18 }}
+            initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.18 }}
           >
             There's no industry we won't work in, no company too small, and no geography that's out of reach.
           </motion.p>
           <motion.div
-            className="mt-lg"
-            style={{ display: 'flex', gap: 14 }}
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.25 }}
+            className="mt-lg" style={{ display: 'flex', gap: 14 }}
+            initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.25 }}
           >
             <Link to="/contact">
               <motion.span className="btn btn-dark" whileHover={{ y: -2 }} style={{ display: 'inline-flex' }}>
@@ -388,7 +287,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── How we work / Principles ────────────────────────────── */}
+      {/* ── Principles ──────────────────────────────────────────── */}
       <section className="section section-gray">
         <div className="container">
           <motion.span
@@ -399,26 +298,21 @@ export default function Home() {
           </motion.span>
           <motion.h2
             className="headline-lg"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
+            initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }} transition={{ duration: 0.7 }}
           >
             Three things we never compromise on.
           </motion.h2>
           <div className="principles-grid">
             {[
-              { n: '01', title: 'Vendor neutrality', body: 'We represent 200+ providers. Our only incentive is finding what\'s actually right for your business — not what pays us the most.' },
-              { n: '02', title: 'No cost to you', body: 'Our advisory services are funded entirely by the vendors we place. You get enterprise-grade expertise at zero cost to your budget.' },
+              { n: '01', title: 'Vendor neutrality',       body: 'We represent 200+ providers. Our only incentive is finding what\'s actually right for your business — not what pays us the most.' },
+              { n: '02', title: 'No cost to you',          body: 'Our advisory services are funded entirely by the vendors we place. You get enterprise-grade expertise at zero cost to your budget.' },
               { n: '03', title: 'Long-term accountability', body: 'We don\'t disappear after the contract is signed. We manage the relationship, handle escalations, and optimize over time.' },
             ].map((p, i) => (
               <motion.div
-                key={p.n}
-                className="principle"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: i * 0.1 }}
+                key={p.n} className="principle"
+                initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }} transition={{ duration: 0.6, delay: i * 0.1 }}
               >
                 <div className="principle-num">{p.n}</div>
                 <h3>{p.title}</h3>
@@ -432,10 +326,8 @@ export default function Home() {
       {/* ── Footer CTA ──────────────────────────────────────────── */}
       <motion.section
         className="footer-cta"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true, margin: '-60px' }}
-        transition={{ duration: 0.8 }}
+        initial={{ opacity: 0 }} whileInView={{ opacity: 1 }}
+        viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.8 }}
       >
         <h2>Ready to stop managing vendors?</h2>
         <p>15 minutes. No cost. No obligation.</p>

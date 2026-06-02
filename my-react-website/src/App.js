@@ -1,7 +1,9 @@
 import './App.css';
+import { useState, useCallback } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Nav from './components/Nav';
 import Footer from './components/Footer';
+import PageIntro from './components/PageIntro';
 import Home from './pages/Home';
 import Solutions from './pages/Solutions';
 import About from './pages/About';
@@ -16,9 +18,13 @@ import ManagedServices from './pages/solutions/ManagedServices';
 import SDWAN from './pages/solutions/SDWAN';
 
 function App() {
+  const [introDone, setIntroDone] = useState(false);
+  const handleIntroDone = useCallback(() => setIntroDone(true), []);
+
   return (
     <BrowserRouter>
-      <div className="App">
+      <PageIntro onDone={handleIntroDone} />
+      <div className="App" style={{ visibility: introDone ? 'visible' : 'hidden' }}>
         <Nav />
         <Routes>
           <Route path="/" element={<Home />} />
