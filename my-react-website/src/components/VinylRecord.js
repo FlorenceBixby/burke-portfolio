@@ -1,14 +1,20 @@
 import { motion } from 'motion/react';
 
 /**
- * Decorative vinyl record SVG — slowly spins in the hero background.
- * Dark disc on a light background, using the green accent for details.
+ * Spinning vinyl record with Black Keys-style label and animated tonearm.
+ * Tonearm swings in from rest position and drops onto the groove on load.
  */
-export default function VinylRecord({ size = 540, opacity = 0.13 }) {
+export default function VinylRecord({ size = 700, opacity = 0.11 }) {
   const cx = size / 2;
-  const grooves = Array.from({ length: 18 }, (_, i) => ({
-    r: 80 + i * 14,
-    o: 0.14 - i * 0.004,
+
+  // Tonearm pivot point (upper right of record)
+  const pivotX = cx + size * 0.345;
+  const pivotY = cx - size * 0.322;
+
+  // Groove rings — tighter spacing for more realism
+  const grooves = Array.from({ length: 28 }, (_, i) => ({
+    r: size * 0.148 + i * (size * 0.026),
+    opacity: 0.09 + (i % 3 === 0 ? 0.05 : 0),
   }));
 
   return (
@@ -21,103 +27,185 @@ export default function VinylRecord({ size = 540, opacity = 0.13 }) {
         userSelect: 'none',
         pointerEvents: 'none',
       }}
-      initial={{ opacity: 0, scale: 0.9 }}
+      initial={{ opacity: 0, scale: 0.94 }}
       animate={{ opacity, scale: 1 }}
-      transition={{ duration: 2.4, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 1.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
     >
-      {/* Spinning disc */}
+      {/* ── Spinning disc ─────────────────────────── */}
       <motion.svg
         width={size}
         height={size}
         viewBox={`0 0 ${size} ${size}`}
         animate={{ rotate: 360 }}
-        transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
+        transition={{ duration: 2.8, repeat: Infinity, ease: 'linear' }}
         style={{ position: 'absolute', top: 0, left: 0 }}
       >
-        {/* Outer body */}
-        <circle cx={cx} cy={cx} r={cx - 4} fill="#1a1a1a" stroke="rgba(0,0,0,0.1)" strokeWidth="1" />
+        {/* Outer vinyl body */}
+        <circle cx={cx} cy={cx} r={cx - 3} fill="#0f0f0f" />
 
-        {/* Vinyl grooves */}
-        {grooves.map(({ r, o }) => (
-          <circle
-            key={r}
-            cx={cx}
-            cy={cx}
-            r={r}
+        {/* Outer edge highlight */}
+        <circle cx={cx} cy={cx} r={cx - 3} fill="none"
+          stroke="rgba(255,255,255,0.07)" strokeWidth="2" />
+
+        {/* Grooves — dense rings */}
+        {grooves.map(({ r, opacity: go }, i) => (
+          <circle key={i} cx={cx} cy={cx} r={r}
             fill="none"
-            stroke={`rgba(255,255,255,${o})`}
-            strokeWidth="0.6"
-          />
+            stroke={`rgba(255,255,255,${go})`}
+            strokeWidth="0.5" />
         ))}
 
-        {/* Label area */}
-        <circle cx={cx} cy={cx} r={62} fill="#2d2d2d" />
-        <circle cx={cx} cy={cx} r={58} fill="none" stroke="rgba(74,124,89,0.6)" strokeWidth="0.8" />
-        <circle cx={cx} cy={cx} r={46} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />
-
-        {/* TIG monogram */}
-        <text
-          x={cx}
-          y={cx - 6}
-          textAnchor="middle"
-          fontSize="11"
-          fontFamily="Inter, sans-serif"
-          fontWeight="700"
-          letterSpacing="0.12em"
-          fill="rgba(255,255,255,0.6)"
-        >
-          TIG
-        </text>
-        <text
-          x={cx}
-          y={cx + 8}
-          textAnchor="middle"
-          fontSize="5.5"
-          fontFamily="Inter, sans-serif"
-          fontWeight="400"
-          letterSpacing="0.18em"
-          fill="rgba(255,255,255,0.3)"
-        >
-          AUSTIN TX
-        </text>
-
-        {/* Center spindle */}
-        <circle cx={cx} cy={cx} r={5} fill="#111" stroke="rgba(255,255,255,0.2)" strokeWidth="0.8" />
-
-        {/* Sheen highlight */}
-        <ellipse
-          cx={cx - 55}
-          cy={cx - 85}
-          rx={65}
-          ry={24}
+        {/* Sheen / light reflection arc */}
+        <path
+          d={`M ${cx - size * 0.28} ${cx - size * 0.36} A ${size * 0.45} ${size * 0.45} 0 0 1 ${cx + size * 0.36} ${cx - size * 0.1}`}
           fill="none"
           stroke="rgba(255,255,255,0.035)"
-          strokeWidth="16"
-          transform={`rotate(-35 ${cx} ${cx})`}
+          strokeWidth={size * 0.045}
+          strokeLinecap="round"
         />
+
+        {/* ── Label area ── */}
+        {/* Label base — deep charcoal */}
+        <circle cx={cx} cy={cx} r={size * 0.138} fill="#1c1c1c" />
+
+        {/* Label outer ring — Black Keys gold/amber */}
+        <circle cx={cx} cy={cx} r={size * 0.136} fill="none"
+          stroke="#c8882a" strokeWidth={size * 0.008} />
+
+        {/* Inner detail ring */}
+        <circle cx={cx} cy={cx} r={size * 0.118} fill="none"
+          stroke="rgba(200,136,42,0.3)" strokeWidth="1" />
+
+        {/* "THE" — top of label */}
+        <text
+          x={cx}
+          y={cx - size * 0.058}
+          textAnchor="middle"
+          fontSize={size * 0.028}
+          fontFamily="Inter, sans-serif"
+          fontWeight="900"
+          letterSpacing={size * 0.003}
+          fill="rgba(255,255,255,0.85)"
+        >
+          THE
+        </text>
+
+        {/* "BLACK KEYS" — center of label */}
+        <text
+          x={cx}
+          y={cx - size * 0.018}
+          textAnchor="middle"
+          fontSize={size * 0.021}
+          fontFamily="Inter, sans-serif"
+          fontWeight="700"
+          letterSpacing={size * 0.002}
+          fill="rgba(255,255,255,0.7)"
+        >
+          BLACK KEYS
+        </text>
+
+        {/* Thin divider line */}
+        <line
+          x1={cx - size * 0.065} y1={cx + size * 0.005}
+          x2={cx + size * 0.065} y2={cx + size * 0.005}
+          stroke="rgba(200,136,42,0.5)" strokeWidth="0.8"
+        />
+
+        {/* "El Camino" in smaller italic */}
+        <text
+          x={cx}
+          y={cx + size * 0.028}
+          textAnchor="middle"
+          fontSize={size * 0.013}
+          fontFamily="Inter, sans-serif"
+          fontWeight="300"
+          fontStyle="italic"
+          letterSpacing={size * 0.002}
+          fill="rgba(255,255,255,0.4)"
+        >
+          El Camino
+        </text>
+
+        {/* Catalog number */}
+        <text
+          x={cx}
+          y={cx + size * 0.058}
+          textAnchor="middle"
+          fontSize={size * 0.009}
+          fontFamily="Inter, sans-serif"
+          fontWeight="400"
+          letterSpacing={size * 0.002}
+          fill="rgba(255,255,255,0.25)"
+        >
+          NON-539882-A
+        </text>
+
+        {/* Center spindle hole */}
+        <circle cx={cx} cy={cx} r={size * 0.012} fill="#050505" />
+        <circle cx={cx} cy={cx} r={size * 0.012} fill="none"
+          stroke="rgba(255,255,255,0.12)" strokeWidth="0.8" />
       </motion.svg>
 
-      {/* Tonearm — static */}
+      {/* ── Tonearm — swings in from rest on load ─── */}
       <svg
         width={size}
         height={size}
         viewBox={`0 0 ${size} ${size}`}
         style={{ position: 'absolute', top: 0, left: 0 }}
       >
-        <circle cx={cx + 155} cy={cx - 145} r={7} fill="#333" stroke="rgba(0,0,0,0.2)" strokeWidth="1.2" />
-        <circle cx={cx + 155} cy={cx - 145} r={3} fill="rgba(74,124,89,0.8)" />
-        <line
-          x1={cx + 155} y1={cx - 145}
-          x2={cx + 38}  y2={cx - 26}
-          stroke="rgba(0,0,0,0.3)" strokeWidth="3.5" strokeLinecap="round"
-        />
-        <line
-          x1={cx + 38} y1={cx - 26}
-          x2={cx + 20} y2={cx - 6}
-          stroke="rgba(0,0,0,0.4)" strokeWidth="2.5" strokeLinecap="round"
-        />
-        <circle cx={cx + 20} cy={cx - 5} r={2.5} fill="rgba(74,124,89,0.9)" />
-        <circle cx={cx + 20} cy={cx - 5} r={5} fill="none" stroke="rgba(74,124,89,0.4)" strokeWidth="0.8" />
+        {/* Pivot base circle */}
+        <circle cx={pivotX} cy={pivotY} r={size * 0.018}
+          fill="#2a2a2a" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
+        <circle cx={pivotX} cy={pivotY} r={size * 0.007}
+          fill="rgba(74,124,89,0.9)" />
+
+        {/* Animated arm group — rotates around pivot */}
+        <motion.g
+          initial={{ rotate: 36 }}
+          animate={{ rotate: 0 }}
+          transition={{ duration: 2.2, delay: 1.0, ease: [0.16, 1, 0.3, 1] }}
+          style={{ transformOrigin: `${pivotX}px ${pivotY}px` }}
+        >
+          {/* Counter-weight end (behind pivot) */}
+          <line
+            x1={pivotX} y1={pivotY}
+            x2={pivotX + size * 0.06} y2={pivotY - size * 0.02}
+            stroke="rgba(80,80,80,0.8)" strokeWidth={size * 0.007} strokeLinecap="round"
+          />
+          <circle
+            cx={pivotX + size * 0.068} cy={pivotY - size * 0.023}
+            r={size * 0.012}
+            fill="#333" stroke="rgba(255,255,255,0.1)" strokeWidth="0.8"
+          />
+
+          {/* Main arm shaft */}
+          <line
+            x1={pivotX} y1={pivotY}
+            x2={cx + size * 0.078} y2={cx - size * 0.06}
+            stroke="rgba(60,60,60,0.9)" strokeWidth={size * 0.007} strokeLinecap="round"
+          />
+
+          {/* Headshell / cartridge angled section */}
+          <line
+            x1={cx + size * 0.078} y1={cx - size * 0.06}
+            x2={cx + size * 0.038} y2={cx - size * 0.015}
+            stroke="rgba(60,60,60,0.9)" strokeWidth={size * 0.005} strokeLinecap="round"
+          />
+
+          {/* Stylus tip */}
+          <circle
+            cx={cx + size * 0.038} cy={cx - size * 0.013}
+            r={size * 0.006}
+            fill="rgba(74,124,89,0.95)"
+          />
+          {/* Stylus glow */}
+          <circle
+            cx={cx + size * 0.038} cy={cx - size * 0.013}
+            r={size * 0.013}
+            fill="none"
+            stroke="rgba(74,124,89,0.25)" strokeWidth="1"
+          />
+        </motion.g>
       </svg>
     </motion.div>
   );
