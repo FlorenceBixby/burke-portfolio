@@ -2,13 +2,13 @@ import { motion } from 'motion/react';
 
 /**
  * Decorative vinyl record SVG — slowly spins in the hero background.
- * Rendered as a large, near-transparent watermark element.
+ * Dark disc on a light background, using the green accent for details.
  */
 export default function VinylRecord({ size = 540, opacity = 0.13 }) {
   const cx = size / 2;
   const grooves = Array.from({ length: 18 }, (_, i) => ({
     r: 80 + i * 14,
-    o: 0.18 - i * 0.006,
+    o: 0.14 - i * 0.004,
   }));
 
   return (
@@ -21,9 +21,9 @@ export default function VinylRecord({ size = 540, opacity = 0.13 }) {
         userSelect: 'none',
         pointerEvents: 'none',
       }}
-      initial={{ opacity: 0, scale: 0.88 }}
+      initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity, scale: 1 }}
-      transition={{ duration: 2.2, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 2.4, ease: [0.16, 1, 0.3, 1] }}
     >
       {/* Spinning disc */}
       <motion.svg
@@ -31,11 +31,11 @@ export default function VinylRecord({ size = 540, opacity = 0.13 }) {
         height={size}
         viewBox={`0 0 ${size} ${size}`}
         animate={{ rotate: 360 }}
-        transition={{ duration: 9, repeat: Infinity, ease: 'linear' }}
+        transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
         style={{ position: 'absolute', top: 0, left: 0 }}
       >
-        {/* Outer edge */}
-        <circle cx={cx} cy={cx} r={cx - 4} fill="#0e0e0e" stroke="rgba(255,255,255,0.12)" strokeWidth="1.5" />
+        {/* Outer body */}
+        <circle cx={cx} cy={cx} r={cx - 4} fill="#1a1a1a" stroke="rgba(0,0,0,0.1)" strokeWidth="1" />
 
         {/* Vinyl grooves */}
         {grooves.map(({ r, o }) => (
@@ -46,16 +46,14 @@ export default function VinylRecord({ size = 540, opacity = 0.13 }) {
             r={r}
             fill="none"
             stroke={`rgba(255,255,255,${o})`}
-            strokeWidth="0.7"
+            strokeWidth="0.6"
           />
         ))}
 
         {/* Label area */}
-        <circle cx={cx} cy={cx} r={62} fill="#111" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
-        <circle cx={cx} cy={cx} r={58} fill="none" stroke="var(--accent)" strokeWidth="0.6" opacity="0.5" />
-
-        {/* Label text rings */}
-        <circle cx={cx} cy={cx} r={46} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="0.5" />
+        <circle cx={cx} cy={cx} r={62} fill="#2d2d2d" />
+        <circle cx={cx} cy={cx} r={58} fill="none" stroke="rgba(74,124,89,0.6)" strokeWidth="0.8" />
+        <circle cx={cx} cy={cx} r={46} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />
 
         {/* TIG monogram */}
         <text
@@ -64,9 +62,9 @@ export default function VinylRecord({ size = 540, opacity = 0.13 }) {
           textAnchor="middle"
           fontSize="11"
           fontFamily="Inter, sans-serif"
-          fontWeight="600"
+          fontWeight="700"
           letterSpacing="0.12em"
-          fill="rgba(255,255,255,0.55)"
+          fill="rgba(255,255,255,0.6)"
         >
           TIG
         </text>
@@ -77,63 +75,49 @@ export default function VinylRecord({ size = 540, opacity = 0.13 }) {
           fontSize="5.5"
           fontFamily="Inter, sans-serif"
           fontWeight="400"
-          letterSpacing="0.15em"
-          fill="rgba(255,255,255,0.28)"
+          letterSpacing="0.18em"
+          fill="rgba(255,255,255,0.3)"
         >
-          AUSTIN, TX
+          AUSTIN TX
         </text>
 
-        {/* Center spindle hole */}
-        <circle cx={cx} cy={cx} r={5} fill="#060606" stroke="rgba(255,255,255,0.15)" strokeWidth="0.8" />
+        {/* Center spindle */}
+        <circle cx={cx} cy={cx} r={5} fill="#111" stroke="rgba(255,255,255,0.2)" strokeWidth="0.8" />
 
-        {/* Highlight sheen */}
+        {/* Sheen highlight */}
         <ellipse
-          cx={cx - 60}
-          cy={cx - 90}
-          rx={70}
-          ry={28}
+          cx={cx - 55}
+          cy={cx - 85}
+          rx={65}
+          ry={24}
           fill="none"
-          stroke="rgba(255,255,255,0.04)"
-          strokeWidth="18"
+          stroke="rgba(255,255,255,0.035)"
+          strokeWidth="16"
           transform={`rotate(-35 ${cx} ${cx})`}
         />
       </motion.svg>
 
-      {/* Tonearm — static, layered on top */}
+      {/* Tonearm — static */}
       <svg
         width={size}
         height={size}
         viewBox={`0 0 ${size} ${size}`}
         style={{ position: 'absolute', top: 0, left: 0 }}
       >
-        {/* Pivot point */}
-        <circle cx={cx + 155} cy={cx - 145} r={7} fill="#1a1a1a" stroke="rgba(255,255,255,0.18)" strokeWidth="1.2" />
-        <circle cx={cx + 155} cy={cx - 145} r={3} fill="rgba(255,255,255,0.25)" />
-
-        {/* Arm shaft */}
+        <circle cx={cx + 155} cy={cx - 145} r={7} fill="#333" stroke="rgba(0,0,0,0.2)" strokeWidth="1.2" />
+        <circle cx={cx + 155} cy={cx - 145} r={3} fill="rgba(74,124,89,0.8)" />
         <line
-          x1={cx + 155}
-          y1={cx - 145}
-          x2={cx + 38}
-          y2={cx - 26}
-          stroke="rgba(255,255,255,0.22)"
-          strokeWidth="3.5"
-          strokeLinecap="round"
+          x1={cx + 155} y1={cx - 145}
+          x2={cx + 38}  y2={cx - 26}
+          stroke="rgba(0,0,0,0.3)" strokeWidth="3.5" strokeLinecap="round"
         />
-        {/* Headshell / cartridge */}
         <line
-          x1={cx + 38}
-          y1={cx - 26}
-          x2={cx + 20}
-          y2={cx - 6}
-          stroke="rgba(255,255,255,0.3)"
-          strokeWidth="2.5"
-          strokeLinecap="round"
+          x1={cx + 38} y1={cx - 26}
+          x2={cx + 20} y2={cx - 6}
+          stroke="rgba(0,0,0,0.4)" strokeWidth="2.5" strokeLinecap="round"
         />
-        {/* Stylus tip */}
-        <circle cx={cx + 20} cy={cx - 5} r={2.5} fill="var(--accent)" opacity="0.7" />
-        {/* Accent glow on stylus */}
-        <circle cx={cx + 20} cy={cx - 5} r={5} fill="none" stroke="var(--accent)" strokeWidth="0.8" opacity="0.3" />
+        <circle cx={cx + 20} cy={cx - 5} r={2.5} fill="rgba(74,124,89,0.9)" />
+        <circle cx={cx + 20} cy={cx - 5} r={5} fill="none" stroke="rgba(74,124,89,0.4)" strokeWidth="0.8" />
       </svg>
     </motion.div>
   );

@@ -1,389 +1,467 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  motion,
-  useScroll,
-  useTransform,
-  useInView,
-  useMotionValue,
-  useSpring,
-  animate,
-} from 'motion/react';
+import { motion } from 'motion/react';
 import VinylRecord from '../components/VinylRecord';
 
-/* ── Animated counter ─────────────────────────────────────── */
-function Counter({ to, suffix = '' }) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true });
-  const motionVal = useMotionValue(0);
-  const [display, setDisplay] = useState('0');
+/* ── Constellation / orb canvas background ────────────────── */
+function HeroCanvas() {
+  const canvasRef = useRef(null);
 
   useEffect(() => {
-    if (!inView) return;
-    const controls = animate(motionVal, to, {
-      duration: 1.8,
-      ease: [0.16, 1, 0.3, 1],
-    });
-    const unsub = motionVal.on('change', (v) => setDisplay(Math.round(v).toString()));
-    return () => { controls.stop(); unsub(); };
-  }, [inView, motionVal, to]);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let raf;
+    let W, H;
 
-  return <span ref={ref}>{display}{suffix}</span>;
+    const DOTS = 55;
+    const CONN_DIST = 160;
+    const dots = [];
+
+    function resize() {
+      W = canvas.width  = canvas.offsetWidth;
+      H = canvas.height = canvas.offsetHeight;
+    }
+
+    function init() {
+      dots.length = 0;
+      for (let i = 0; i < DOTS; i++) {
+        dots.push({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          vx: (Math.random() - 0.5) * 0.35,
+          vy: (Math.random() - 0.5) * 0.35,
+          r: Math.random() * 2 + 1.5,
+        });
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+
+      // connections
+      for (let i = 0; i < dots.length; i++) {
+        for (let j = i + 1; j < dots.length; j++) {
+          const dx = dots[i].x - dots[j].x;
+          const dy = dots[i].y - dots[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < CONN_DIST) {
+            const alpha = (1 - dist / CONN_DIST) * 0.18;
+            ctx.beginPath();
+            ctx.moveTo(dots[i].x, dots[i].y);
+            ctx.lineTo(dots[j].x, dots[j].y);
+            ctx.strokeStyle = `rgba(74,124,89,${alpha})`;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          }
+        }
+      }
+
+      // dots
+      for (const d of dots) {
+        ctx.beginPath();
+        ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(74,124,89,0.35)';
+        ctx.fill();
+      }
+    }
+
+    function tick() {
+      for (const d of dots) {
+        d.x += d.vx;
+        d.y += d.vy;
+        if (d.x < 0 || d.x > W) d.vx *= -1;
+        if (d.y < 0 || d.y > H) d.vy *= -1;
+      }
+      draw();
+      raf = requestAnimationFrame(tick);
+    }
+
+    resize();
+    init();
+    tick();
+
+    const ro = new ResizeObserver(() => { resize(); init(); });
+    ro.observe(canvas);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+    };
+  }, []);
+
+  return <canvas ref={canvasRef} className="hero-canvas" style={{ width: '100%', height: '100%' }} />;
 }
 
-/* ── Cursor glow ──────────────────────────────────────────── */
-function CursorGlow() {
-  const x = useMotionValue(-400);
-  const y = useMotionValue(-400);
-  const sx = useSpring(x, { stiffness: 80, damping: 20 });
-  const sy = useSpring(y, { stiffness: 80, damping: 20 });
-
-  useEffect(() => {
-    const move = (e) => { x.set(e.clientX); y.set(e.clientY); };
-    window.addEventListener('mousemove', move);
-    return () => window.removeEventListener('mousemove', move);
-  }, [x, y]);
-
-  return (
-    <motion.div
-      className="cursor-glow"
-      style={{ left: sx, top: sy }}
-    />
-  );
-}
-
-const solutions = [
-  { icon: '📡', title: 'Network & Voice', desc: 'Enterprise connectivity and carrier-grade voice from every major provider.', path: '/solutions/network-voice' },
-  { icon: '💬', title: 'Unified Communications', desc: 'Cloud phone, video, and messaging platforms for modern teams.', path: '/solutions/unified-communications' },
-  { icon: '🎧', title: 'Contact Center', desc: 'AI-powered CCaaS that scales from 10 seats to enterprise.', path: '/solutions/contact-center' },
-  { icon: '🔒', title: 'Cybersecurity', desc: 'Zero Trust, SASE, MDR, and compliance-ready security frameworks.', path: '/solutions/cybersecurity' },
-  { icon: '☁️', title: 'Cloud Computing', desc: 'Public, private, and hybrid cloud strategies across AWS, Azure, GCP.', path: '/solutions/cloud-computing' },
-  { icon: '📱', title: 'Mobility & IoT & AI', desc: 'MDM, IoT connectivity, and AI automation for distributed operations.', path: '/solutions/mobility-iot-ai' },
-  { icon: '⚙️', title: 'Managed Services', desc: 'Fully outsourced IT, NOC, and helpdesk support from top MSPs.', path: '/solutions/managed-services' },
-  { icon: '🌐', title: 'SD-WAN', desc: 'Intelligent networking that cuts WAN costs by 30–50%.', path: '/solutions/sd-wan' },
+/* ── Marquee items ────────────────────────────────────────── */
+const marqueeItems = [
+  'Connectivity', 'SD-WAN', 'UCaaS', 'CCaaS',
+  'Cybersecurity', 'Cloud', 'Managed IT', 'IoT',
+  'Mobility', 'Network Voice', 'Telecom',
 ];
 
-const whyItems = [
-  { icon: '🎯', title: 'Vendor-Neutral Advice', desc: 'We represent 200+ providers. Our recommendations are always based on your needs, not margins.' },
-  { icon: '💰', title: 'No Additional Cost', desc: 'Advisory services funded by vendors — you get expert guidance at no charge.' },
-  { icon: '⚡', title: 'Faster Procurement', desc: 'Skip months of RFP cycles. Competitive quotes in days through our Sandler Partners network.' },
-  { icon: '🔧', title: 'Ongoing Support', desc: 'We stay engaged after contracts are signed — managing escalations and renewals.' },
+/* ── Solution cards ───────────────────────────────────────── */
+const portfolioCards = [
+  {
+    icon: '📡', title: 'Connectivity & Networking',
+    bullets: ['Dedicated Internet Access', 'MPLS, VPN, Point-to-Point', 'SD-WAN & failover', 'Redundant circuits'],
+  },
+  {
+    icon: '💬', title: 'Unified Communications',
+    bullets: ['Cloud phone & softphones', 'Video & team messaging', 'Microsoft Teams voice', 'Mobile-first workflows'],
+  },
+  {
+    icon: '🎧', title: 'Contact Center & CX',
+    bullets: ['Omni-channel routing', 'AI-powered IVR & virtual agents', 'Workforce management', 'CRM integrations'],
+  },
+  {
+    icon: '🔒', title: 'Cybersecurity',
+    bullets: ['SASE & Zero Trust', 'Endpoint protection & EDR', 'SIEM & SOC-as-a-Service', 'Compliance (SOC 2, HIPAA)'],
+  },
+  {
+    icon: '☁️', title: 'Cloud Infrastructure',
+    bullets: ['AWS, Azure, Google Cloud', 'Managed cloud & migration', 'Direct connect / cloud on-ramps', 'DaaS / virtual desktop'],
+  },
+  {
+    icon: '⚙️', title: 'Managed Services',
+    bullets: ['Helpdesk & IT support', 'Office 365 management', 'Environmental monitoring', 'Custom analytics dashboards'],
+  },
 ];
-
-const vendors = [
-  'AT&T', 'Lumen', 'Comcast Business', 'Spectrum Enterprise', 'Verizon',
-  'RingCentral', 'Zoom', 'Microsoft Teams', 'Dialpad', 'Vonage',
-  'Five9', 'Genesys', 'NICE CXone', 'Talkdesk', 'Palo Alto Networks',
-  'CrowdStrike', 'Fortinet', 'Zscaler', 'AWS', 'Azure', 'Google Cloud',
-  'Airespring', 'Broadvoice', 'Logically', 'Graphiant', 'Crown Castle',
-];
-
-/* ── Fade-up variant ──────────────────────────────────────── */
-const fadeUp = {
-  hidden: { opacity: 0, y: 32 },
-  visible: (i = 0) => ({
-    opacity: 1, y: 0,
-    transition: { duration: 0.7, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] },
-  }),
-};
-
-const fadeIn = {
-  hidden: { opacity: 0 },
-  visible: (i = 0) => ({
-    opacity: 1,
-    transition: { duration: 0.6, delay: i * 0.08 },
-  }),
-};
 
 export default function Home() {
-  const heroRef = useRef(null);
-  const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
-  const heroY = useTransform(scrollYProgress, [0, 1], [0, 80]);
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
-
-  const doubledVendors = [...vendors, ...vendors];
+  const doubled = [...marqueeItems, ...marqueeItems];
 
   return (
-    <main style={{ background: 'var(--bg)' }}>
-      <CursorGlow />
+    <div className="page">
 
-      {/* ── Hero ─────────────────────────────────────────────── */}
-      <section className="hero" ref={heroRef}>
-        <div className="hero-noise" />
-        <div className="hero-glow" />
-        <div className="hero-glow-2" />
+      {/* ── Hero ──────────────────────────────────────────────── */}
+      <section className="hero">
+        <HeroCanvas />
 
-        {/* Vinyl record — hero background right side */}
+        {/* Vinyl record — right side, partially cropped */}
         <div style={{
-          position: 'absolute', right: '-60px', top: '50%',
-          transform: 'translateY(-48%)', zIndex: 0, pointerEvents: 'none',
+          position: 'absolute', right: '-80px', top: '50%',
+          transform: 'translateY(-50%)', zIndex: 1, pointerEvents: 'none',
         }}>
-          <VinylRecord size={600} opacity={0.14} />
+          <VinylRecord size={560} opacity={0.12} />
         </div>
 
-        <motion.div
-          className="hero-content container"
-          style={{ y: heroY, opacity: heroOpacity }}
-        >
-          <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0}>
-            <div className="label">Technology Advisory</div>
-          </motion.div>
+        <div className="hero-inner">
+          <motion.span
+            className="eyebrow"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            Technology Advisor
+          </motion.span>
 
-          <motion.h1 className="hero-h1" variants={fadeUp} initial="hidden" animate="visible" custom={1}>
-            Smarter Technology.
-            <em>Simpler Decisions.</em>
+          <motion.h1
+            className="display"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
+          >
+            Your tech<br />vendors,<br />handled.
           </motion.h1>
 
-          <motion.p className="hero-sub" variants={fadeUp} initial="hidden" animate="visible" custom={2}>
-            Your independent technology advisor — helping businesses source the right telecom, cloud, cybersecurity, and IT solutions from 200+ top vendors, at no additional cost.
+          <motion.p
+            className="body-lg hero-sub"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.18 }}
+          >
+            We source, negotiate, and manage business technology on your behalf — so you can focus on running your business. At no cost to you.
           </motion.p>
 
-          <motion.div className="hero-actions" variants={fadeUp} initial="hidden" animate="visible" custom={3}>
+          <motion.div
+            className="hero-actions"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.28 }}
+          >
             <Link to="/contact">
               <motion.span
-                className="btn-primary"
-                whileHover={{ scale: 1.03 }}
+                className="btn btn-dark"
+                whileHover={{ scale: 1.03, y: -2 }}
                 whileTap={{ scale: 0.97 }}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
+                style={{ display: 'inline-flex' }}
               >
-                Get a Free Assessment →
+                Book a 15-minute call →
               </motion.span>
             </Link>
             <Link to="/solutions">
               <motion.span
-                className="btn-outline"
-                whileHover={{ scale: 1.03 }}
+                className="btn btn-outline"
+                whileHover={{ scale: 1.03, y: -2 }}
                 whileTap={{ scale: 0.97 }}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
+                style={{ display: 'inline-flex' }}
               >
-                Explore Solutions
+                See what we handle
               </motion.span>
             </Link>
           </motion.div>
-
-          <motion.div
-            className="hero-stats"
-            variants={fadeUp}
-            initial="hidden"
-            animate="visible"
-            custom={4}
-          >
-            {[
-              { to: 200, suffix: '+', label: 'Technology Vendors' },
-              { to: 8, suffix: '', label: 'Solution Categories' },
-              { to: 0, prefix: '$', suffix: '', label: 'Advisory Cost to You' },
-              { to: 1, suffix: '', label: 'Trusted Partner' },
-            ].map((s, i) => (
-              <div key={s.label} className="hero-stat">
-                <div className="hero-stat-num">
-                  {s.prefix || ''}<Counter to={s.to} suffix={s.suffix} />
-                  {s.suffix === '+' ? null : null}
-                </div>
-                <div className="hero-stat-label">{s.label}</div>
-              </div>
-            ))}
-          </motion.div>
-        </motion.div>
+        </div>
       </section>
 
-      {/* ── Ticker bar ───────────────────────────────────────── */}
-      <div className="ticker-bar">
-        <div className="ticker-track">
-          {[...vendors, ...vendors].map((v, i) => (
-            <div key={i} className="ticker-item">
-              <span>◆</span>{v}
-            </div>
+      {/* ── Marquee ────────────────────────────────────────────── */}
+      <div className="marquee-outer">
+        <div className="marquee-track">
+          {doubled.map((item, i) => (
+            <span key={i} className="marquee-item">
+              {item}
+              {i < doubled.length - 1 && <span className="marquee-dot" />}
+            </span>
           ))}
         </div>
       </div>
 
-      {/* ── Solutions ────────────────────────────────────────── */}
-      <section className="section-shell">
+      {/* ── How it works ───────────────────────────────────────── */}
+      <section className="section">
         <div className="container">
-          <span className="section-num">01</span>
-          <motion.div
-            className="section-header"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-80px' }}
-            variants={fadeUp}
+          <motion.span
+            className="eyebrow"
+            initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
           >
-            <div className="label">Solutions</div>
-            <h2 className="section-title">
-              Every Category<br /><span>Your Business Needs</span>
-            </h2>
-            <p className="section-sub">
-              We source and manage best-fit solutions across every major technology category — from connectivity to cloud to cybersecurity.
-            </p>
-          </motion.div>
-
-          <motion.div
-            className="sol-grid"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-60px' }}
-            variants={{ visible: { transition: { staggerChildren: 0.06 } } }}
-          >
-            {solutions.map((s, i) => (
-              <motion.div key={s.path} variants={fadeIn} custom={i}>
-                <Link to={s.path} className="sol-card" style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                  <motion.div whileHover={{ scale: 1.02 }} style={{ height: '100%', display: 'contents' }}>
-                    <div className="sol-card-num">0{i + 1}</div>
-                    <div className="sol-card-icon">{s.icon}</div>
-                    <div className="sol-card-title">{s.title}</div>
-                    <div className="sol-card-desc">{s.desc}</div>
-                    <div className="sol-card-arrow">View solution →</div>
-                  </motion.div>
-                </Link>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ── Statement ────────────────────────────────────────── */}
-      <section className="statement-section">
-        <div className="container">
+            How it works
+          </motion.span>
           <motion.h2
-            className="statement-h2"
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-80px' }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-          >
-            Stop overpaying for technology.<br />
-            <span>We fix that.</span>
-          </motion.h2>
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
+            className="headline-lg"
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.7, delay: 0.2 }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           >
-            <Link to="/contact">
-              <motion.span
-                className="btn-primary"
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.96 }}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
-              >
-                Schedule a Free Assessment →
-              </motion.span>
-            </Link>
-          </motion.div>
-        </div>
-      </section>
+            Simple by design.
+          </motion.h2>
 
-      {/* ── Why Us ───────────────────────────────────────────── */}
-      <section className="section-shell">
-        <div className="container">
-          <span className="section-num">02</span>
-          <motion.div
-            className="section-header"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-80px' }}
-            variants={fadeUp}
-          >
-            <div className="label">Why Us</div>
-            <h2 className="section-title">
-              The Smarter Way<br /><span>to Buy Technology</span>
-            </h2>
-            <p className="section-sub">
-              Most businesses overpay because navigating hundreds of vendors is complex. We simplify the entire process.
-            </p>
-          </motion.div>
-
-          <motion.div
-            className="why-row"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-60px' }}
-            variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
-          >
-            {whyItems.map((w, i) => (
+          <div className="steps-grid">
+            {[
+              { n: '01', title: 'Tell us what you need', body: 'A 15-minute call to understand your tech environment, your goals, and where you\'re feeling pain.' },
+              { n: '02', title: 'We do the work', body: 'We evaluate vendors, run the comparison, negotiate pricing, and bring you a clear recommendation.' },
+              { n: '03', title: 'We stay with you', body: 'After you\'re live, we manage the vendor relationship — escalations, renewals, and optimization.' },
+            ].map((s, i) => (
               <motion.div
-                key={w.title}
-                className="why-cell"
-                variants={fadeUp}
-                custom={i}
+                key={s.n}
+                className="step-card"
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
                 whileHover={{ y: -4, transition: { duration: 0.2 } }}
               >
-                <div className="why-cell-num">0{i + 1}</div>
-                <div className="why-cell-icon">{w.icon}</div>
-                <div className="why-cell-title">{w.title}</div>
-                <div className="why-cell-desc">{w.desc}</div>
+                <span className="step-num">{s.n}</span>
+                <h3>{s.title}</h3>
+                <p>{s.body}</p>
               </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ── Vendors ──────────────────────────────────────────── */}
-      <section className="vendors-section">
-        <div className="container">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeUp}
-          >
-            <div className="label">Vendor Network</div>
-            <h2 className="section-title">200+ Carriers &amp; Providers</h2>
-            <p className="section-sub">
-              Access to every major technology vendor — giving you unbiased comparisons and competitive pricing.
-            </p>
-          </motion.div>
-        </div>
-        <div className="vendors-marquee-wrap" style={{ marginTop: '3rem' }}>
-          <div className="vendors-marquee">
-            {doubledVendors.map((v, i) => (
-              <div key={i} className="vendor-chip">{v}</div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── CTA ──────────────────────────────────────────────── */}
-      <section className="cta-band">
-        <div className="cta-band-glow" />
-        <div className="container" style={{ position: 'relative' }}>
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-80px' }}
-            variants={{ visible: { transition: { staggerChildren: 0.12 } } }}
+      {/* ── Statement ──────────────────────────────────────────── */}
+      <motion.section
+        className="statement"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true, margin: '-80px' }}
+        transition={{ duration: 0.8 }}
+      >
+        <p className="statement-text">
+          Most businesses are running on technology they didn't choose carefully —{' '}
+          <strong>not because they made a bad decision, but because they never had time to look.</strong>
+        </p>
+      </motion.section>
+
+      {/* ── Portfolio ───────────────────────────────────────────── */}
+      <section className="section section-gray">
+        <div className="container">
+          <motion.span
+            className="eyebrow"
+            initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
           >
-            <motion.div variants={fadeUp}>
-              <div className="label" style={{ justifyContent: 'center' }}>Ready to Start?</div>
-            </motion.div>
-            <motion.h2 className="section-title cta-band .section-title" variants={fadeUp}
-              style={{ maxWidth: '640px', margin: '0 auto 1rem', textAlign: 'center' }}>
-              Let's Find the Right Technology<br /><span>for Your Business</span>
-            </motion.h2>
-            <motion.p className="section-sub" variants={fadeUp}
-              style={{ maxWidth: '440px', margin: '0 auto 3rem', textAlign: 'center' }}>
-              Free assessment. We review your environment, identify savings, and present the best options across our 200+ vendor network.
-            </motion.p>
-            <motion.div className="cta-actions" variants={fadeUp}>
-              <Link to="/contact">
-                <motion.span className="btn-primary"
-                  whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-                  Schedule a Free Assessment →
-                </motion.span>
-              </Link>
-              <Link to="/solutions">
-                <motion.span className="btn-outline"
-                  whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-                  Browse Solutions
-                </motion.span>
-              </Link>
-            </motion.div>
+            Full capability portfolio
+          </motion.span>
+          <motion.h2
+            className="headline-lg"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          >
+            Everything we handle for you.
+          </motion.h2>
+          <motion.p
+            className="body-md mt-sm"
+            initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+          >
+            We work across every category of business technology through a network of 200+ suppliers. If your business needs it, we can source it, negotiate it, and manage it — at no cost to you.
+          </motion.p>
+
+          <div className="portfolio-grid">
+            {portfolioCards.map((card, i) => (
+              <motion.div
+                key={card.title}
+                className="p-card"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.07 }}
+              >
+                <div className="p-card-icon">{card.icon}</div>
+                <h3>{card.title}</h3>
+                <ul>
+                  {card.bullets.map((b) => (
+                    <li key={b}>{b}</li>
+                  ))}
+                </ul>
+              </motion.div>
+            ))}
+          </div>
+
+          <motion.p
+            style={{ marginTop: '2rem', fontSize: 15, color: 'var(--gray-mid)', textAlign: 'center' }}
+            initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
+          >
+            Don't see what you need?{' '}
+            <Link to="/contact" style={{ color: 'var(--accent)', fontWeight: 600 }}>Let's talk →</Link>
+          </motion.p>
+        </div>
+      </section>
+
+      {/* ── Who we work with ───────────────────────────────────── */}
+      <section className="section">
+        <div className="container-mid">
+          <motion.span
+            className="eyebrow"
+            initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
+          >
+            Who we work with
+          </motion.span>
+          <motion.h2
+            className="headline-lg"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          >
+            Any business. Any size. Anywhere.
+          </motion.h2>
+          <motion.p
+            className="body-lg mt-md"
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+          >
+            If your business runs on technology — and every business does — we can help. We work with companies across construction, healthcare, logistics, legal, finance, retail, manufacturing, and beyond.
+          </motion.p>
+          <motion.p
+            className="body-lg mt-md"
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.18 }}
+          >
+            There's no industry we won't work in, no company too small, and no geography that's out of reach.
+          </motion.p>
+          <motion.div
+            className="mt-lg"
+            style={{ display: 'flex', gap: 14 }}
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.25 }}
+          >
+            <Link to="/contact">
+              <motion.span className="btn btn-dark" whileHover={{ y: -2 }} style={{ display: 'inline-flex' }}>
+                Book a call →
+              </motion.span>
+            </Link>
+            <Link to="/solutions">
+              <motion.span className="btn btn-outline" whileHover={{ y: -2 }} style={{ display: 'inline-flex' }}>
+                See the full portfolio
+              </motion.span>
+            </Link>
           </motion.div>
         </div>
       </section>
-    </main>
+
+      {/* ── How we work / Principles ────────────────────────────── */}
+      <section className="section section-gray">
+        <div className="container">
+          <motion.span
+            className="eyebrow"
+            initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
+          >
+            How we work
+          </motion.span>
+          <motion.h2
+            className="headline-lg"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+          >
+            Three things we never compromise on.
+          </motion.h2>
+          <div className="principles-grid">
+            {[
+              { n: '01', title: 'Vendor neutrality', body: 'We represent 200+ providers. Our only incentive is finding what\'s actually right for your business — not what pays us the most.' },
+              { n: '02', title: 'No cost to you', body: 'Our advisory services are funded entirely by the vendors we place. You get enterprise-grade expertise at zero cost to your budget.' },
+              { n: '03', title: 'Long-term accountability', body: 'We don\'t disappear after the contract is signed. We manage the relationship, handle escalations, and optimize over time.' },
+            ].map((p, i) => (
+              <motion.div
+                key={p.n}
+                className="principle"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: i * 0.1 }}
+              >
+                <div className="principle-num">{p.n}</div>
+                <h3>{p.title}</h3>
+                <p>{p.body}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Footer CTA ──────────────────────────────────────────── */}
+      <motion.section
+        className="footer-cta"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true, margin: '-60px' }}
+        transition={{ duration: 0.8 }}
+      >
+        <h2>Ready to stop managing vendors?</h2>
+        <p>15 minutes. No cost. No obligation.</p>
+        <Link to="/contact">
+          <motion.span
+            className="btn btn-white"
+            whileHover={{ scale: 1.04, y: -2 }}
+            whileTap={{ scale: 0.97 }}
+            style={{ display: 'inline-flex' }}
+          >
+            Book a Call →
+          </motion.span>
+        </Link>
+      </motion.section>
+
+      {/* ── Footer ──────────────────────────────────────────────── */}
+      <footer className="footer">
+        <div className="footer-logo">
+          <span className="footer-logo-the">THE</span>
+          <span className="footer-logo-rest">Interesting Group</span>
+        </div>
+        <div className="footer-meta">
+          <span>© {new Date().getFullYear()} The Interesting Group · Based in Austin, TX · </span>
+          <a href="mailto:info@theinterestinggroup.com">info@theinterestinggroup.com</a>
+        </div>
+      </footer>
+    </div>
   );
 }

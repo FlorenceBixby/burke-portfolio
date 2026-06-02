@@ -22,19 +22,18 @@ function App() {
         <Nav />
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/solutions" element={<Solutions />} />
-          <Route path="/solutions/network-voice" element={<NetworkVoice />} />
-          <Route path="/solutions/unified-communications" element={<UnifiedCommunications />} />
-          <Route path="/solutions/contact-center" element={<ContactCenter />} />
-          <Route path="/solutions/cybersecurity" element={<Cybersecurity />} />
-          <Route path="/solutions/cloud-computing" element={<CloudComputing />} />
-          <Route path="/solutions/mobility-iot-ai" element={<MobilityIoT />} />
-          <Route path="/solutions/managed-services" element={<ManagedServices />} />
-          <Route path="/solutions/sd-wan" element={<SDWAN />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
+          <Route path="/solutions" element={<><Solutions /><Footer /></>} />
+          <Route path="/solutions/network-voice" element={<><NetworkVoice /><Footer /></>} />
+          <Route path="/solutions/unified-communications" element={<><UnifiedCommunications /><Footer /></>} />
+          <Route path="/solutions/contact-center" element={<><ContactCenter /><Footer /></>} />
+          <Route path="/solutions/cybersecurity" element={<><Cybersecurity /><Footer /></>} />
+          <Route path="/solutions/cloud-computing" element={<><CloudComputing /><Footer /></>} />
+          <Route path="/solutions/mobility-iot-ai" element={<><MobilityIoT /><Footer /></>} />
+          <Route path="/solutions/managed-services" element={<><ManagedServices /><Footer /></>} />
+          <Route path="/solutions/sd-wan" element={<><SDWAN /><Footer /></>} />
+          <Route path="/about" element={<><About /><Footer /></>} />
+          <Route path="/contact" element={<><Contact /><Footer /></>} />
         </Routes>
-        <Footer />
       </div>
     </BrowserRouter>
   );
