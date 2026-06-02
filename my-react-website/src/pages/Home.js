@@ -46,14 +46,14 @@ export default function Home() {
       {/* ── Hero ──────────────────────────────────────────────── */}
       <section className="hero">
 
-        {/* Full-hero vinyl record background — centred, large, subtle */}
+        {/* Full turntable — top-right, fully visible */}
         <div style={{
           position: 'absolute',
-          top: '50%', left: '50%',
-          transform: 'translate(-50%, -50%)',
+          top: '-24px',
+          right: '-32px',
           zIndex: 0, pointerEvents: 'none',
         }}>
-          <VinylRecord size={Math.min(window.innerWidth, 900)} opacity={0.09} />
+          <VinylRecord size={380} opacity={0.15} />
         </div>
 
         <div className="hero-inner">
