@@ -29,10 +29,6 @@ export default function Nav() {
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
     >
       <Link to="/" className="nav-logo">
-        {/* Bracket mark */}
-        <svg width="14" height="18" viewBox="0 0 14 18" fill="none" style={{ flexShrink: 0, marginRight: 1 }}>
-          <path d="M8 1H3V17H8" stroke="currentColor" strokeWidth="2.2" strokeLinecap="square" strokeLinejoin="miter"/>
-        </svg>
         <span className="nav-logo-the">THE</span>
         <span className="nav-logo-rest">Interesting Group</span>
       </Link>
