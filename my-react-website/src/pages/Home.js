@@ -336,7 +336,7 @@ export default function Home() {
       <footer className="footer">
         <div className="footer-logo">
           <svg width="11" height="14" viewBox="0 0 14 18" fill="none" style={{ flexShrink: 0, marginRight: 2, color: '#86868b' }}>
-            <path d="M8 1H4C2.9 1 2 1.9 2 3V15C2 16.1 2.9 17 4 17H8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M8 1H3V17H8" stroke="currentColor" strokeWidth="2.2" strokeLinecap="square" strokeLinejoin="miter"/>
           </svg>
           <span className="footer-logo-the">THE</span>
           <span className="footer-logo-rest">Interesting Group</span>
