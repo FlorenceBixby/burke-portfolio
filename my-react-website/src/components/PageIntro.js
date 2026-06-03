@@ -81,7 +81,7 @@ export default function PageIntro({ onDone }) {
               }
               transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
               style={{
-                color: '#4a7c59',
+                color: '#2d5c3d',
                 fontWeight: 900,
                 fontSize: '1.4em',
                 lineHeight: 0.75,
