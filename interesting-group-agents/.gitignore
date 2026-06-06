@@ -1,0 +1,12 @@
+.env
+__pycache__/
+*.pyc
+.DS_Store
+gmail_token.json
+gmail_credentials.json
+
+# Ignore logs but keep state files
+output/
+!output/enrolled_ids.json
+!output/search_state.json
+!output/instantly_campaign_ids.json

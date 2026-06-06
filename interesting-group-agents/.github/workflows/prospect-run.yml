@@ -1,0 +1,48 @@
+name: Prospect Run
+
+on:
+  schedule:
+    - cron: '0 11 * * 1'   # Monday    6 AM CT (UTC-5)
+    - cron: '0 11 * * 3'   # Wednesday 6 AM CT (UTC-5)
+  workflow_dispatch:         # Allow manual trigger from GitHub UI
+
+jobs:
+  prospect-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Write secrets to disk
+        run: |
+          cat > .env << 'EOF'
+          APOLLO_API_KEY=${{ secrets.APOLLO_API_KEY }}
+          INSTANTLY_API_KEY=${{ secrets.INSTANTLY_API_KEY }}
+          HUBSPOT_API_KEY=${{ secrets.HUBSPOT_API_KEY }}
+          GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+          EOF
+          echo '${{ secrets.GMAIL_CREDENTIALS }}' > gmail_credentials.json
+          echo '${{ secrets.GMAIL_TOKEN }}' > gmail_token.json
+
+      - name: Run prospect run
+        run: python autonomous_pipeline.py prospect
+
+      - name: Commit updated state files
+        run: |
+          git config user.name  "TIG Pipeline Bot"
+          git config user.email "burke@theinterestinggroup.com"
+          git add output/enrolled_ids.json output/search_state.json || true
+          git diff --staged --quiet || git commit -m "chore: update pipeline state [skip ci]"
+          git push || true
