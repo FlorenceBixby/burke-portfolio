@@ -2,5 +2,7 @@
   "default": "a67ce237-81be-454e-9638-157680e1fdb3",
   "construction": "839be457-d6f8-4918-be75-d156dfddc660",
   "healthcare": "102c94fc-a52e-4784-9e11-c928a76e0b33",
-  "logistics": "6a53bf59-1703-4291-a2b3-26f8ffd0afcf"
+  "logistics": "6a53bf59-1703-4291-a2b3-26f8ffd0afcf",
+  "ccaas": "PENDING_CREATE_IN_INSTANTLY",
+  "enterprise_security": "PENDING_CREATE_IN_INSTANTLY"
 }

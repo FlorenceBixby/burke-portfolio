@@ -126,8 +126,39 @@ def add_lead_to_campaign(
         return False
 
 
-def detect_industry(company: str) -> str:
+def detect_industry(company: str, employees: int = 0, title: str = "") -> str:
+    """
+    Two-track routing:
+      Enterprise (>=100 employees) → ccaas or enterprise_security based on title
+      SMB (<100 employees)         → construction / healthcare / logistics / default
+    """
     c = (company or "").lower()
+    t = (title or "").lower()
+
+    # ── Enterprise track ──────────────────────────────────────────────────────
+    if employees >= 100:
+        ccaas_signals = [
+            "customer experience", "contact center", "call center", "cx ",
+            "vp operations", "chief operating", "coo", "customer service",
+            "customer success", "customer care",
+        ]
+        if any(s in t for s in ccaas_signals):
+            return "ccaas"
+
+        security_signals = [
+            "ciso", "chief information security", "it director", "director of it",
+            "vp it", "vp of it", "head of it", "it manager", "infrastructure",
+            "network", "security", "cto", "chief technology",
+        ]
+        if any(s in t for s in security_signals):
+            return "enterprise_security"
+
+        # Generic enterprise title → CCaaS (higher avg commission)
+        enterprise_signals = ["vp", "director", "chief", "head of", "president"]
+        if any(s in t for s in enterprise_signals):
+            return "ccaas"
+
+    # ── SMB track ─────────────────────────────────────────────────────────────
     if any(w in c for w in ["construct", "build", "contractor", "plumb", "electric", "hvac", "roofing"]):
         return "construction"
     if any(w in c for w in ["health", "clinic", "dental", "medical", "care", "therapy"]):
@@ -141,10 +172,15 @@ def enroll_prospect(prospect: dict) -> bool:
     """
     Enroll a fully-revealed prospect into the right Instantly campaign.
     prospect must have: email, first_name, last_name, company, title
+    Optional: employees (int) for enterprise routing
     Returns True if enrolled successfully.
     """
     campaign_ids = load_campaign_ids()
-    industry = detect_industry(prospect.get("company", ""))
+    industry = detect_industry(
+        prospect.get("company", ""),
+        employees=prospect.get("employees", 0),
+        title=prospect.get("title", ""),
+    )
     campaign_id = campaign_ids.get(industry, campaign_ids.get("default"))
 
     if not campaign_id:
