@@ -29,6 +29,9 @@ jobs:
           HUBSPOT_API_KEY=${{ secrets.HUBSPOT_API_KEY }}
           GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+          CLOUDFLARE_CLAUDE_READ=${{ secrets.CLOUDFLARE_CLAUDE_READ }}
+          CLOUDFLARE_ZONE_ID=${{ secrets.CLOUDFLARE_ZONE_ID }}
+          CLOUDFLARE_ACCOUNT_ID=${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           EOF
           echo '${{ secrets.GMAIL_CREDENTIALS }}' > gmail_credentials.json
           echo '${{ secrets.GMAIL_TOKEN }}' > gmail_token.json

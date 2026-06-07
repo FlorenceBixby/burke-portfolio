@@ -576,7 +576,18 @@ def daily_recap() -> None:
         f"  Reply rate — yours: {avg_reply_rate}%   |  industry avg: 1-3%  |  good: >5%",
         f"  Click rate — yours: {avg_click_rate}%   |  industry avg: 2-5%  |  good: >7%",
         "",
-        "— Your pipeline agent",
+    ]
+
+    # Cloudflare website traffic
+    try:
+        from cloudflare_agent import format_recap_section
+        lines.append(format_recap_section())
+    except Exception as e:
+        lines.append(f"  (Website traffic unavailable: {e})")
+
+    lines += [
+        "",
+        "— ARIA",
         "",
     ]
 
