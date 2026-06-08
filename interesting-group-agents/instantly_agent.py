@@ -108,18 +108,21 @@ def add_lead_to_campaign(
     """
     payload = {
         "campaign_id":           campaign_id,
-        "skip_if_in_workspace":  True,
-        "email":                 email,
-        "first_name":            first_name,
-        "last_name":             last_name,
-        "company_name":          company,
-        "personalization":       personalization,
-        "custom_variables": {
-            "title": title,
-        },
+        "skip_if_in_campaign":   True,
+        "leads": [
+            {
+                "email":         email,
+                "first_name":    first_name,
+                "last_name":     last_name,
+                "company_name":  company,
+                "personalization": personalization,
+                "job_title":     title,
+                "custom_variables": {"title": title},
+            }
+        ],
     }
     try:
-        _post("leads", payload)
+        _post("leads/add", payload)
         return True
     except requests.HTTPError as e:
         print(f"  Instantly lead add failed: {e.response.text[:120]}")
