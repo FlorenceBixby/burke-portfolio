@@ -449,7 +449,7 @@ def weekly_digest() -> None:
     try:
         from gmail_agent import create_draft
         draft_id = create_draft(
-            to_email="burke@theinterestinggroup.com",
+            to_email="burke.ruder@gmail.com",
             subject=f"TIG Weekly Report — {now}",
             body=body,
         )
@@ -599,7 +599,7 @@ def daily_recap() -> None:
         from gmail_agent import create_draft
         from gmail_agent import _get_gmail_service
         draft_id = create_draft(
-            to_email="burke@theinterestinggroup.com",
+            to_email="burke.ruder@gmail.com",
             subject=f"TIG Daily Recap — {datetime.now().strftime('%b %d')}",
             body=body,
         )
