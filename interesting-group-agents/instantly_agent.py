@@ -215,28 +215,35 @@ def get_campaign_analytics(campaign_id: str) -> dict:
 
 def get_all_campaign_stats() -> list:
     """
-    Pull stats for all 4 TIG campaigns from Instantly v2 API.
-    Returns real open/reply/click/bounce rates.
+    Pull stats for all TIG campaigns from Instantly v2 API.
+    Uses GET /campaigns/analytics which returns all campaigns in one call.
     """
     campaign_ids = load_campaign_ids()
-    campaigns    = {c["id"]: c for c in list_campaigns()}
-    stats        = []
+    id_to_industry = {v: k for k, v in campaign_ids.items()}
 
+    try:
+        all_analytics = _get("campaigns/analytics")
+        if not isinstance(all_analytics, list):
+            all_analytics = []
+    except Exception:
+        all_analytics = []
+
+    # Index by campaign_id
+    analytics_map = {a["campaign_id"]: a for a in all_analytics}
+
+    stats = []
     for industry, cid in campaign_ids.items():
-        campaign  = campaigns.get(cid, {})
-        name      = campaign.get("name", industry)
-        # status: 1=active, 2=paused, 3=completed, 4=draft
-        status    = campaign.get("status", 0)
+        a = analytics_map.get(cid, {})
 
-        a = get_campaign_analytics(cid)
-
+        name      = a.get("campaign_name", industry)
+        status    = a.get("campaign_status", 0)
         sent      = a.get("emails_sent_count",      0) or 0
         opened    = a.get("open_count_unique",       0) or 0
         clicked   = a.get("link_click_count_unique", 0) or 0
         replied   = a.get("reply_count_unique",      0) or 0
         bounced   = a.get("bounced_count",           0) or 0
         opted_out = a.get("unsubscribed_count",      0) or 0
-        leads     = a.get("contacted_count",         0) or 0
+        leads     = a.get("leads_count",             0) or 0
 
         open_rate   = round(opened  / sent * 100, 1) if sent > 0 else 0.0
         reply_rate  = round(replied / sent * 100, 1) if sent > 0 else 0.0
@@ -266,23 +273,22 @@ def get_all_campaign_stats() -> list:
 
 def get_recent_replies(since_hours: int = 24):
     """
-    Pull replies that came in within the last N hours.
-    Returns list of reply dicts with email, name, campaign, reply_text.
+    Pull replies from Instantly that came in within the last N hours.
+    Returns list of reply dicts with email, name, subject, snippet.
     """
     try:
         data = _get("emails", {"limit": 50, "filter": "reply"})
         replies = data.get("items", [])
-        # Filter to recent ones
         cutoff = datetime.utcnow().timestamp() - (since_hours * 3600)
         recent = []
         for r in replies:
-            ts_str = r.get("created_at", "")
+            ts_str = r.get("timestamp_created") or r.get("timestamp_email", "")
             try:
                 ts = datetime.fromisoformat(ts_str.replace("Z", "+00:00")).timestamp()
                 if ts >= cutoff:
                     recent.append(r)
             except Exception:
-                recent.append(r)  # include if we can't parse the timestamp
+                pass  # skip if timestamp can't be parsed
         return recent
     except Exception as e:
         print(f"  Could not fetch replies: {e}")

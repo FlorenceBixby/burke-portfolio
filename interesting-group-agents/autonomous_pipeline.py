@@ -548,8 +548,8 @@ def daily_recap() -> None:
     if recent_replies:
         lines += [sep, f"  REPLIES TODAY ({len(recent_replies)})", sep]
         for r in recent_replies[:10]:
-            sender = r.get("from_address") or r.get("reply_email", "unknown")
-            subject = (r.get("subject", "") or "")[:50]
+            sender = (r.get("to_address_email_list") or r.get("from_address_email") or "unknown")
+            subject = (r.get("subject") or "(no subject)")[:60]
             lines.append(f"  • {sender}  —  {subject}")
         lines.append("")
 
