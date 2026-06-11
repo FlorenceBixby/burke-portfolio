@@ -1,0 +1,10 @@
+name = "rb2b-pipe"
+main = "rb2b_worker.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+# Secrets are set separately via: wrangler secret put APOLLO_API_KEY
+
+[[routes]]
+pattern = "theinterestinggroup.com/webhook/rb2b"
+zone_name = "theinterestinggroup.com"

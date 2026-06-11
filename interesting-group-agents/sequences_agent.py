@@ -65,7 +65,7 @@ AB_VARIANTS = {
             "one contact for connectivity, phones, and cloud. "
             "No cost to you. I'm paid by the vendors, so my job is finding the best fit, not pushing one supplier.\n\n"
             "Worth 15 minutes?\n\n"
-            "Burke\nThe Interesting Group | burke@theinterestinggroup.com"
+            "Burke\nThe Interesting Group | burke@theinterestinggroup.com | https://theinterestinggroup.com?utm_source=instantly&utm_medium=email&utm_campaign={{industry}}"
         ),
         "body_b": (
             "Hi {{first_name | there}},\n\n"
@@ -125,7 +125,7 @@ AB_VARIANTS = {
             "I'm Burke Ruder, based in Buda TX. I work with healthcare practices "
             "as an outside tech procurement resource — vendor evaluation, "
             "HIPAA-compliant communications, contract negotiation. No cost to you.\n\n"
-            "Worth a 15-minute call?\n\nBurke\nThe Interesting Group | burke@theinterestinggroup.com"
+            "Worth a 15-minute call?\n\nBurke\nThe Interesting Group | burke@theinterestinggroup.com | https://theinterestinggroup.com?utm_source=instantly&utm_medium=email&utm_campaign={{industry}}"
         ),
         "body_b": (
             "Hi {{first_name | there}},\n\n"
@@ -184,7 +184,7 @@ AB_VARIANTS = {
             "consolidate and negotiate their tech vendors. "
             "IoT connectivity, SD-WAN, UCaaS. One contact, honest options. "
             "I'm paid by the vendors, so it costs you nothing.\n\n"
-            "Worth 15 minutes?\n\nBurke\nThe Interesting Group | burke@theinterestinggroup.com"
+            "Worth 15 minutes?\n\nBurke\nThe Interesting Group | burke@theinterestinggroup.com | https://theinterestinggroup.com?utm_source=instantly&utm_medium=email&utm_campaign={{industry}}"
         ),
         "body_b": (
             "Hi {{first_name | there}},\n\n"
@@ -243,7 +243,7 @@ AB_VARIANTS = {
             "I work with businesses as an outside tech procurement resource. "
             "Vendor selection, negotiation, account management. "
             "I'm paid by the vendors — no cost to you.\n\n"
-            "Worth a 15-minute call?\n\nBurke\nThe Interesting Group | burke@theinterestinggroup.com"
+            "Worth a 15-minute call?\n\nBurke\nThe Interesting Group | burke@theinterestinggroup.com | https://theinterestinggroup.com?utm_source=instantly&utm_medium=email&utm_campaign={{industry}}"
         ),
         "body_b": (
             "Hi {{first_name | there}},\n\n"
@@ -317,7 +317,7 @@ AB_VARIANTS = {
             "I represent 200+ vendors including Five9, Genesys, NICE CXone, and Talkdesk, "
             "which means I can show you an honest comparison instead of a single vendor pitch.\n\n"
             "Is a 20-minute conversation worth it to see where you stand?\n\n"
-            "Burke\nThe Interesting Group | burke@theinterestinggroup.com"
+            "Burke\nThe Interesting Group | burke@theinterestinggroup.com | https://theinterestinggroup.com?utm_source=instantly&utm_medium=email&utm_campaign={{industry}}"
         ),
         "body_b": (
             "Hi {{first_name | there}},\n\n"
@@ -396,7 +396,7 @@ AB_VARIANTS = {
             "specializing in network security and SASE — I represent Cloudflare One, "
             "Zscaler, Cato Networks, and others, so I can give you an objective view "
             "of where {{company | your business}} stands and what the fastest path forward looks like.\n\n"
-            "Worth 20 minutes?\n\nBurke\nThe Interesting Group | burke@theinterestinggroup.com"
+            "Worth 20 minutes?\n\nBurke\nThe Interesting Group | burke@theinterestinggroup.com | https://theinterestinggroup.com?utm_source=instantly&utm_medium=email&utm_campaign={{industry}}"
         ),
         "body_b": (
             "Hi {{first_name | there}},\n\n"
@@ -464,7 +464,7 @@ BREAKUP_EMAIL = (
     "I've reached out a few times — I'll take the hint.\n\n"
     "I'm going to close out my notes on {{company | your business}} unless I hear otherwise. "
     "If the timing is ever right to talk, you know where to find me.\n\n"
-    "Burke\nburke@theinterestinggroup.com"
+    "Burke\nburke@theinterestinggroup.com | https://theinterestinggroup.com?utm_source=instantly&utm_medium=email&utm_campaign={{industry}}"
 )
 
 
