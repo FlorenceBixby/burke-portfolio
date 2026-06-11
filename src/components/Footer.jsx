@@ -40,6 +40,14 @@ export default function Footer({ navigate }) {
           </a>
         </span>
         <span className="footer-meta">© {new Date().getFullYear()} The Interesting Group</span>
+        <span className="footer-meta">
+          <a href="#" onClick={e => { e.preventDefault(); navigate('privacy') }}
+            style={{ color: '#86868B', fontSize: 12, transition: 'color 0.2s' }}
+            onMouseEnter={e => e.target.style.color = '#fff'}
+            onMouseLeave={e => e.target.style.color = '#86868B'}>
+            Privacy Policy
+          </a>
+        </span>
       </footer>
     </>
   )

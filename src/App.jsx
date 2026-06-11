@@ -5,6 +5,7 @@ import Home from './pages/Home.jsx'
 import Portfolio from './pages/Portfolio.jsx'
 import About from './pages/About.jsx'
 import Contact from './pages/Contact.jsx'
+import Privacy from './pages/Privacy.jsx'
 import LogoShowcase from './pages/LogoShowcase.jsx'
 import Footer from './components/Footer.jsx'
 
@@ -138,6 +139,7 @@ export default function App() {
                   {page === 'portfolio' && <Portfolio navigate={navigate} />}
                   {page === 'about'     && <About navigate={navigate} />}
                   {page === 'contact'   && <Contact />}
+                  {page === 'privacy'   && <Privacy />}
                   {page === 'logos'     && <LogoShowcase navigate={navigate} />}
                 </div>
               </motion.div>
