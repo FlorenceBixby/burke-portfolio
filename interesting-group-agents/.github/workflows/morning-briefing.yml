@@ -1,0 +1,40 @@
+name: Morning Briefing
+
+on:
+  schedule:
+    - cron: '45 11 * * *'   # 11:45 UTC = 6:45 AM CT
+  workflow_dispatch:
+
+jobs:
+  morning-briefing:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: interesting-group-agents
+        run: pip install -r requirements.txt
+
+      - name: Write secrets to disk
+        working-directory: interesting-group-agents
+        run: |
+          cat > .env << 'EOF'
+          APOLLO_API_KEY=${{ secrets.APOLLO_API_KEY }}
+          INSTANTLY_API_KEY=${{ secrets.INSTANTLY_API_KEY }}
+          HUBSPOT_API_KEY=${{ secrets.HUBSPOT_API_KEY }}
+          GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+          EOF
+          echo '${{ secrets.GMAIL_CREDENTIALS }}' > gmail_credentials.json
+          echo '${{ secrets.GMAIL_TOKEN }}' > gmail_token.json
+
+      - name: Send morning briefing
+        working-directory: interesting-group-agents
+        run: python autonomous_pipeline.py briefing

@@ -429,7 +429,73 @@ def prospect_run(target_reveals: int = 25) -> dict:
     save_search_state({"page": next_page})
     save_enrolled_ids(enrolled_ids)
     log(f"\nRun complete: {enrolled_count} enrolled, {skipped_count} skipped/DQ'd (next run: page {next_page})")
+
+    # ── SCOUT: submit enrolled emails to Sandler connectivity database ────────
+    scout_emails = _get_todays_enrolled_emails()
+    if scout_emails:
+        _submit_to_scout(scout_emails)
+
     return {"enrolled": enrolled_count, "skipped": skipped_count}
+
+
+def _get_todays_enrolled_emails() -> list:
+    """Collect email addresses enrolled today from the pipeline log."""
+    emails = []
+    try:
+        today = datetime.now().strftime("%Y-%m-%d")
+        with open(LOG_FILE) as f:
+            for line in f:
+                if today in line and "✓ Enrolled" in line:
+                    # Extract email from log line if present
+                    # Log format: [timestamp] ✓ Enrolled: FirstName LastName @ Company → Instantly [industry]
+                    # We need to get the actual email — read from revealed_contacts.json
+                    pass
+        # Better: read the Instantly leads added today from campaign stats delta
+        # Simplest reliable source: parse output/revealed_contacts.json for today
+        rc_path = "output/revealed_contacts.json"
+        if os.path.exists(rc_path):
+            with open(rc_path) as f:
+                contacts = json.load(f)
+            today_contacts = [
+                c for c in contacts
+                if c.get("enrolled_date", "").startswith(today) or
+                   c.get("email", "") and today in c.get("enrolled_date", "")
+            ]
+            emails = [c["email"] for c in today_contacts if c.get("email")]
+    except Exception as e:
+        log(f"  (SCOUT email collection: {e})")
+    return emails
+
+
+def _submit_to_scout(emails: list) -> None:
+    """
+    Email Sandler SCOUT with today's enrolled prospect emails.
+    SCOUT returns connectivity data (phone, social, etc.) for each address.
+    Sends one email with all addresses — SCOUT processes the list automatically.
+    """
+    if not emails:
+        return
+
+    try:
+        from gmail_agent import _get_gmail_service
+        import base64
+        from email.mime.text import MIMEText
+
+        count   = len(emails)
+        subject = f"SCOUT Request — {count} prospect{'s' if count > 1 else ''} — {datetime.now().strftime('%b %d %Y')}"
+        body    = "\n".join(emails)
+
+        msg = MIMEText(body)
+        msg["to"]      = "scout@sandlerpartners.com"
+        msg["from"]    = "burke@theinterestinggroup.com"
+        msg["subject"] = subject
+
+        service = _get_gmail_service()
+        raw     = base64.urlsafe_b64encode(msg.as_bytes()).decode()
+        service.users().messages().send(userId="me", body={"raw": raw}).execute()
+        log(f"📡 SCOUT: submitted {count} emails to scout@sandlerpartners.com")
+    except Exception as e:
+        log(f"  (SCOUT submit failed: {e})")
 
 
 def reply_check() -> dict:
@@ -441,7 +507,7 @@ def reply_check() -> dict:
 
     try:
         from gmail_agent import check_replies, create_threaded_draft
-        from hubspot_agent import advance_deal_stage, STAGE_MAP
+        from hubspot_agent import advance_deal_stage, upsert_contact, STAGE_MAP
         from reply_agent import classify_reply, draft_response, process_reply
     except ImportError as e:
         log(f"Import error: {e}")
@@ -512,9 +578,32 @@ def reply_check() -> dict:
         if intent == "UNSUBSCRIBE":
             log(f"  ⚠ UNSUBSCRIBE REQUEST — remove from Apollo sequence manually")
 
-        # Advance HubSpot deal
+        # ── Positive reply: create/update HubSpot + notify Burke ─────────────
+        POSITIVE_INTENTS = ("INTERESTED", "MEETING_REQUEST", "POSITIVE", "QUESTION")
+        if intent in POSITIVE_INTENTS:
+            try:
+                # Upsert contact + deal in HubSpot
+                contact_id, deal_id_new = upsert_contact(prospect)
+                if deal_id_new and responded_stage:
+                    advance_deal_stage(deal_id_new, responded_stage)
+                    log(f"  ✓ HubSpot: contact + deal created/updated (intent: {intent})")
+                    advanced += 1
+            except Exception as e:
+                log(f"  ✗ HubSpot upsert failed: {e}")
+
+            # Notify Burke immediately
+            try:
+                _notify_positive_reply(from_email, prospect, subject, intent)
+            except Exception as e:
+                log(f"  ✗ Positive reply notify failed: {e}")
+
+        # Handle unsubscribes in HubSpot
+        if intent == "UNSUBSCRIBE":
+            log(f"  ⚠ UNSUBSCRIBE REQUEST — remove from Apollo sequence manually")
+
+        # Advance HubSpot deal for non-positive intents too
         deal_id = prospect.get("hubspot_deal_id")
-        if deal_id and responded_stage and intent not in ("OOO",):
+        if deal_id and responded_stage and intent not in ("OOO",) and intent not in POSITIVE_INTENTS:
             try:
                 advance_deal_stage(deal_id, responded_stage)
                 log(f"  ✓ HubSpot deal advanced to Responded")
@@ -524,6 +613,178 @@ def reply_check() -> dict:
 
     log(f"\nReply check complete: {len(replies)} replies, {drafted} drafts created, {advanced} deals advanced")
     return {"replies": len(replies), "advanced": advanced, "drafted": drafted}
+
+
+def _notify_positive_reply(from_email: str, prospect: dict, subject: str, intent: str) -> None:
+    """Send Burke an instant notification email when a prospect replies positively."""
+    from gmail_agent import _get_gmail_service
+    import base64
+    from email.mime.text import MIMEText
+
+    name    = f"{prospect.get('first_name','') or ''} {prospect.get('last_name','') or ''}".strip() or from_email
+    company = prospect.get("company", "")
+    label   = {
+        "INTERESTED":       "🔥 INTERESTED",
+        "MEETING_REQUEST":  "📅 MEETING REQUEST",
+        "POSITIVE":         "👍 POSITIVE REPLY",
+        "QUESTION":         "❓ HAS A QUESTION",
+    }.get(intent, intent)
+
+    body = (
+        f"{label}\n\n"
+        f"From:    {name}\n"
+        f"Company: {company}\n"
+        f"Email:   {from_email}\n"
+        f"Subject: {subject}\n\n"
+        f"→ HubSpot deal created/updated automatically.\n"
+        f"→ Draft reply queued in Gmail.\n\n"
+        f"Reply now: mailto:{from_email}\n\n"
+        f"— ARIA"
+    )
+
+    msg            = MIMEText(body)
+    msg["to"]      = "burke.ruder@gmail.com"
+    msg["from"]    = "burke@theinterestinggroup.com"
+    msg["subject"] = f"🔔 {label} — {name} @ {company}"
+
+    service = _get_gmail_service()
+    raw     = base64.urlsafe_b64encode(msg.as_bytes()).decode()
+    service.users().messages().send(userId="me", body={"raw": raw}).execute()
+    log(f"  📨 Positive reply notification sent to burke.ruder@gmail.com")
+
+
+def morning_briefing() -> None:
+    """
+    Daily 6:45 AM CT run.
+    Sends Burke a crisp morning briefing: overnight replies, yesterday's enrollments,
+    campaign health snapshot, deliverability status, and any action items.
+    """
+    log("=== MORNING BRIEFING ===")
+
+    from instantly_agent import get_all_campaign_stats, get_recent_replies, get_latest_placement_test_id, get_inbox_placement_results
+
+    today     = datetime.now().strftime("%A, %B %d")
+    seq_stats = get_all_campaign_stats()
+
+    # ── Overnight replies (last 12 hours) ────────────────────────────────────
+    overnight_replies = get_recent_replies(since_hours=12)
+
+    # ── Yesterday enrollments from log ───────────────────────────────────────
+    enrolled_yesterday = 0
+    try:
+        yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+        with open(LOG_FILE) as f:
+            for line in f:
+                if yesterday in line and "✓ Enrolled" in line:
+                    enrolled_yesterday += 1
+    except FileNotFoundError:
+        pass
+
+    # ── Campaign totals ───────────────────────────────────────────────────────
+    total_leads   = sum(s["leads"]   for s in seq_stats)
+    total_sent    = sum(s["sent"]    for s in seq_stats)
+    total_opened  = sum(s["opened"]  for s in seq_stats)
+    total_replied = sum(s["replied"] for s in seq_stats)
+    avg_open_rate  = round(total_opened  / total_sent * 100, 1) if total_sent else 0
+    avg_reply_rate = round(total_replied / total_sent * 100, 1) if total_sent else 0
+
+    # ── Action items ──────────────────────────────────────────────────────────
+    paused = [s["name"] for s in seq_stats if not s["active"] and s["leads"] > 0]
+    action_items = []
+    if paused:
+        action_items.append(f"⚠️  {len(paused)} campaign(s) paused — activate in Instantly")
+    if overnight_replies:
+        positives = []
+        try:
+            from reply_agent import classify_reply
+            for r in overnight_replies:
+                intent = classify_reply(r.get("body", ""), r.get("snippet", ""))
+                if intent in ("INTERESTED", "MEETING_REQUEST", "POSITIVE", "QUESTION"):
+                    sender = r.get("to_address_email_list") or r.get("from_address_email") or "?"
+                    positives.append(sender)
+        except Exception:
+            pass
+        if positives:
+            for p in positives:
+                action_items.append(f"🔥 Positive reply from {p} — check Gmail drafts")
+
+    # ── Deliverability ────────────────────────────────────────────────────────
+    deliverability_line = ""
+    try:
+        test_id = get_latest_placement_test_id()
+        if test_id:
+            result = get_inbox_placement_results(test_id)
+            if result.get("status") == "complete":
+                inbox_pct = result.get("inbox_pct", 0)
+                icon = "✅" if inbox_pct >= 80 else ("⚠️" if inbox_pct >= 60 else "🚨")
+                deliverability_line = f"{icon} Inbox rate: {inbox_pct}%  |  Spam: {result.get('spam_pct',0)}%"
+                if inbox_pct < 70:
+                    action_items.append("🚨 Inbox rate below 70% — check sending reputation")
+    except Exception:
+        pass
+
+    sep = "─" * 48
+    lines = [
+        f"Good morning. Here's your pipeline for {today}.",
+        "",
+    ]
+
+    # Action items first
+    if action_items:
+        lines += [sep, "  ACTION ITEMS", sep]
+        for item in action_items:
+            lines.append(f"  {item}")
+        lines.append("")
+
+    # Overnight activity
+    lines += [
+        sep,
+        "  OVERNIGHT",
+        sep,
+        f"  Replies:          {len(overnight_replies)}",
+        f"  Enrolled (yest):  {enrolled_yesterday}",
+        "",
+    ]
+
+    # Pipeline snapshot
+    lines += [
+        sep,
+        "  PIPELINE SNAPSHOT",
+        sep,
+        f"  Total in sequence : {total_leads}",
+        f"  Emails sent       : {total_sent}",
+        f"  Open rate         : {avg_open_rate}%",
+        f"  Reply rate        : {avg_reply_rate}%",
+        "",
+    ]
+
+    # Deliverability
+    if deliverability_line:
+        lines += [sep, "  DELIVERABILITY", sep, f"  {deliverability_line}", ""]
+
+    # Active campaigns
+    lines += [sep, "  CAMPAIGNS", sep]
+    for s in seq_stats:
+        status = "●" if s["active"] else "○"
+        lines.append(f"  {status} {s['name']}  —  {s['leads']} leads  |  {s['sent']} sent  |  {s['open_rate']}% open  |  {s['reply_rate']}% reply")
+    lines += ["", "— ARIA", ""]
+
+    body = "\n".join(lines)
+    log(f"\n{body}")
+
+    # Send
+    try:
+        from gmail_agent import create_draft, _get_gmail_service
+        draft_id = create_draft(
+            to_email="burke.ruder@gmail.com",
+            subject=f"☀️ Morning Briefing — {today}",
+            body=body,
+        )
+        service = _get_gmail_service()
+        service.users().drafts().send(userId="me", body={"id": draft_id}).execute()
+        log("Morning briefing sent to burke.ruder@gmail.com")
+    except Exception as e:
+        log(f"Could not send morning briefing: {e}")
 
 
 def weekly_digest() -> None:
@@ -788,6 +1049,8 @@ if __name__ == "__main__":
         weekly_digest()
     elif task == "recap":
         daily_recap()
+    elif task == "briefing":
+        morning_briefing()
     else:
         print(f"Unknown task: {task}")
-        print("Usage: python autonomous_pipeline.py [prospect|replies|digest|recap]")
+        print("Usage: python autonomous_pipeline.py [prospect|replies|digest|recap|briefing]")
