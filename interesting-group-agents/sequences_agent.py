@@ -54,11 +54,11 @@ AB_VARIANTS = {
 
     # ── Construction ──────────────────────────────────────────────────────────
     "construction": {
-        "subject_a": "tech vendors for {{company}} — quick question",
-        "subject_b": "managing technology at {{company}}",
+        "subject_a": "tech vendors for {{company | your business}} — quick question",
+        "subject_b": "managing technology at {{company | your business}}",
         "body_a": (
-            "Hi {{first_name}},\n\n"
-            "Running {{company}} means juggling crews, subs, and clients — "
+            "Hi {{first_name | there}},\n\n"
+            "Running {{company | your business}} means juggling crews, subs, and clients — "
             "the last thing you need is chasing down internet or phone vendors when something breaks.\n\n"
             "I'm Burke Ruder, founder of The Interesting Group in Buda, TX. "
             "I help Texas businesses manage their tech vendors — "
@@ -68,7 +68,7 @@ AB_VARIANTS = {
             "Burke\nThe Interesting Group | burke@theinterestinggroup.com"
         ),
         "body_b": (
-            "Hi {{first_name}},\n\n"
+            "Hi {{first_name | there}},\n\n"
             "Most construction companies I talk to are overpaying on telecom "
             "and connectivity — not because they made a bad decision, but because "
             "there was never time to renegotiate.\n\n"
@@ -78,38 +78,38 @@ AB_VARIANTS = {
             "Open to a quick call?\n\nBurke\nThe Interesting Group"
         ),
         "followup_a": (
-            "Hi {{first_name}},\n\n"
+            "Hi {{first_name | there}},\n\n"
             "Just following up. If field connectivity or phone systems are a headache, "
             "I may be able to help — no pitch, just a conversation.\n\nBurke"
         ),
         "followup_b": (
-            "Hi {{first_name}},\n\n"
+            "Hi {{first_name | there}},\n\n"
             "Still happy to connect. I work with construction companies in the "
             "Austin–San Antonio corridor and most find at least one area to save.\n\nBurke"
         ),
         "value_subject": "something worth knowing about construction tech costs",
         "value_body": (
-            "Hi {{first_name}},\n\n"
+            "Hi {{first_name | there}},\n\n"
             "One number worth knowing: construction firms with under 150 employees "
             "overpay on telecom by an average of 23% compared to market rate — "
             "mostly because contracts auto-renewed without a rebid.\n\n"
             "That's the problem I fix. One conversation and I can tell you "
-            "whether {{company}} is in that bucket.\n\nBurke\nThe Interesting Group"
+            "whether {{company | your business}} is in that bucket.\n\nBurke\nThe Interesting Group"
         ),
         "proof_subject": "what we found for a Texas contractor",
         "proof_body": (
-            "Hi {{first_name}},\n\n"
+            "Hi {{first_name | there}},\n\n"
             "Quick example: worked with a mid-size contractor outside Austin last year. "
             "Their phone system contract had auto-renewed twice. "
             "We put it out to bid, switched providers, and cut their monthly bill by 31% — "
             "with better uptime.\n\n"
-            "That's the kind of thing I do for {{company}} if you want to take a look.\n\nBurke"
+            "That's the kind of thing I do for {{company | your business}} if you want to take a look.\n\nBurke"
         ),
         "redirect_subject": "wrong person?",
         "redirect_body": (
-            "Hi {{first_name}},\n\n"
+            "Hi {{first_name | there}},\n\n"
             "I've reached out a few times — if technology procurement isn't something "
-            "you handle at {{company}}, no worries at all. "
+            "you handle at {{company | your business}}, no worries at all. "
             "Would you mind pointing me to the right person?\n\nAppreciate your time.\n\nBurke"
         ),
     },
@@ -117,9 +117,9 @@ AB_VARIANTS = {
     # ── Healthcare (SMB) ──────────────────────────────────────────────────────
     "healthcare": {
         "subject_a": "tech procurement for your practice",
-        "subject_b": "quick question, {{first_name}}",
+        "subject_b": "quick question, {{first_name | there}}",
         "body_a": (
-            "Hi {{first_name}},\n\n"
+            "Hi {{first_name | there}},\n\n"
             "Managing a practice is hard enough without also being the person "
             "handling phone systems, internet contracts, and cloud storage.\n\n"
             "I'm Burke Ruder, based in Buda TX. I work with healthcare practices "
@@ -128,7 +128,7 @@ AB_VARIANTS = {
             "Worth a 15-minute call?\n\nBurke\nThe Interesting Group | burke@theinterestinggroup.com"
         ),
         "body_b": (
-            "Hi {{first_name}},\n\n"
+            "Hi {{first_name | there}},\n\n"
             "Most independent practices I speak with are running on phone systems "
             "that were set up years ago and never renegotiated.\n\n"
             "I help practices source and manage tech vendors — UCaaS, connectivity, cloud. "
@@ -136,38 +136,38 @@ AB_VARIANTS = {
             "Open to a quick conversation?\n\nBurke\nThe Interesting Group"
         ),
         "followup_a": (
-            "Hi {{first_name}},\n\n"
-            "Wanted to follow up. If managing tech vendors for {{company}} "
+            "Hi {{first_name | there}},\n\n"
+            "Wanted to follow up. If managing tech vendors for {{company | your business}} "
             "is something you'd like help with, I'm here.\n\nBurke"
         ),
         "followup_b": (
-            "Hi {{first_name}},\n\n"
+            "Hi {{first_name | there}},\n\n"
             "Still happy to connect. Even a quick audit of your current "
             "tech contracts often surfaces real savings.\n\nBurke"
         ),
         "value_subject": "HIPAA-compliant communications — what practices miss",
         "value_body": (
-            "Hi {{first_name}},\n\n"
+            "Hi {{first_name | there}},\n\n"
             "Something I see regularly: practices that upgraded to VoIP or "
             "cloud-based communications a few years ago often didn't get BAAs "
             "from their telecom vendors — which is a HIPAA exposure.\n\n"
-            "If {{company}} is using standard UCaaS tools for patient communications, "
+            "If {{company | your business}} is using standard UCaaS tools for patient communications, "
             "it's worth a quick review. Happy to take a look at no cost.\n\nBurke\nThe Interesting Group"
         ),
         "proof_subject": "what we found for a Texas clinic",
         "proof_body": (
-            "Hi {{first_name}},\n\n"
+            "Hi {{first_name | there}},\n\n"
             "Worked with an independent clinic in the Austin area last year — "
             "they were paying for a 10-line phone system with 4 staff. "
             "We right-sized it, added HIPAA-compliant messaging, and cut their "
             "monthly telecom spend by 28%.\n\n"
-            "Happy to see if we can do the same for {{company}}.\n\nBurke"
+            "Happy to see if we can do the same for {{company | your business}}.\n\nBurke"
         ),
         "redirect_subject": "wrong person?",
         "redirect_body": (
-            "Hi {{first_name}},\n\n"
+            "Hi {{first_name | there}},\n\n"
             "I've reached out a few times — if vendor management isn't in your lane "
-            "at {{company}}, totally understand. "
+            "at {{company | your business}}, totally understand. "
             "Who would be the right person to talk to?\n\nAppreciate your time.\n\nBurke"
         ),
     },
@@ -175,9 +175,9 @@ AB_VARIANTS = {
     # ── Logistics (SMB) ───────────────────────────────────────────────────────
     "logistics": {
         "subject_a": "connectivity for your fleet — quick question",
-        "subject_b": "tech vendors for {{company}}",
+        "subject_b": "tech vendors for {{company | your business}}",
         "body_a": (
-            "Hi {{first_name}},\n\n"
+            "Hi {{first_name | there}},\n\n"
             "Keeping drivers connected and dispatch running smoothly "
             "is hard when you're managing multiple cellular and connectivity contracts.\n\n"
             "I'm Burke Ruder out of Buda, TX — I help logistics companies "
@@ -187,57 +187,57 @@ AB_VARIANTS = {
             "Worth 15 minutes?\n\nBurke\nThe Interesting Group | burke@theinterestinggroup.com"
         ),
         "body_b": (
-            "Hi {{first_name}},\n\n"
+            "Hi {{first_name | there}},\n\n"
             "Most logistics operators I talk to are paying too much for mobile "
             "connectivity because they haven't had time to put it out to bid.\n\n"
             "I handle that — vendor selection, negotiation, management. "
-            "No cost to {{company}}. And because I work with multiple suppliers, "
+            "No cost to {{company | your business}}. And because I work with multiple suppliers, "
             "I have no reason to push one over another.\n\n"
             "Open to a call?\n\nBurke\nThe Interesting Group"
         ),
         "followup_a": (
-            "Hi {{first_name}},\n\nFollowing up on my last note. "
+            "Hi {{first_name | there}},\n\nFollowing up on my last note. "
             "If fleet connectivity or dispatch communications are a pain point, "
             "happy to help.\n\nBurke"
         ),
         "followup_b": (
-            "Hi {{first_name}},\n\nStill interested in connecting. "
+            "Hi {{first_name | there}},\n\nStill interested in connecting. "
             "I work with logistics companies in the I-35 corridor "
             "and have helped consolidate vendor spend significantly.\n\nBurke"
         ),
         "value_subject": "what fleet operators are paying vs. market rate",
         "value_body": (
-            "Hi {{first_name}},\n\n"
+            "Hi {{first_name | there}},\n\n"
             "Stat worth knowing: the average logistics company with a fleet of 10+ "
             "vehicles is overpaying on cellular data plans by 18–30% compared to "
             "what's negotiable today — mostly because carriers don't proactively reprice.\n\n"
             "I put those contracts out to bid for you. Happy to take a look "
-            "at what {{company}} is currently paying.\n\nBurke\nThe Interesting Group"
+            "at what {{company | your business}} is currently paying.\n\nBurke\nThe Interesting Group"
         ),
         "proof_subject": "what we saved a Texas freight company",
         "proof_body": (
-            "Hi {{first_name}},\n\n"
+            "Hi {{first_name | there}},\n\n"
             "Quick example: worked with a regional freight operator last year. "
             "They had three separate mobile carriers across their fleet — "
             "no one had ever consolidated. We ran a competitive bid, "
             "moved to one provider, and cut their monthly spend by 22%.\n\n"
-            "Worth seeing if there's a similar opportunity at {{company}}.\n\nBurke"
+            "Worth seeing if there's a similar opportunity at {{company | your business}}.\n\nBurke"
         ),
         "redirect_subject": "wrong person?",
         "redirect_body": (
-            "Hi {{first_name}},\n\n"
-            "I've reached out a few times about tech vendor management for {{company}}. "
+            "Hi {{first_name | there}},\n\n"
+            "I've reached out a few times about tech vendor management for {{company | your business}}. "
             "If this isn't your area, no problem — who's the right person to connect with?\n\nBurke"
         ),
     },
 
     # ── Default / SMB General ─────────────────────────────────────────────────
     "default": {
-        "subject_a": "tech vendors for {{company}} — quick question",
-        "subject_b": "managing technology at {{company}}",
+        "subject_a": "tech vendors for {{company | your business}} — quick question",
+        "subject_b": "managing technology at {{company | your business}}",
         "body_a": (
-            "Hi {{first_name}},\n\n"
-            "As the person running {{company}}, you're probably also the one "
+            "Hi {{first_name | there}},\n\n"
+            "As the person running {{company | your business}}, you're probably also the one "
             "managing tech vendors — phone systems, internet, cloud — on top of everything else.\n\n"
             "I'm Burke Ruder, founder of The Interesting Group in Buda, TX. "
             "I work with businesses as an outside tech procurement resource. "
@@ -246,26 +246,26 @@ AB_VARIANTS = {
             "Worth a 15-minute call?\n\nBurke\nThe Interesting Group | burke@theinterestinggroup.com"
         ),
         "body_b": (
-            "Hi {{first_name}},\n\n"
+            "Hi {{first_name | there}},\n\n"
             "Most business owners I work with are overpaying on at least "
             "one technology contract — not because they made a bad decision, "
             "but because there was never time to look.\n\n"
-            "I handle tech procurement for companies like {{company}} — at no cost to you. "
+            "I handle tech procurement for companies like {{company | your business}} — at no cost to you. "
             "Open to a quick conversation?\n\nBurke\nThe Interesting Group"
         ),
         "followup_a": (
-            "Hi {{first_name}},\n\nFollowing up on my last note. "
+            "Hi {{first_name | there}},\n\nFollowing up on my last note. "
             "If managing tech vendors is something you'd like help with, "
             "happy to connect.\n\nBurke"
         ),
         "followup_b": (
-            "Hi {{first_name}},\n\nStill happy to connect. "
+            "Hi {{first_name | there}},\n\nStill happy to connect. "
             "Even a quick look at your current vendor contracts "
             "often surfaces savings. No obligation.\n\nBurke"
         ),
         "value_subject": "one number worth knowing",
         "value_body": (
-            "Hi {{first_name}},\n\n"
+            "Hi {{first_name | there}},\n\n"
             "Stat from our work across Texas businesses: "
             "companies with under 100 employees overpay on technology contracts "
             "by an average of 20–30% — mostly on phone systems and internet, "
@@ -275,20 +275,20 @@ AB_VARIANTS = {
         ),
         "proof_subject": "what we typically find",
         "proof_body": (
-            "Hi {{first_name}},\n\n"
+            "Hi {{first_name | there}},\n\n"
             "Most businesses I work with find savings in one of three places: "
             "an internet contract that hasn't been rebid in 3+ years, "
             "a phone system with more lines than they need, "
             "or a cloud solution they're paying for but not fully using.\n\n"
             "I do a quick audit — no cost — and tell you honestly what I find. "
-            "Happy to do that for {{company}} if you're open to it.\n\nBurke"
+            "Happy to do that for {{company | your business}} if you're open to it.\n\nBurke"
         ),
         "redirect_subject": "wrong person?",
         "redirect_body": (
-            "Hi {{first_name}},\n\n"
+            "Hi {{first_name | there}},\n\n"
             "I've reached out a few times and haven't heard back — "
             "totally fine if the timing is off or this isn't your area. "
-            "If someone else at {{company}} handles vendor decisions, "
+            "If someone else at {{company | your business}} handles vendor decisions, "
             "I'd appreciate the introduction.\n\nBurke"
         ),
     },
@@ -306,11 +306,11 @@ AB_VARIANTS = {
     # Angle:  Legacy contact center pain → cloud migration → massive ROI
     # Avg deal: $20k–$200k MRR | Commission: $2k–$20k/mo recurring
     "ccaas": {
-        "subject_a": "is {{company}}'s contact center still on-prem?",
-        "subject_b": "contact center question for {{first_name}}",
+        "subject_a": "is {{company | your business}}'s contact center still on-prem?",
+        "subject_b": "contact center question for {{first_name | there}}",
         "body_a": (
-            "Hi {{first_name}},\n\n"
-            "I'll be direct: if {{company}} is still running an on-premise contact center, "
+            "Hi {{first_name | there}},\n\n"
+            "I'll be direct: if {{company | your business}} is still running an on-premise contact center, "
             "you're likely overpaying by 40–60% compared to cloud alternatives — "
             "and leaving AI-powered agent tools on the table that your competitors are already using.\n\n"
             "I'm Burke Ruder with The Interesting Group. I'm an independent technology advisor — "
@@ -320,8 +320,8 @@ AB_VARIANTS = {
             "Burke\nThe Interesting Group | burke@theinterestinggroup.com"
         ),
         "body_b": (
-            "Hi {{first_name}},\n\n"
-            "Quick question: when {{company}}'s contact center contract comes up for renewal, "
+            "Hi {{first_name | there}},\n\n"
+            "Quick question: when {{company | your business}}'s contact center contract comes up for renewal, "
             "do you have someone running a competitive evaluation — or does the incumbent "
             "usually just get renewed?\n\n"
             "I work with mid-market companies as an independent CCaaS advisor. "
@@ -330,14 +330,14 @@ AB_VARIANTS = {
             "Worth a quick call?\n\nBurke\nThe Interesting Group"
         ),
         "followup_a": (
-            "Hi {{first_name}},\n\n"
+            "Hi {{first_name | there}},\n\n"
             "Following up on my note about your contact center. "
             "Even if you're mid-contract, it costs nothing to benchmark where you are "
             "against current market options — and most companies I work with find "
             "significant room to improve before their next renewal.\n\nBurke"
         ),
         "followup_b": (
-            "Hi {{first_name}},\n\n"
+            "Hi {{first_name | there}},\n\n"
             "One more thought: the contact center space has moved faster in the last "
             "2 years than the previous 10 — AI agent assist, omnichannel routing, "
             "workforce management. If your platform is more than 3 years old, "
@@ -346,31 +346,31 @@ AB_VARIANTS = {
         ),
         "value_subject": "what mid-market contact centers are spending vs. should be",
         "value_body": (
-            "Hi {{first_name}},\n\n"
+            "Hi {{first_name | there}},\n\n"
             "Some data worth having: mid-market contact centers (50–500 agents) "
             "that migrated from on-prem to cloud CCaaS in 2023–2025 reported:\n\n"
             "  • 35–50% reduction in total cost of ownership\n"
             "  • 28% improvement in first-call resolution (AI assist)\n"
             "  • 40% reduction in agent onboarding time\n\n"
             "The caveat: results vary significantly by vendor and how the migration "
-            "is scoped. That's exactly the evaluation I run for companies like {{company}}.\n\n"
+            "is scoped. That's exactly the evaluation I run for companies like {{company | your business}}.\n\n"
             "Worth 20 minutes to look at your specific situation?\n\nBurke\nThe Interesting Group"
         ),
         "proof_subject": "CCaaS migration — what we actually see",
         "proof_body": (
-            "Hi {{first_name}},\n\n"
+            "Hi {{first_name | there}},\n\n"
             "Recent example: worked with an insurance company (180 agents) "
             "that had been on the same on-prem system for 9 years. "
             "Their renewal quote came in 18% higher. We ran a 6-vendor evaluation, "
             "moved them to cloud CCaaS, and landed them at 34% below their old contract — "
             "with AI agent assist included.\n\n"
-            "I can do the same evaluation for {{company}}. "
+            "I can do the same evaluation for {{company | your business}}. "
             "It's free to you — I'm compensated by whichever vendor you choose.\n\nBurke"
         ),
         "redirect_subject": "is there a better person to speak with?",
         "redirect_body": (
-            "Hi {{first_name}},\n\n"
-            "I've reached out a few times about contact center modernization at {{company}}. "
+            "Hi {{first_name | there}},\n\n"
+            "I've reached out a few times about contact center modernization at {{company | your business}}. "
             "If this isn't your area of ownership, I completely understand — "
             "could you point me to the right person? "
             "VP of Operations, IT, or whoever owns your customer experience technology "
@@ -385,22 +385,22 @@ AB_VARIANTS = {
     #         security gaps — this is Burke's strongest product knowledge
     # Avg deal: $15k–$150k MRR | Commission: $1.5k–$15k/mo recurring
     "enterprise_security": {
-        "subject_a": "Zero Trust at {{company}} — where are you?",
-        "subject_b": "quick security posture question, {{first_name}}",
+        "subject_a": "Zero Trust at {{company | your business}} — where are you?",
+        "subject_b": "quick security posture question, {{first_name | there}}",
         "body_a": (
-            "Hi {{first_name}},\n\n"
+            "Hi {{first_name | there}},\n\n"
             "With hybrid work now the default, most mid-market IT teams I talk to "
             "are somewhere in the middle of a Zero Trust journey — "
             "past VPN-only, but not yet fully SASE. Sound familiar?\n\n"
             "I'm Burke Ruder with The Interesting Group. I'm an independent technology advisor "
             "specializing in network security and SASE — I represent Cloudflare One, "
             "Zscaler, Cato Networks, and others, so I can give you an objective view "
-            "of where {{company}} stands and what the fastest path forward looks like.\n\n"
+            "of where {{company | your business}} stands and what the fastest path forward looks like.\n\n"
             "Worth 20 minutes?\n\nBurke\nThe Interesting Group | burke@theinterestinggroup.com"
         ),
         "body_b": (
-            "Hi {{first_name}},\n\n"
-            "Quick question: how is {{company}} handling secure access for remote and "
+            "Hi {{first_name | there}},\n\n"
+            "Quick question: how is {{company | your business}} handling secure access for remote and "
             "hybrid employees right now — legacy VPN, ZTNA, or something in between?\n\n"
             "I work with mid-market IT teams as an independent SASE advisor. "
             "I represent the full market (Cloudflare One, Zscaler, Cato, Versa) — "
@@ -408,22 +408,22 @@ AB_VARIANTS = {
             "Open to a short call?\n\nBurke\nThe Interesting Group"
         ),
         "followup_a": (
-            "Hi {{first_name}},\n\n"
+            "Hi {{first_name | there}},\n\n"
             "Following up on my note about your network security posture. "
             "If you're evaluating SASE or Zero Trust options this year — "
             "or want a second opinion on what you already have — "
             "I'm happy to run through it with you. No sales agenda.\n\nBurke"
         ),
         "followup_b": (
-            "Hi {{first_name}},\n\n"
+            "Hi {{first_name | there}},\n\n"
             "One more thought: Cloudflare One specifically has become a strong option "
             "for mid-market teams because it consolidates ZTNA, SWG, CASB, and DDoS "
             "into one platform at a price point that used to require 3 separate vendors.\n\n"
-            "Happy to show you how it compares to what {{company}} is currently running.\n\nBurke"
+            "Happy to show you how it compares to what {{company | your business}} is currently running.\n\nBurke"
         ),
         "value_subject": "the SASE consolidation math — mid-market numbers",
         "value_body": (
-            "Hi {{first_name}},\n\n"
+            "Hi {{first_name | there}},\n\n"
             "Numbers from companies I've worked with that consolidated to SASE:\n\n"
             "  • Average of 3.2 point-security products eliminated\n"
             "  • 25–40% reduction in total network security spend\n"
@@ -431,23 +431,23 @@ AB_VARIANTS = {
             "The consolidation story is compelling, but vendor selection matters a lot — "
             "Cloudflare, Zscaler, and Cato each have meaningful differences "
             "depending on your architecture.\n\n"
-            "Happy to walk through what fits {{company}}.\n\nBurke\nThe Interesting Group"
+            "Happy to walk through what fits {{company | your business}}.\n\nBurke\nThe Interesting Group"
         ),
         "proof_subject": "SASE migration — what we actually deployed",
         "proof_body": (
-            "Hi {{first_name}},\n\n"
+            "Hi {{first_name | there}},\n\n"
             "Recent example: worked with a financial services firm (320 employees, "
             "hybrid workforce) that was running legacy VPN + 4 separate security vendors. "
             "We evaluated the full SASE market and deployed Cloudflare One — "
             "consolidated to one platform, cut their security stack spend by 31%, "
             "and went fully Zero Trust in under 90 days.\n\n"
-            "I can run the same evaluation for {{company}}. "
+            "I can run the same evaluation for {{company | your business}}. "
             "I'm paid by the vendors so there's no cost to you.\n\nBurke"
         ),
         "redirect_subject": "is there a better person to speak with?",
         "redirect_body": (
-            "Hi {{first_name}},\n\n"
-            "I've reached out a few times about network security and SASE for {{company}}. "
+            "Hi {{first_name | there}},\n\n"
+            "I've reached out a few times about network security and SASE for {{company | your business}}. "
             "If this sits with someone else — CISO, IT Director, or your security team lead — "
             "I'd appreciate the introduction.\n\n"
             "Either way, thanks for your time.\n\nBurke"
@@ -460,9 +460,9 @@ AB_VARIANTS = {
 # Research: breakup emails average 2-3x reply rate of earlier steps (Lemlist)
 BREAKUP_SUBJECT = "should I close your file?"
 BREAKUP_EMAIL = (
-    "Hi {{first_name}},\n\n"
+    "Hi {{first_name | there}},\n\n"
     "I've reached out a few times — I'll take the hint.\n\n"
-    "I'm going to close out my notes on {{company}} unless I hear otherwise. "
+    "I'm going to close out my notes on {{company | your business}} unless I hear otherwise. "
     "If the timing is ever right to talk, you know where to find me.\n\n"
     "Burke\nburke@theinterestinggroup.com"
 )
