@@ -33,10 +33,10 @@ export default function Footer({ navigate }) {
           <span className="footer-logo-rest">Interesting Group</span>
         </div>
         <span className="footer-meta">
-          <a href="mailto:burke@theinterestinggroup.com" style={{ color: '#86868B', transition: 'color 0.2s' }}
+          <a href="mailto:info@theinterestinggroup.com" style={{ color: '#86868B', transition: 'color 0.2s' }}
             onMouseEnter={e => e.target.style.color = '#fff'}
             onMouseLeave={e => e.target.style.color = '#86868B'}>
-            burke@theinterestinggroup.com
+            info@theinterestinggroup.com
           </a>
         </span>
         <span className="footer-meta">© {new Date().getFullYear()} The Interesting Group</span>

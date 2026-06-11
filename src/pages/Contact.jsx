@@ -60,7 +60,7 @@ export default function Contact() {
                 <div className="contact-meta">
                   <div className="contact-meta-item">
                     <span className="contact-meta-label">Email</span>
-                    <a href="mailto:burke@theinterestinggroup.com">burke@theinterestinggroup.com</a>
+                    <a href="mailto:info@theinterestinggroup.com">info@theinterestinggroup.com</a>
                   </div>
                   <div className="contact-meta-item">
                     <span className="contact-meta-label">Book directly</span>
@@ -112,7 +112,7 @@ export default function Contact() {
                       <div className="form-row">
                         <div className="form-field">
                           <label>First name <span>*</span></label>
-                          <input required value={form.firstName} onChange={set('firstName')} placeholder="Burke" />
+                          <input required value={form.firstName} onChange={set('firstName')} placeholder="First name" />
                         </div>
                         <div className="form-field">
                           <label>Last name <span>*</span></label>
@@ -155,7 +155,7 @@ export default function Contact() {
                       </div>
 
                       {status === 'error' && (
-                        <p className="form-error">Something went wrong — email us directly at burke@theinterestinggroup.com</p>
+                        <p className="form-error">Something went wrong — email us directly at info@theinterestinggroup.com</p>
                       )}
 
                       <button

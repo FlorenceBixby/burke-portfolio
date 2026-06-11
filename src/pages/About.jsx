@@ -39,7 +39,7 @@ export default function About({ navigate }) {
               <div className="about-body">
                 <h2>Enterprise-grade expertise. Built for every business.</h2>
                 <p>
-                  We're Burke Ruder and The Interesting Group. With a career spent in enterprise technology — selling to and alongside some of the fastest-growing companies in the world — we know how vendors think, how contracts get negotiated, and where the margin is hidden.
+                  We're The Interesting Group. With a career spent in enterprise technology — selling to and alongside some of the fastest-growing companies in the world — we know how vendors think, how contracts get negotiated, and where the margin is hidden.
                 </p>
                 <p>
                   We started The Interesting Group because we kept seeing the same thing: smart business owners spending time and money on technology they didn't choose carefully — because they didn't have the time or a trusted expert in their corner.
@@ -61,7 +61,7 @@ export default function About({ navigate }) {
                   </MagneticButton>
                   <MagneticButton
                     className="btn btn-outline"
-                    href="mailto:burke@theinterestinggroup.com"
+                    href="mailto:info@theinterestinggroup.com"
                   >
                     Send an email
                   </MagneticButton>

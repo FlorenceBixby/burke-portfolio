@@ -61,7 +61,7 @@ export default function Privacy() {
         <p style={p}>
           You have the right to request access to, correction of, or deletion of any personal
           information we hold about you. To exercise these rights, contact us at{' '}
-          <a href="mailto:burke@theinterestinggroup.com" style={link}>burke@theinterestinggroup.com</a>.
+          <a href="mailto:info@theinterestinggroup.com" style={link}>info@theinterestinggroup.com</a>.
         </p>
 
         <h2 style={h2}>Third-Party Services</h2>
@@ -76,7 +76,7 @@ export default function Privacy() {
         <h2 style={h2}>Contact</h2>
         <p style={p}>
           Questions about this policy? Email{' '}
-          <a href="mailto:burke@theinterestinggroup.com" style={link}>burke@theinterestinggroup.com</a>.
+          <a href="mailto:info@theinterestinggroup.com" style={link}>info@theinterestinggroup.com</a>.
         </p>
 
       </div>
