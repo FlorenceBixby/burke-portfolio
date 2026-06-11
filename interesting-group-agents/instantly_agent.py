@@ -37,6 +37,12 @@ def _post(endpoint: str, payload: dict) -> dict:
     return resp.json()
 
 
+def _patch(endpoint: str, payload: dict) -> dict:
+    resp = requests.patch(f"{BASE_URL}/{endpoint}", headers=_headers(), json=payload)
+    resp.raise_for_status()
+    return resp.json()
+
+
 # ── Campaign management ───────────────────────────────────────────────────────
 
 def list_campaigns() -> list:
@@ -175,11 +181,13 @@ def enroll_prospect(prospect: dict) -> bool:
     """
     Enroll a fully-revealed prospect into the right Instantly campaign.
     prospect must have: email, first_name, last_name, company, title
-    Optional: employees (int) for enterprise routing
+    Optional: employees (int), industry (str, pre-computed), personalization (str)
     Returns True if enrolled successfully.
     """
     campaign_ids = load_campaign_ids()
-    industry = detect_industry(
+
+    # Use pre-computed industry if provided (from smart_route_industry), else detect
+    industry = prospect.get("industry") or detect_industry(
         prospect.get("company", ""),
         employees=prospect.get("employees", 0),
         title=prospect.get("title", ""),
@@ -191,12 +199,13 @@ def enroll_prospect(prospect: dict) -> bool:
         return False
 
     return add_lead_to_campaign(
-        campaign_id  = campaign_id,
-        email        = prospect["email"],
-        first_name   = prospect.get("first_name", ""),
-        last_name    = prospect.get("last_name", ""),
-        company      = prospect.get("company", ""),
-        title        = prospect.get("title", ""),
+        campaign_id     = campaign_id,
+        email           = prospect["email"],
+        first_name      = prospect.get("first_name", ""),
+        last_name       = prospect.get("last_name", ""),
+        company         = prospect.get("company", ""),
+        title           = prospect.get("title", ""),
+        personalization = prospect.get("personalization", ""),
     )
 
 
@@ -293,6 +302,93 @@ def get_recent_replies(since_hours: int = 24):
     except Exception as e:
         print(f"  Could not fetch replies: {e}")
         return []
+
+
+# ── Inbox placement ───────────────────────────────────────────────────────────
+
+def run_inbox_placement_test(subject: str = None, body: str = None) -> dict:
+    """
+    Fire a manual inbox placement test using Instantly's seed network.
+    Returns the test object with id and test_code.
+    Sending account: burke@theinterestinggroup.com
+    """
+    if not subject:
+        subject = "Quick question about your tech vendors"
+    if not body:
+        body = (
+            "Hi there,\n\n"
+            "As the person running your business, you're probably also the one managing "
+            "tech vendors — phone systems, internet, cloud — on top of everything else.\n\n"
+            "I help Texas businesses manage those contracts at no cost. "
+            "I'm paid by the vendors, so my job is finding the best fit.\n\n"
+            "Worth a 15-minute call?\n\nBurke Ruder\nThe Interesting Group"
+        )
+    payload = {
+        "name":           f"ARIA Check — {datetime.utcnow().strftime('%Y-%m-%d')}",
+        "type":           1,          # manual test
+        "sending_method": 2,          # send via connected account
+        "email_subject":  subject,
+        "email_body":     body,
+        "emails":         [],         # use Instantly seed network
+    }
+    try:
+        r = _post("inbox-placement-tests", payload)
+        return r
+    except Exception as e:
+        print(f"  Inbox placement test failed: {e}")
+        return {}
+
+
+def get_inbox_placement_results(test_id: str) -> dict:
+    """
+    Pull results for a previously-run inbox placement test.
+    Returns: inbox_pct, spam_pct, missing_pct, total, status
+    Results typically available 30-60 min after test fires.
+    """
+    try:
+        import requests
+        r = requests.get(
+            f"{BASE_URL}/inbox-placement-analytics",
+            headers=_headers(),
+            params={"test_id": test_id},
+        )
+        if not r.ok:
+            return {}
+        items = r.json().get("items", [])
+        if not items:
+            return {"status": "pending", "total": 0}
+
+        inbox = sum(1 for i in items if i.get("status") == "inbox")
+        spam  = sum(1 for i in items if i.get("status") == "spam")
+        miss  = sum(1 for i in items if i.get("status") == "missing")
+        total = len(items)
+
+        return {
+            "status":      "complete",
+            "total":       total,
+            "inbox":       inbox,
+            "spam":        spam,
+            "missing":     miss,
+            "inbox_pct":   round(inbox / total * 100, 1) if total else 0,
+            "spam_pct":    round(spam  / total * 100, 1) if total else 0,
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
+
+def get_latest_placement_test_id() -> str:
+    """Return the most recent inbox placement test ID, or empty string."""
+    try:
+        import requests
+        r = requests.get(
+            f"{BASE_URL}/inbox-placement-tests",
+            headers=_headers(),
+            params={"limit": 1},
+        )
+        items = r.json().get("items", [])
+        return items[0]["id"] if items else ""
+    except Exception:
+        return ""
 
 
 # ── CLI ───────────────────────────────────────────────────────────────────────

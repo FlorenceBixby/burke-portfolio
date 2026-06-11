@@ -135,9 +135,107 @@ def create_apollo_contact(person: dict) -> str:
     return None
 
 
+def enrich_org(domain: str) -> dict:
+    """
+    Pull Apollo org enrichment for a company domain.
+    Returns tech stack, keywords, employee count, description, phone.
+    Free to call — does not spend reveal credits.
+    """
+    try:
+        resp = requests.get(
+            f"{APOLLO_BASE}/organizations/enrich",
+            headers=APOLLO_HEADERS,
+            params={"domain": domain},
+            timeout=8,
+        )
+        if resp.ok:
+            return resp.json().get("organization", {})
+    except Exception:
+        pass
+    return {}
+
+
+def build_personalization(person: dict, org: dict) -> str:
+    """
+    Craft a 1-line personalization snippet using Apollo org data.
+    Used as the {{personalization}} variable in Instantly sequences.
+    Falls back to empty string if nothing useful found.
+    """
+    tech = [t.lower() for t in (org.get("technology_names") or [])]
+    keywords = " ".join(org.get("keywords") or []).lower()
+    desc = (org.get("short_description") or "").lower()
+    title = (person.get("title") or "").lower()
+    company = (person.get("organization") or {}).get("name", "") or ""
+    employees = org.get("estimated_num_employees") or 0
+
+    # CCaaS signals
+    if any(t in tech for t in ["five9", "genesys", "nice", "talkdesk", "avaya", "cisco contact center", "amazon connect"]):
+        matched = next(t for t in ["Five9","Genesys","NICE","Talkdesk","Avaya","Amazon Connect"] if t.lower() in tech)
+        return f"I saw {company} is running {matched} — wanted to reach out about optimizing that contract."
+
+    # UCaaS / phone system
+    if any(t in tech for t in ["ringcentral", "vonage", "8x8", "zoom phone", "microsoft teams", "webex"]):
+        matched = next(t for t in ["RingCentral","Vonage","8x8","Zoom Phone","Microsoft Teams","Webex"] if t.lower() in tech)
+        return f"Noticed {company} is on {matched} — I work with a few vendors who compete aggressively on that."
+
+    # Security stack signals
+    if any(t in tech for t in ["crowdstrike", "sentinelone", "palo alto", "fortinet", "zscaler", "okta"]):
+        matched = next(t for t in ["CrowdStrike","SentinelOne","Palo Alto","Fortinet","Zscaler","Okta"] if t.lower() in tech)
+        return f"Saw {company} is using {matched} — I help businesses benchmark those contracts."
+
+    # Generic tech stack mention
+    if tech:
+        top = [t for t in tech if t not in ("google analytics","wordpress","jquery","bootstrap","font awesome")][:2]
+        if top:
+            return f"Noticed {company} is running {' and '.join(t.title() for t in top)} — always good context before reaching out."
+
+    # Industry/keyword signal
+    if "veteran" in keywords or "veteran" in desc:
+        return f"Respect the veteran-owned operation at {company} — that's a rare commitment."
+
+    return ""
+
+
+def smart_route_industry(person: dict, org: dict) -> str:
+    """
+    Enhanced enterprise routing using Apollo org enrichment data.
+    Supplements employee-count routing with tech stack and keyword signals.
+    """
+    from instantly_agent import detect_industry
+
+    tech = [t.lower() for t in (org.get("technology_names") or [])]
+    keywords = " ".join(org.get("keywords") or []).lower()
+    desc = (org.get("short_description") or "").lower()
+    employees = org.get("estimated_num_employees") or person.get("employees", 0) or 0
+    title = (person.get("title") or "").lower()
+    company = (person.get("organization") or {}).get("name", "") or ""
+
+    # Hard CCaaS signals in tech stack → always CCaaS regardless of size
+    ccaas_tech = ["five9", "genesys", "nice", "talkdesk", "avaya", "cisco contact center",
+                  "amazon connect", "twilio", "zendesk talk", "freshcaller"]
+    if any(t in tech for t in ccaas_tech):
+        return "ccaas"
+
+    # Contact center / customer experience keywords
+    ccaas_kw = ["contact center", "call center", "customer experience", "cx platform",
+                "omnichannel", "ivr", "workforce management", "customer engagement"]
+    if any(k in keywords or k in desc for k in ccaas_kw):
+        return "ccaas"
+
+    # Security stack signals → enterprise_security
+    sec_tech = ["crowdstrike", "sentinelone", "palo alto", "fortinet", "zscaler",
+                "okta", "cyberark", "carbon black", "splunk", "darktrace"]
+    if any(t in tech for t in sec_tech):
+        return "enterprise_security"
+
+    # Fall back to title + employee count routing
+    return detect_industry(company, employees=employees, title=title)
+
+
 def reveal_and_enroll(person_id: str, company: str, first_name: str) -> bool:
     """
     Spend 1 Apollo credit to reveal contact details, then enroll in Instantly campaign.
+    Enriches org data for smart routing and personalization before enrolling.
     Apollo = prospecting database only. Instantly = sequencing + analytics.
     Returns True if successfully enrolled.
     """
@@ -158,14 +256,35 @@ def reveal_and_enroll(person_id: str, company: str, first_name: str) -> bool:
     if not person:
         return False
 
+    # ── Org enrichment (no credit cost) ──────────────────────────────────────
+    org_data = {}
+    domain = (person.get("organization") or {}).get("primary_domain", "")
+    if not domain:
+        # Derive domain from email
+        email_raw = person.get("email", "") or ""
+        if "@" in email_raw:
+            domain = email_raw.split("@")[1]
+    if domain:
+        org_data = enrich_org(domain)
+
+    # ── Build personalization line ────────────────────────────────────────────
+    personalization = build_personalization(person, org_data)
+
+    # ── Smart industry routing ────────────────────────────────────────────────
+    industry = smart_route_industry(person, org_data)
+
     # Build prospect dict
     prospect = {
-        "first_name": person.get("first_name"),
-        "last_name":  person.get("last_name"),
-        "title":      person.get("title"),
-        "company":    (person.get("organization") or {}).get("name", company),
-        "email":      person.get("email"),
-        "phone":      person.get("direct_phone"),
+        "first_name":      person.get("first_name"),
+        "last_name":       person.get("last_name"),
+        "title":           person.get("title"),
+        "company":         (person.get("organization") or {}).get("name", company),
+        "email":           person.get("email"),
+        "phone":           person.get("direct_phone") or org_data.get("phone"),
+        "employees":       org_data.get("estimated_num_employees", 0),
+        "tech_stack":      (org_data.get("technology_names") or [])[:10],
+        "personalization": personalization,
+        "industry":        industry,  # pre-computed, skip re-detection in enroll_prospect
     }
 
     # Disqualification check
@@ -184,10 +303,14 @@ def reveal_and_enroll(person_id: str, company: str, first_name: str) -> bool:
         log(f"  Skipping unverified email ({email_status}) for {prospect['first_name']} @ {prospect['company']}")
         return False
 
-    # Enroll in Instantly campaign (replaces Apollo sequence enrollment)
+    if personalization:
+        log(f"  📍 Personalization: {personalization[:60]}...")
+    log(f"  🎯 Route: {industry}")
+
+    # Enroll in Instantly campaign
     enrolled = enroll_prospect(prospect)
     if enrolled:
-        log(f"  ✓ Enrolled: {prospect['first_name']} {prospect.get('last_name','')} @ {prospect['company']} → Instantly")
+        log(f"  ✓ Enrolled: {prospect['first_name']} {prospect.get('last_name','')} @ {prospect['company']} → Instantly [{industry}]")
     else:
         log(f"  ✗ Enroll failed: {prospect['first_name']} @ {prospect['company']}")
 
@@ -219,6 +342,26 @@ def prospect_run(target_reveals: int = 25) -> dict:
     from scoring_agent import score_all
 
     log(f"=== PROSPECT RUN (target: {target_reveals} reveals) ===")
+
+    # ── Inbox placement check ─────────────────────────────────────────────────
+    # Run a deliverability test at the start of each batch so we catch spam
+    # issues before they affect real prospects. Results show up in daily recap.
+    try:
+        from instantly_agent import run_inbox_placement_test, get_inbox_placement_results, get_latest_placement_test_id
+        prior_test_id = get_latest_placement_test_id()
+        if prior_test_id:
+            prior = get_inbox_placement_results(prior_test_id)
+            if prior.get("status") == "complete":
+                inbox_pct = prior.get("inbox_pct", 100)
+                log(f"📬 Last deliverability test: {inbox_pct}% inbox | {prior.get('spam_pct',0)}% spam")
+                if inbox_pct < 70:
+                    log("⚠️  WARNING: Inbox rate below 70% — check sending reputation before continuing.")
+        # Fire a fresh test for next run's check
+        new_test = run_inbox_placement_test()
+        if new_test.get("id"):
+            log(f"📬 Deliverability test queued (id: {new_test['id'][:8]}…) — results in ~1hr")
+    except Exception as e:
+        log(f"  (Inbox placement check skipped: {e})")
 
     credits = get_credit_balance()
     log(f"Apollo credits available: {credits}")
@@ -584,6 +727,28 @@ def daily_recap() -> None:
         lines.append(format_recap_section())
     except Exception as e:
         lines.append(f"  (Website traffic unavailable: {e})")
+
+    # Inbox placement / deliverability
+    try:
+        from instantly_agent import get_latest_placement_test_id, get_inbox_placement_results
+        test_id = get_latest_placement_test_id()
+        if test_id:
+            result = get_inbox_placement_results(test_id)
+            lines.append(sep)
+            lines.append("  DELIVERABILITY")
+            lines.append(sep)
+            if result.get("status") == "complete":
+                inbox_pct = result.get("inbox_pct", 0)
+                spam_pct  = result.get("spam_pct", 0)
+                icon = "✅" if inbox_pct >= 80 else ("⚠️" if inbox_pct >= 60 else "🚨")
+                lines.append(f"  {icon}  Inbox: {inbox_pct}%  |  Spam: {spam_pct}%  |  Tested: {result.get('total',0)} mailboxes")
+                if inbox_pct < 80:
+                    lines.append("  ⚠️  Action needed: inbox rate below 80%. Check SPF/DKIM/warmup.")
+            elif result.get("status") == "pending":
+                lines.append("  ⏳  Last test still processing — check back tomorrow.")
+            lines.append("")
+    except Exception as e:
+        pass
 
     lines += [
         "",
