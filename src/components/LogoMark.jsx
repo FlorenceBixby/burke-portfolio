@@ -27,7 +27,7 @@
 // ── Concept A: The Dot Grid ────────────────────────────────────────────────
 // 3×3 grid. Pattern (reading L→R, T→B): ● ● ○ / ● ○ ● / ○ ● ●
 // Six filled (terracotta), three open (ghost). Diagonal scatter = momentum.
-export function DotGrid({ size = 36, accent = '#C4622D', ghost = 'rgba(196,98,45,0.18)' }) {
+export function DotGrid({ size = 36, accent = '#2d5c3d', ghost = 'rgba(45,92,61,0.18)' }) {
   const r = size / 8          // circle radius
   const gap = size / 8        // gap between circles
   const step = r * 2 + gap    // center-to-center distance
@@ -66,7 +66,7 @@ export function DotGrid({ size = 36, accent = '#C4622D', ghost = 'rgba(196,98,45
 // Three concentric forms: thin outer ring → medium inner ring → solid dot.
 // Proportions: outer r=36, middle r=22, dot r=7. Golden-ratio inspired.
 // The dot — the only solid element — is terracotta. The rest is structure.
-export function Orbit({ size = 40, accent = '#C4622D', stroke = '#1D1D1F' }) {
+export function Orbit({ size = 40, accent = '#2d5c3d', stroke = '#1D1D1F' }) {
   const cx = size / 2
   const cy = size / 2
   const outerR = size * 0.45
@@ -93,7 +93,7 @@ export function Orbit({ size = 40, accent = '#C4622D', stroke = '#1D1D1F' }) {
 // 4-column × 3-row modular grid, Eames House facade proportions.
 // Filled cells: terracotta (warm), black (structure), open (light).
 // The pattern reads as a forward-leaning "T" in negative space.
-export function TheHouse({ size = 48, accent = '#C4622D', dark = '#1D1D1F', border = '#D2D2D7' }) {
+export function TheHouse({ size = 48, accent = '#2d5c3d', dark = '#1D1D1F', border = '#D2D2D7' }) {
   // Grid: 4 cols × 3 rows. Each cell proportioned 3:2 (wider than tall).
   const cols = 4
   const rows = 3
@@ -149,8 +149,8 @@ export function TheHouse({ size = 48, accent = '#C4622D', dark = '#1D1D1F', bord
 export function LogoWordmark({ mark = 'dots', size, dark = false }) {
   const color = dark ? '#fff' : '#1D1D1F'
   const subColor = dark ? 'rgba(255,255,255,0.5)' : '#86868B'
-  const accent = dark ? '#E8845A' : '#C4622D'
-  const ghost = dark ? 'rgba(255,255,255,0.2)' : 'rgba(196,98,45,0.18)'
+  const accent = dark ? '#2d5c3d' : '#2d5c3d'
+  const ghost = dark ? 'rgba(255,255,255,0.2)' : 'rgba(45,92,61,0.18)'
 
   return (
     <span style={{ display: 'flex', alignItems: 'center', gap: 10, userSelect: 'none' }}>

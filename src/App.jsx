@@ -11,7 +11,7 @@ import Footer from './components/Footer.jsx'
 // ── Dot Grid assembled inline so the loader has no import side-effects ──
 // Each dot lights up individually — the mark "builds" before your eyes.
 const DOT_PATTERN = [true, true, false, true, false, true, false, true, true]
-const ACCENT = '#E8845A'
+const ACCENT = '#2d5c3d'
 const GHOST  = 'rgba(255,255,255,0.14)'
 
 function LoaderDots() {

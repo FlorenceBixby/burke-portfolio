@@ -9,7 +9,7 @@ const LINE_ALPHA = 0.09       // line max opacity (fades by distance)
 const ACCENT_RATIO = 0.12     // ~12% of dots are terracotta
 
 const DARK   = '29,29,31'
-const WARM   = '196,98,45'
+const WARM   = '45,92,61'
 
 export default function HeroBackground() {
   const canvasRef = useRef(null)

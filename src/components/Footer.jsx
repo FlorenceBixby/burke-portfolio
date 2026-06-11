@@ -30,7 +30,7 @@ export default function Footer({ navigate }) {
 
       <footer className="footer">
         <div className="footer-logo" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 12 }} onClick={() => navigate('home')}>
-          <DotGrid size={30} accent="#E8845A" ghost="rgba(255,255,255,0.18)" />
+          <DotGrid size={30} accent="#2d5c3d" ghost="rgba(255,255,255,0.25)" />
           <span style={{ display: 'flex', flexDirection: 'column', gap: 3, lineHeight: 1 }}>
             <span className="footer-logo-the">THE</span>
             <span className="footer-logo-rest" style={{ fontSize: 8, letterSpacing: '0.18em', textTransform: 'uppercase' }}>

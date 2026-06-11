@@ -9,7 +9,7 @@
   --gray-mid:     #86868B;
   --gray-dark:    #424245;
   --gray-border:  #D2D2D7;
-  --accent:       #C4622D;
+  --accent:       #2d5c3d;
   --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
@@ -95,7 +95,7 @@ button { font-family: var(--font); cursor: pointer; border: none; outline: none;
   font-size: 12px; font-weight: 600; letter-spacing: 0.14em;
   text-transform: uppercase; color: var(--accent); display: block; margin-bottom: 16px;
 }
-.eyebrow-light { color: rgba(196,98,45,0.7); }
+.eyebrow-light { color: rgba(45,92,61,0.7); }
 
 .display {
   font-size: clamp(52px, 8vw, 96px);

@@ -56,7 +56,7 @@ function ConceptCard({ concept, isSelected, onSelect }) {
       animate={{ y: isSelected ? -4 : 0 }}
       style={{
         cursor: 'pointer',
-        border: isSelected ? '2px solid #C4622D' : '2px solid #E8E0D6',
+        border: isSelected ? '2px solid #2d5c3d' : '2px solid #E8E0D6',
         borderRadius: 16,
         overflow: 'hidden',
         transition: 'border-color 0.25s',
@@ -74,7 +74,7 @@ function ConceptCard({ concept, isSelected, onSelect }) {
       }}>
         <Mark
           size={concept.id === 'house' ? 80 : 72}
-          accent={concept.id === 'orbit' ? '#E8845A' : '#C4622D'}
+          accent={concept.id === 'orbit' ? '#2d5c3d' : '#2d5c3d'}
           ghost="rgba(255,255,255,0.15)"
           stroke="#fff"
           dark="#E8E0D8"
@@ -101,8 +101,8 @@ function ConceptCard({ concept, isSelected, onSelect }) {
       }}>
         <Mark
           size={concept.id === 'house' ? 56 : 48}
-          accent="#C4622D"
-          ghost="rgba(196,98,45,0.15)"
+          accent="#2d5c3d"
+          ghost="rgba(45,92,61,0.15)"
           stroke="#1D1D1F"
           dark="#1D1D1F"
           {...markProps}
@@ -124,8 +124,8 @@ function ConceptCard({ concept, isSelected, onSelect }) {
           {isSelected && (
             <span style={{
               fontSize: 10, fontWeight: 600, letterSpacing: '0.12em',
-              textTransform: 'uppercase', color: '#C4622D',
-              background: 'rgba(196,98,45,0.1)', padding: '3px 10px', borderRadius: 980,
+              textTransform: 'uppercase', color: '#2d5c3d',
+              background: 'rgba(45,92,61,0.1)', padding: '3px 10px', borderRadius: 980,
             }}>
               Selected
             </span>
@@ -137,7 +137,7 @@ function ConceptCard({ concept, isSelected, onSelect }) {
         <p style={{ fontSize: 14, lineHeight: 1.65, color: '#424245', marginBottom: 16 }}>
           {concept.description}
         </p>
-        <div style={{ background: 'rgba(196,98,45,0.06)', borderLeft: '3px solid #C4622D', padding: '10px 14px', borderRadius: '0 6px 6px 0' }}>
+        <div style={{ background: 'rgba(45,92,61,0.06)', borderLeft: '3px solid #2d5c3d', padding: '10px 14px', borderRadius: '0 6px 6px 0' }}>
           <p style={{ fontSize: 13, lineHeight: 1.6, color: '#424245', fontStyle: 'italic' }}>
             {concept.why}
           </p>
@@ -159,7 +159,7 @@ export default function LogoShowcase({ navigate }) {
           initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           style={{ display: 'block', fontSize: 11, fontWeight: 600, letterSpacing: '0.18em',
-            textTransform: 'uppercase', color: '#C4622D', marginBottom: 16 }}
+            textTransform: 'uppercase', color: '#2d5c3d', marginBottom: 16 }}
         >
           Identity System
         </motion.span>
@@ -234,8 +234,8 @@ export default function LogoShowcase({ navigate }) {
                 <div key={s} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
                   <Mark
                     size={c.id === 'house' ? Math.round(s * 1.15) : s}
-                    accent="#C4622D"
-                    ghost="rgba(196,98,45,0.18)"
+                    accent="#2d5c3d"
+                    ghost="rgba(45,92,61,0.18)"
                     stroke="#1D1D1F"
                     dark="#1D1D1F"
                     {...markProps}
@@ -252,7 +252,7 @@ export default function LogoShowcase({ navigate }) {
       <section style={{ padding: '0 5vw 80px', maxWidth: 960, margin: '0 auto' }}>
         <div style={{ background: '#1D1D1F', borderRadius: 20, padding: '48px 52px' }}>
           <span style={{ display: 'block', fontSize: 11, fontWeight: 600, letterSpacing: '0.18em',
-            textTransform: 'uppercase', color: '#E8845A', marginBottom: 16 }}>
+            textTransform: 'uppercase', color: '#2d5c3d', marginBottom: 16 }}>
             My Recommendation
           </span>
           <h2 style={{ fontSize: 28, fontWeight: 800, letterSpacing: '-0.03em', color: '#fff', marginBottom: 20, lineHeight: 1.2 }}>
