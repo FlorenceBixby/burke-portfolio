@@ -1,5 +1,4 @@
 import MagneticButton from './MagneticButton.jsx'
-import { DotGrid } from './LogoMark.jsx'
 
 export default function Footer({ navigate }) {
   return (
@@ -29,14 +28,9 @@ export default function Footer({ navigate }) {
       </section>
 
       <footer className="footer">
-        <div className="footer-logo" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 12 }} onClick={() => navigate('home')}>
-          <DotGrid size={30} accent="#2d5c3d" ghost="rgba(255,255,255,0.25)" />
-          <span style={{ display: 'flex', flexDirection: 'column', gap: 3, lineHeight: 1 }}>
-            <span className="footer-logo-the">THE</span>
-            <span className="footer-logo-rest" style={{ fontSize: 8, letterSpacing: '0.18em', textTransform: 'uppercase' }}>
-              Interesting Group
-            </span>
-          </span>
+        <div className="footer-logo" style={{ cursor: 'pointer' }} onClick={() => navigate('home')}>
+          <span className="footer-logo-the">THE</span>
+          <span className="footer-logo-rest">Interesting Group</span>
         </div>
         <span className="footer-meta">
           <a href="mailto:burke@theinterestinggroup.com" style={{ color: '#86868B', transition: 'color 0.2s' }}

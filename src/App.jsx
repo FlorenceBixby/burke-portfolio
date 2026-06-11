@@ -8,119 +8,90 @@ import Contact from './pages/Contact.jsx'
 import LogoShowcase from './pages/LogoShowcase.jsx'
 import Footer from './components/Footer.jsx'
 
-// ── Dot Grid assembled inline so the loader has no import side-effects ──
-// Each dot lights up individually — the mark "builds" before your eyes.
-const DOT_PATTERN = [true, true, false, true, false, true, false, true, true]
 const ACCENT = '#2d5c3d'
-const GHOST  = 'rgba(255,255,255,0.14)'
 
-function LoaderDots() {
-  return (
-    <svg width="54" height="54" viewBox="0 0 54 54" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* 3×3 grid: r=7, step=20, starts at 7 */}
-      {DOT_PATTERN.map((filled, i) => {
-        const col = i % 3
-        const row = Math.floor(i / 3)
-        return (
-          <motion.circle
-            key={i}
-            cx={7 + col * 20}
-            cy={7 + row * 20}
-            r={7}
-            fill={filled ? ACCENT : GHOST}
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{
-              delay: 0.15 + i * 0.07,
-              type: 'spring',
-              stiffness: 500,
-              damping: 22,
-            }}
-          />
-        )
-      })}
-    </svg>
-  )
-}
+// ── Intro screen — Alamo Drafthouse style ────────────────────────────────
+// Black full-screen. "THE" drops in, "Interesting Group" fades up,
+// then the green period crawls in slowly. Slides up to reveal the page.
+function Loader() {
+  const [showPeriod, setShowPeriod] = useState(false)
 
-// ── Alamo-style word slam ────────────────────────────────────────────────
-// Each word hits from a different direction with a hard spring snap.
-// This is the Alamo Drafthouse DNA: theatrical, punchy, cinematic.
-const slamWords = [
-  {
-    text: 'THE',
-    from: { x: 160, y: 0, rotate: -4 },
-    delay: 0.55,
-    style: {
-      fontSize: 'clamp(72px, 13vw, 140px)',
-      fontWeight: 900,
-      letterSpacing: '-0.05em',
-      color: '#FFFFFF',
-      lineHeight: 1,
-    },
-  },
-  {
-    text: 'INTERESTING',
-    from: { x: -180, y: 0, rotate: 2 },
-    delay: 0.85,
-    style: {
-      fontSize: 'clamp(18px, 3.8vw, 42px)',
-      fontWeight: 700,
-      letterSpacing: '0.18em',
-      color: '#FFFFFF',
-      lineHeight: 1,
-    },
-  },
-  {
-    text: 'GROUP',
-    from: { x: 0, y: -80, rotate: 0 },
-    delay: 1.05,
-    style: {
-      fontSize: 'clamp(18px, 3.8vw, 42px)',
-      fontWeight: 300,
-      letterSpacing: '0.42em',
-      color: ACCENT,
-      lineHeight: 1,
-    },
-  },
-]
+  useEffect(() => {
+    const t = setTimeout(() => setShowPeriod(true), 1000)
+    return () => clearTimeout(t)
+  }, [])
 
-// Accent flash on impact — a single frame punch of color
-function SlamWord({ word }) {
   return (
     <motion.div
-      initial={{ x: word.from.x, y: word.from.y, rotate: word.from.rotate, opacity: 0 }}
-      animate={{ x: 0, y: 0, rotate: 0, opacity: 1 }}
-      transition={{
-        delay: word.delay,
-        type: 'spring',
-        stiffness: 480,
-        damping: 26,
-        opacity: { duration: 0.01, delay: word.delay },
-      }}
-      style={word.style}
+      className="loader"
+      initial={{ opacity: 1 }}
+      exit={{ y: '-100%', transition: { duration: 0.55, ease: [0.76, 0, 0.24, 1] } }}
+      style={{ flexDirection: 'column', gap: 0, overflow: 'hidden' }}
     >
-      {word.text}
-    </motion.div>
-  )
-}
+      {/* Scanline grit */}
+      <div style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1,
+        backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.015) 2px, rgba(255,255,255,0.015) 4px)',
+      }} />
 
-// Thin horizontal rule that slashes across like a film clapperboard line
-function SlashLine() {
-  return (
-    <motion.div
-      initial={{ scaleX: 0 }}
-      animate={{ scaleX: 1 }}
-      transition={{ delay: 0.72, duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-      style={{
-        height: 2,
-        background: ACCENT,
-        width: '100%',
-        transformOrigin: 'left',
-        marginTop: 4,
-        marginBottom: 10,
-      }}
-    />
+      {/* Content */}
+      <div style={{
+        position: 'relative', zIndex: 2,
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        padding: '0 5vw', textAlign: 'center',
+      }}>
+        {/* THE — drops from above */}
+        <motion.div
+          initial={{ opacity: 0, y: -40, scale: 1.08 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+          style={{
+            fontSize: 'clamp(72px, 18vw, 180px)',
+            fontWeight: 900,
+            color: '#fff',
+            letterSpacing: '-0.05em',
+            lineHeight: 1,
+          }}
+        >
+          THE
+        </motion.div>
+
+        {/* Interesting Group + green period */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.38, ease: [0.16, 1, 0.3, 1] }}
+          style={{
+            display: 'flex', alignItems: 'flex-end', gap: '0.12em',
+            fontSize: 'clamp(14px, 3.8vw, 38px)',
+            fontWeight: 300,
+            color: 'rgba(255,255,255,0.82)',
+            letterSpacing: '0.22em',
+            textTransform: 'uppercase',
+            lineHeight: 1,
+            marginTop: '0.15em',
+          }}
+        >
+          <span>Interesting Group</span>
+
+          {/* The dramatic green period */}
+          <motion.span
+            initial={{ opacity: 0, x: -6 }}
+            animate={showPeriod ? { opacity: 1, x: 0 } : { opacity: 0, x: -6 }}
+            transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+            style={{
+              color: ACCENT,
+              fontWeight: 900,
+              fontSize: '1.4em',
+              lineHeight: 0.75,
+              display: 'inline-block',
+            }}
+          >
+            .
+          </motion.span>
+        </motion.div>
+      </div>
+    </motion.div>
   )
 }
 
@@ -129,7 +100,7 @@ export default function App() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 2400)
+    const t = setTimeout(() => setLoading(false), 2800)
     return () => clearTimeout(t)
   }, [])
 
@@ -140,67 +111,12 @@ export default function App() {
 
   return (
     <>
-      {/* ── Loading screen ──────────────────────────────────────────── */}
+      {/* ── Intro screen ─────────────────────────────────────────── */}
       <AnimatePresence>
-        {loading && (
-          <motion.div
-            className="loader"
-            initial={{ opacity: 1 }}
-            exit={{
-              y: '-100%',
-              transition: { duration: 0.55, ease: [0.76, 0, 0.24, 1] },
-            }}
-            style={{ flexDirection: 'column', gap: 0, overflow: 'hidden' }}
-          >
-            {/* Scanline texture overlay — cinematic grit */}
-            <div style={{
-              position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1,
-              backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.015) 2px, rgba(255,255,255,0.015) 4px)',
-            }} />
-
-            {/* Content */}
-            <div style={{
-              position: 'relative', zIndex: 2,
-              display: 'flex', flexDirection: 'column', alignItems: 'center',
-              gap: 18, padding: '0 5vw', textAlign: 'center',
-            }}>
-              {/* Dot grid assembles first */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.1, duration: 0.01 }}
-              >
-                <LoaderDots />
-              </motion.div>
-
-              {/* Wordmark slams in word by word */}
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-                {slamWords.map((w, i) => <SlamWord key={i} word={w} />)}
-              </div>
-
-              {/* Slash line */}
-              <div style={{ width: 'clamp(180px, 30vw, 320px)' }}>
-                <SlashLine />
-              </div>
-
-              {/* Tagline blinks in last — Alamo-style footer text */}
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.45 }}
-                transition={{ delay: 1.35, duration: 0.4 }}
-                style={{
-                  fontSize: 10, fontWeight: 500, letterSpacing: '0.22em',
-                  textTransform: 'uppercase', color: '#fff',
-                }}
-              >
-                Technology Advisor
-              </motion.p>
-            </div>
-          </motion.div>
-        )}
+        {loading && <Loader key="loader" />}
       </AnimatePresence>
 
-      {/* ── App shell ───────────────────────────────────────────────── */}
+      {/* ── App shell ────────────────────────────────────────────── */}
       <AnimatePresence>
         {!loading && (
           <motion.div

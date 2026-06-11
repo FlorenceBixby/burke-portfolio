@@ -1,6 +1,4 @@
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { DotGrid } from './LogoMark.jsx'
 
 export default function Nav({ page, navigate }) {
   const [scrolled, setScrolled] = useState(false)
@@ -13,15 +11,10 @@ export default function Nav({ page, navigate }) {
 
   return (
     <nav className="nav" style={{ boxShadow: scrolled ? '0 1px 20px rgba(0,0,0,0.06)' : 'none' }}>
-      {/* Logo */}
-      <div className="nav-logo" onClick={() => navigate('home')} style={{ gap: 10 }}>
-        <DotGrid size={26} />
-        <span style={{ display: 'flex', flexDirection: 'column', gap: 2, lineHeight: 1 }}>
-          <span className="nav-logo-the">THE</span>
-          <span className="nav-logo-rest" style={{ fontSize: 8, letterSpacing: '0.18em', textTransform: 'uppercase' }}>
-            Interesting Group
-          </span>
-        </span>
+      {/* Logo — text only */}
+      <div className="nav-logo" onClick={() => navigate('home')}>
+        <span className="nav-logo-the">THE</span>
+        <span className="nav-logo-rest">Interesting Group</span>
       </div>
 
       {/* Links */}
