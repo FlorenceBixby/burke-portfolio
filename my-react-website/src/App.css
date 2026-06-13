@@ -3,14 +3,15 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:          #080808;
-  --bg2:         #111111;
-  --bg3:         #1a1a1a;
-  --text:        #f0ede8;
-  --text-muted:  #888880;
-  --accent:      #e8a44a;
-  --accent2:     #c4873a;
-  --border:      rgba(255,255,255,0.08);
+  --bg:          #0a0d0b;
+  --bg2:         #0f1410;
+  --bg3:         #151c16;
+  --text:        #e8e4dc;
+  --text-muted:  #7a8078;
+  --accent:      #4a7c59;
+  --accent2:     #3a6147;
+  --accent-glow: rgba(74,124,89,0.15);
+  --border:      rgba(255,255,255,0.07);
   --serif:       'Playfair Display', Georgia, serif;
   --sans:        'Inter', -apple-system, sans-serif;
 }

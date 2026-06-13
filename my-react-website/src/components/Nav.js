@@ -31,7 +31,7 @@ const socials = [
     ),
   },
   {
-    href: 'https://x.com',
+    href: 'https://x.com/BurkeRuder',
     label: 'X / Twitter',
     icon: (
       <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">

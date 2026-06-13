@@ -98,7 +98,7 @@ function Hero() {
       <motion.div
         className="hero-bg"
         style={{
-          backgroundImage: `url(${process.env.PUBLIC_URL}/best/3R2A5336.jpg)`,
+          backgroundImage: `url(${process.env.PUBLIC_URL}/photos/photo5.jpg)`,
           y: bgY,
           scale,
         }}
@@ -332,7 +332,7 @@ function Contact() {
     { label: 'GitHub', href: 'https://github.com/FlorenceBixby' },
     { label: 'Instagram', href: 'https://instagram.com/burkeruder' },
     { label: 'Discord', href: 'https://discord.com/users/Mr.Bixby' },
-    { label: 'X / Twitter', href: 'https://x.com' },
+    { label: 'X / Twitter', href: 'https://x.com/BurkeRuder' },
   ];
 
   return (
