@@ -9,7 +9,7 @@ const experience = [
     color: '#F6821F',
     bullets: [
       '100%+ quota attainment consistently',
-      '4× President\'s Club honoree',
+      '4× Top Performer',
       'Top regional performer in enterprise segment',
     ],
   },
@@ -158,7 +158,7 @@ export default function About() {
         {[
           { num: '20+', label: 'Years experience' },
           { num: '$50M+', label: 'Procurement managed' },
-          { num: '4×', label: "President's Club" },
+          { num: '4×', label: "Top Performer" },
           { num: '100%+', label: 'Quota attainment' },
         ].map((s, i) => (
           <motion.div
@@ -202,7 +202,7 @@ export default function About() {
             {[
               "I started my career loading package cars at UPS at 3am. No plan, just work. Over the next twelve years I touched every part of that operation — logistics, management, team-building, problem-solving under pressure. It was the best business school I could have attended.",
               "When the solar industry started to boom, I made a move into procurement. I spent several years at Lighthouse Solar building supplier relationships and managing $50M+ in materials. That chapter taught me how to think in systems, manage complexity, and make big decisions with incomplete information.",
-              "Then I bet on myself again. I joined Cloudflare — one of the fastest-growing infrastructure companies in the world — as a BDR. Within a couple of years I was a Senior AE. I've hit 100%+ quota every year, earned 4× President's Club recognition, and I'm still learning something new every week.",
+              "Then I bet on myself again. I joined Cloudflare — one of the fastest-growing infrastructure companies in the world — as a BDR. Within a couple of years I was a Senior AE. I've hit 100%+ quota every year, earned 4× Top Performer recognition, and I'm still learning something new every week.",
               "Outside of work I'm a photographer. I shoot street and urban scenes around Austin — always looking for the light, the moment, the thing you weren't supposed to see. Same instinct, different medium.",
             ].map((para, i) => (
               <motion.p

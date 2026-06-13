@@ -70,7 +70,7 @@ const timeline = [
     year: '2023 – Present',
     role: 'Account Executive → Senior AE',
     company: 'Cloudflare',
-    desc: "100%+ quota attainment. 4× President's Club recognition. Named one of the top performers in the region. Still just getting started.",
+    desc: "100%+ quota attainment. 4× Top Performer recognition. Named one of the top performers in the region. Still just getting started.",
   },
 ];
 
@@ -214,7 +214,7 @@ function Intro() {
           color: 'var(--text-muted)',
           maxWidth: 620,
         }}>
-          I started my career at <strong style={{ color: 'var(--text)', fontWeight: 500 }}>UPS</strong> throwing boxes in the dark. Twelve years later I was running procurement for a solar company moving <strong style={{ color: 'var(--text)', fontWeight: 500 }}>$50M+</strong> in materials. Then I made the jump into enterprise tech — and I haven't looked back. I'm a Senior Account Executive at <strong style={{ color: 'var(--text)', fontWeight: 500 }}>Cloudflare</strong>, 4× President's Club, and I approach every problem the same way I did at 22: with curiosity, a lot of hustle, and zero attachment to how things are "supposed" to work.
+          I started my career at <strong style={{ color: 'var(--text)', fontWeight: 500 }}>UPS</strong> throwing boxes in the dark. Twelve years later I was running procurement for a solar company moving <strong style={{ color: 'var(--text)', fontWeight: 500 }}>$50M+</strong> in materials. Then I made the jump into enterprise tech — and I haven't looked back. I'm a Senior Account Executive at <strong style={{ color: 'var(--text)', fontWeight: 500 }}>Cloudflare</strong>, 4× Top Performer, and I approach every problem the same way I did at 22: with curiosity, a lot of hustle, and zero attachment to how things are "supposed" to work.
         </p>
       </FadeUp>
     </section>
@@ -229,7 +229,7 @@ function Stats() {
   const items = [
     { num: '20', suffix: '+', label: 'Years of experience' },
     { num: '$50', suffix: 'M+', label: 'Procurement managed' },
-    { num: '4×', suffix: '', label: "President's Club" },
+    { num: '4×', suffix: '', label: "Top Performer" },
     { num: '100', suffix: '%+', label: 'Quota attainment' },
   ];
 
