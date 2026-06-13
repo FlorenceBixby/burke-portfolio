@@ -1,227 +1,250 @@
-import { Link } from 'react-router-dom';
-import { motion } from 'motion/react';
+import { useRef } from 'react';
+import { motion, useInView } from 'motion/react';
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 28 },
-  visible: (i = 0) => ({
-    opacity: 1, y: 0,
-    transition: { duration: 0.7, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] },
-  }),
-};
-
-const values = [
-  { icon: '🔍', title: 'Transparency First', desc: 'We always tell you what we know, what we don\'t, and why we\'re recommending what we are.' },
-  { icon: '🤝', title: 'Long-Term Relationships', desc: 'We\'re not transactional. We build partnerships that last the lifetime of your technology agreements.' },
-  { icon: '⚖️', title: 'Vendor Neutral', desc: 'We work with 200+ vendors so we can always match the right solution to your specific needs.' },
-  { icon: '🚀', title: 'Speed & Efficiency', desc: 'Our process cuts months of RFP cycles down to days, without sacrificing diligence.' },
-  { icon: '🛡️', title: 'Accountability', desc: 'We stay engaged after contracts are signed — managing escalations, renewals, and optimization.' },
-  { icon: '💡', title: 'Strategic Thinking', desc: 'We bring a 20+ year enterprise technology perspective to every engagement.' },
+const experience = [
+  {
+    years: '2023 – Present',
+    role: 'Senior Account Executive',
+    company: 'Cloudflare',
+    color: '#F6821F',
+    bullets: [
+      '100%+ quota attainment consistently',
+      '4× President\'s Club honoree',
+      'Top regional performer in enterprise segment',
+    ],
+  },
+  {
+    years: '2022 – 2023',
+    role: 'Account Executive',
+    company: 'Cloudflare',
+    color: '#F6821F',
+    bullets: [
+      'Closed complex enterprise deals across networking & security',
+      'Built and expanded strategic accounts',
+    ],
+  },
+  {
+    years: '2021 – 2022',
+    role: 'Channel Account Executive / BDR',
+    company: 'Cloudflare',
+    color: '#F6821F',
+    bullets: [
+      'Launched partner channel relationships',
+      'Consistently exceeded pipeline targets',
+    ],
+  },
+  {
+    years: '2020 – 2021',
+    role: 'Account Executive',
+    company: 'Paycor',
+    color: '#4a7c59',
+    bullets: [
+      'Sold HCM solutions to mid-market companies',
+      'Top new business performer in territory',
+    ],
+  },
+  {
+    years: '2019 – 2020',
+    role: 'Account Executive',
+    company: 'Vercara',
+    color: '#4a7c59',
+    bullets: [
+      'Enterprise DNS & cybersecurity solutions',
+      'Managed complex multi-stakeholder sales cycles',
+    ],
+  },
+  {
+    years: '2016 – 2019',
+    role: 'Director of Procurement',
+    company: 'Lighthouse Solar',
+    color: '#e8c84a',
+    bullets: [
+      'Managed $50M+ in annual materials procurement',
+      'Built supplier network from the ground up',
+      'Scaled operations through rapid company growth',
+    ],
+  },
+  {
+    years: '2004 – 2016',
+    role: 'Pre-loader → Operations Supervisor',
+    company: 'UPS',
+    color: '#8B6914',
+    bullets: [
+      'Started loading package cars at 3am',
+      'Progressed through every operational role in the building',
+      'Managed teams, logistics, and time-critical operations',
+    ],
+  },
 ];
+
+function ExpCard({ item, index }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: '-60px' });
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 32 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.7, delay: index * 0.07, ease: [0.22, 1, 0.36, 1] }}
+      style={{
+        borderLeft: `2px solid ${item.color}`,
+        paddingLeft: '1.5rem',
+        paddingBottom: '2.5rem',
+      }}
+    >
+      <div style={{ fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.4rem' }}>
+        {item.years}
+      </div>
+      <div style={{ fontFamily: 'var(--serif)', fontSize: '1.15rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.2rem' }}>
+        {item.role}
+      </div>
+      <div style={{ fontSize: '0.78rem', letterSpacing: '0.06em', color: item.color, marginBottom: '0.75rem', textTransform: 'uppercase', fontWeight: 500 }}>
+        {item.company}
+      </div>
+      <ul style={{ paddingLeft: '1rem' }}>
+        {item.bullets.map((b, i) => (
+          <li key={i} style={{ fontSize: '0.88rem', lineHeight: 1.75, color: 'var(--text-muted)', fontWeight: 300, marginBottom: '0.15rem' }}>
+            {b}
+          </li>
+        ))}
+      </ul>
+    </motion.div>
+  );
+}
 
 export default function About() {
   return (
-    <div className="about-page">
+    <div style={{ background: 'var(--bg)', paddingTop: 64, minHeight: '100vh' }}>
 
       {/* Hero */}
-      <section className="about-hero-section">
-        <div className="container">
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
+      <div style={{ position: 'relative', height: '55vh', overflow: 'hidden', background: '#000' }}>
+        <img
+          src={`${process.env.PUBLIC_URL}/photos/photo4.jpg`}
+          alt="Burke Ruder"
+          style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.45, display: 'block' }}
+        />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 30%, rgba(10,13,11,0.95) 100%)' }} />
+        <div style={{ position: 'absolute', bottom: '3rem', left: '5vw' }}>
+          <motion.p
+            style={{ fontSize: '0.7rem', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--accent)', marginBottom: '0.75rem' }}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
           >
-            <motion.div variants={fadeUp}><div className="label">About Us</div></motion.div>
-            <motion.h1 className="about-hero-h1" variants={fadeUp}>
-              We're Technology Advisors<br />Who Work for You
-            </motion.h1>
-            <motion.p className="about-hero-sub" variants={fadeUp}>
-              The Interesting Group is an independent technology solutions advisory firm based in Austin, TX. We help businesses navigate the complex landscape of telecom, cloud, cybersecurity, and IT services — at no cost to you.
-            </motion.p>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Mission */}
-      <section className="about-mission">
-        <div className="container">
-          <div className="about-mission-grid">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: '-80px' }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <div className="label">Our Mission</div>
-              <blockquote className="about-mission-quote">
-                "Technology should accelerate your business, not distract from it. Our job is to make sure you're always running on the right infrastructure — at the right price."
-              </blockquote>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: '-80px' }}
-              transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            >
-              {[
-                'Most businesses end up with the wrong technology because the process of evaluating vendors is slow, opaque, and tilted in the vendors\' favor.',
-                'The Interesting Group exists to level the playing field. As an independent advisor, we bring deep market knowledge, vendor relationships, and a structured evaluation process to every engagement.',
-                'Because our compensation comes from the vendors — not you — our interests are fully aligned with getting you the best outcome.',
-              ].map((p, i) => (
-                <motion.p
-                  key={i}
-                  className="about-mission-body"
-                  initial={{ opacity: 0, y: 16 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: i * 0.1 }}
-                >{p}</motion.p>
-              ))}
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Values */}
-      <section className="about-values">
-        <div className="container">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-60px' }}
-            variants={fadeUp}
+            About
+          </motion.p>
+          <motion.h1
+            style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(2.5rem, 6vw, 5rem)', fontWeight: 900, color: 'var(--text)', letterSpacing: '-0.02em', lineHeight: 1 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="label">Our Values</div>
-            <h2 className="section-title">What Guides<br /><span>Everything We Do</span></h2>
-          </motion.div>
-          <motion.div
-            className="about-values-grid"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-60px' }}
-            variants={{ visible: { transition: { staggerChildren: 0.07 } } }}
+            Burke Ruder
+          </motion.h1>
+          <motion.p
+            style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.5rem', letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 300 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
           >
-            {values.map((v, i) => (
-              <motion.div
-                key={v.title}
-                className="about-value-card"
-                variants={fadeUp}
-                custom={i}
-                whileHover={{ y: -6, transition: { duration: 0.2 } }}
-              >
-                <div className="about-value-num">0{i + 1}</div>
-                <div className="about-value-icon">{v.icon}</div>
-                <div className="about-value-title">{v.title}</div>
-                <div className="about-value-desc">{v.desc}</div>
-              </motion.div>
-            ))}
-          </motion.div>
+            Senior Account Executive · Cloudflare · Austin, TX
+          </motion.p>
         </div>
-      </section>
+      </div>
 
-      {/* Sandler */}
-      <section className="about-sandler">
-        <div className="container">
-          <div className="about-sandler-inner">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-            >
-              <div className="label">Our Partnership</div>
-              <h2 className="section-title">Powered by<br /><span>Sandler Partners</span></h2>
-              {[
-                'The Interesting Group operates under a partnership agreement with Sandler Partners — one of the largest technology advisory organizations in the United States.',
-                'This gives us access to every major carrier, cloud provider, and technology vendor, backed by proven procurement infrastructure and supplier relationships.',
-                'What this means for you: the reach of a national advisory firm with the attention of a dedicated local partner.',
-              ].map((p, i) => (
-                <motion.p
-                  key={i}
-                  className="about-mission-body"
-                  style={{ marginTop: i === 0 ? '1.5rem' : 0 }}
-                  initial={{ opacity: 0, y: 16 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 + 0.2, duration: 0.6 }}
-                >{p}</motion.p>
-              ))}
-              <motion.div
-                style={{ marginTop: '2rem' }}
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.5 }}
-              >
-                <Link to="/contact">
-                  <motion.span className="btn-primary" whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-                    Work With Us →
-                  </motion.span>
-                </Link>
-              </motion.div>
-            </motion.div>
-            <motion.div
-              className="about-sandler-stat-grid"
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
-            >
-              {[
-                { num: '200+', label: 'Technology Vendors' },
-                { num: '8',    label: 'Solution Categories' },
-                { num: '#1',   label: 'Master Agent in US' },
-                { num: '$0',   label: 'Cost to You' },
-              ].map((s) => (
-                <motion.div
-                  key={s.label}
-                  className="about-sandler-stat"
-                  variants={{ hidden: { opacity: 0, scale: 0.92 }, visible: { opacity: 1, scale: 1, transition: { duration: 0.5, ease: [0.16,1,0.3,1] } } }}
-                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                >
-                  <div className="about-sandler-stat-num">{s.num}</div>
-                  <div className="about-sandler-stat-label">{s.label}</div>
-                </motion.div>
-              ))}
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="cta-band">
-        <div className="cta-band-glow" />
-        <div className="container" style={{ position: 'relative' }}>
+      {/* Stats */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderBottom: '1px solid var(--border)' }}>
+        {[
+          { num: '20+', label: 'Years experience' },
+          { num: '$50M+', label: 'Procurement managed' },
+          { num: '4×', label: "President's Club" },
+          { num: '100%+', label: 'Quota attainment' },
+        ].map((s, i) => (
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            key={s.label}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
+            transition={{ delay: i * 0.1, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            style={{ padding: '2.5rem 2rem', borderRight: i < 3 ? '1px solid var(--border)' : 'none' }}
           >
-            <div className="label" style={{ justifyContent: 'center' }}>Let's Talk</div>
-            <h2 className="section-title" style={{ textAlign: 'center', maxWidth: 560, margin: '0 auto 1rem' }}>
-              Ready to Simplify Your<br /><span>Technology Stack?</span>
-            </h2>
-            <p className="section-sub" style={{ textAlign: 'center', margin: '0 auto 3rem' }}>
-              Free 30-minute technology assessment. No sales pressure — just an honest conversation about your environment and your options.
-            </p>
-            <div className="cta-actions">
-              <Link to="/contact">
-                <motion.span className="btn-primary" whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-                  Schedule a Free Assessment →
-                </motion.span>
-              </Link>
-              <Link to="/solutions">
-                <motion.span className="btn-outline" whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-                  View All Solutions
-                </motion.span>
-              </Link>
+            <div style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 900, lineHeight: 1, marginBottom: '0.4rem' }}>
+              <span style={{ color: 'var(--accent)' }}>{s.num}</span>
+            </div>
+            <div style={{ fontSize: '0.7rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+              {s.label}
             </div>
           </motion.div>
+        ))}
+      </div>
+
+      {/* Bio + Experience */}
+      <div style={{ padding: '6rem 5vw', maxWidth: 1100, margin: '0 auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5rem', alignItems: 'start' }}>
+
+          {/* Bio */}
+          <div>
+            <motion.p
+              style={{ fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--accent)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}
+              initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
+            >
+              <span style={{ display: 'block', width: 28, height: 1, background: 'var(--accent)' }} />
+              Background
+            </motion.p>
+            <motion.h2
+              style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(1.8rem, 3vw, 2.6rem)', fontWeight: 700, lineHeight: 1.2, letterSpacing: '-0.02em', color: 'var(--text)', marginBottom: '2rem' }}
+              initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            >
+              Curious by nature.<br />Built by experience.
+            </motion.h2>
+            {[
+              "I started my career loading package cars at UPS at 3am. No plan, just work. Over the next twelve years I touched every part of that operation — logistics, management, team-building, problem-solving under pressure. It was the best business school I could have attended.",
+              "When the solar industry started to boom, I made a move into procurement. I spent several years at Lighthouse Solar building supplier relationships and managing $50M+ in materials. That chapter taught me how to think in systems, manage complexity, and make big decisions with incomplete information.",
+              "Then I bet on myself again. I joined Cloudflare — one of the fastest-growing infrastructure companies in the world — as a BDR. Within a couple of years I was a Senior AE. I've hit 100%+ quota every year, earned 4× President's Club recognition, and I'm still learning something new every week.",
+              "Outside of work I'm a photographer. I shoot street and urban scenes around Austin — always looking for the light, the moment, the thing you weren't supposed to see. Same instinct, different medium.",
+            ].map((para, i) => (
+              <motion.p
+                key={i}
+                style={{ fontSize: '0.93rem', lineHeight: 1.9, color: 'var(--text-muted)', fontWeight: 300, marginBottom: '1.25rem' }}
+                initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+                transition={{ delay: i * 0.08, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              >
+                {para}
+              </motion.p>
+            ))}
+          </div>
+
+          {/* Experience */}
+          <div>
+            <motion.p
+              style={{ fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--accent)', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}
+              initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
+            >
+              <span style={{ display: 'block', width: 28, height: 1, background: 'var(--accent)' }} />
+              Experience
+            </motion.p>
+            {experience.map((item, i) => (
+              <ExpCard key={item.years + item.company} item={item} index={i} />
+            ))}
+          </div>
         </div>
-      </section>
+      </div>
+
+      {/* Contact strip */}
+      <div style={{ borderTop: '1px solid var(--border)', padding: '4rem 5vw', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
+        <div>
+          <p style={{ fontSize: '0.7rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Get in touch</p>
+          <a href="mailto:burke.ruder@gmail.com" style={{ fontFamily: 'var(--serif)', fontSize: '1.4rem', fontWeight: 700, color: 'var(--text)', borderBottom: '1px solid var(--accent)', paddingBottom: 2 }}>
+            burke.ruder@gmail.com
+          </a>
+        </div>
+        <a href="https://www.linkedin.com/in/burke-ruder/" target="_blank" rel="noopener noreferrer"
+          style={{ fontSize: '0.78rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-muted)', borderBottom: '1px solid var(--border)', paddingBottom: 2 }}>
+          View LinkedIn →
+        </a>
+      </div>
     </div>
   );
 }
