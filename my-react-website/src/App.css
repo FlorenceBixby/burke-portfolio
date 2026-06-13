@@ -12,8 +12,7 @@
   --accent2:     #3a6147;
   --accent-glow: rgba(74,124,89,0.15);
   --border:      rgba(255,255,255,0.07);
-  --serif:       'Playfair Display', Georgia, serif;
-  --display:     'Cormorant Garamond', Georgia, serif;
+  --serif:       'Cormorant Garamond', Georgia, serif;
   --sans:        'Inter', -apple-system, sans-serif;
 }
 
