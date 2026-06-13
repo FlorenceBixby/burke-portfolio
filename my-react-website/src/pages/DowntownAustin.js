@@ -1,5 +1,5 @@
-import { motion, useScroll, useTransform, useSpring } from 'motion/react';
-import { useRef } from 'react';
+import { motion, useInView, AnimatePresence, useScroll, useTransform } from 'motion/react';
+import { useRef, useState } from 'react';
 
 const photos = [
   '/photos/3R2A5320.jpg', '/photos/3R2A5322.jpg', '/photos/3R2A5327.jpg',
@@ -18,126 +18,130 @@ const photos = [
   '/photos/3R2A5403.jpg', '/photos/3R2A5406.jpg',
 ];
 
-/* ── Sticky progress bar at top ── */
-function ScrollProgress() {
-  const { scrollYProgress } = useScroll();
-  const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
+function ScrollPhoto({ src, index, onClick }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: '-80px' });
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] });
+  const scale = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [1.06, 1, 1, 1.06]);
+  const isWide = index % 5 === 0 || index % 7 === 3;
+
   return (
     <motion.div
-      className="scroll-progress-bar"
-      style={{ scaleX, transformOrigin: 'left' }}
-    />
+      ref={ref}
+      className="scroll-gallery-item"
+      style={{ maxWidth: isWide ? '100%' : '80%', margin: '0 auto 3px' }}
+      initial={{ opacity: 0, y: 60 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+      onClick={() => onClick(index)}
+    >
+      <motion.img
+        src={`${process.env.PUBLIC_URL}${src}`}
+        alt=""
+        loading="lazy"
+        style={{ scale, width: '100%', display: 'block' }}
+      />
+      <div className="scroll-gallery-caption">
+        <span>Downtown Austin</span>
+        <span>{index + 1} / {photos.length}</span>
+      </div>
+    </motion.div>
   );
 }
 
-/* ── Single full-screen scroll photo ── */
-function ScrollPhoto({ src, index }) {
-  const ref = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start end', 'end start'],
-  });
-
-  const imgY = useTransform(scrollYProgress, [0, 1], ['8%', '-8%']);
-  const smoothImgY = useSpring(imgY, { stiffness: 60, damping: 20 });
-  const opacity = useTransform(scrollYProgress, [0, 0.18, 0.82, 1], [0, 1, 1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 0.18, 0.82, 1], [1.08, 1, 1, 1.04]);
-  const captionY = useTransform(scrollYProgress, [0.12, 0.28], [30, 0]);
-  const captionOpacity = useTransform(scrollYProgress, [0.12, 0.28, 0.78, 0.92], [0, 1, 1, 0]);
-
-  const isOdd = index % 2 !== 0;
-
+function Lightbox({ index, onClose, onPrev, onNext }) {
+  const photo = index !== null ? photos[index] : null;
   return (
-    <div ref={ref} className="scroll-photo-section">
-      <motion.div className="scroll-photo-frame" style={{ opacity, scale }}>
-        <div className="scroll-photo-bg-wrap">
-          <motion.div
-            className="scroll-photo-bg"
-            style={{
-              backgroundImage: `url(${process.env.PUBLIC_URL}${src})`,
-              y: smoothImgY,
-            }}
-          />
-          <div className="scroll-photo-vignette" />
-        </div>
+    <AnimatePresence>
+      {photo && (
         <motion.div
-          className={`scroll-photo-caption ${isOdd ? 'scroll-photo-caption--right' : ''}`}
-          style={{ y: captionY, opacity: captionOpacity }}
+          className="lightbox"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          onClick={onClose}
         >
-          <span className="scroll-photo-index">{String(index + 1).padStart(2, '0')}</span>
-          <span className="scroll-photo-location">Downtown Austin</span>
+          <motion.div
+            className="lightbox-inner"
+            initial={{ scale: 0.92, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.96, opacity: 0 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            onClick={e => e.stopPropagation()}
+          >
+            <AnimatePresence mode="wait">
+              <motion.img
+                key={photo}
+                src={`${process.env.PUBLIC_URL}${photo}`}
+                alt=""
+                className="lightbox-img"
+                initial={{ opacity: 0, scale: 0.97 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 1.02 }}
+                transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              />
+            </AnimatePresence>
+            <div className="lightbox-caption">
+              <span>Downtown Austin</span>
+              <span>{index + 1} / {photos.length}</span>
+            </div>
+            <button className="lightbox-close" onClick={onClose}>✕</button>
+            <button className="lightbox-prev" onClick={onPrev}>←</button>
+            <button className="lightbox-next" onClick={onNext}>→</button>
+          </motion.div>
         </motion.div>
-      </motion.div>
-    </div>
+      )}
+    </AnimatePresence>
   );
 }
 
 export default function DowntownAustin() {
-  return (
-    <div className="gallery-scroll-page">
-      <ScrollProgress />
+  const [selected, setSelected] = useState(null);
+  const prev = () => setSelected(i => (i - 1 + photos.length) % photos.length);
+  const next = () => setSelected(i => (i + 1) % photos.length);
 
-      {/* Hero header */}
-      <motion.div
-        className="gallery-scroll-header"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1.2 }}
-      >
+  return (
+    <div className="gallery-page">
+      <div className="gallery-header">
         <motion.p
           className="section-label"
-          initial={{ opacity: 0, x: -20 }}
+          initial={{ opacity: 0, x: -16 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
+          transition={{ duration: 0.6 }}
         >
           Portfolio
         </motion.p>
         <motion.h1
-          className="gallery-scroll-title"
-          initial={{ opacity: 0, y: 30 }}
+          className="gallery-title"
+          initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
         >
           Downtown Austin
         </motion.h1>
         <motion.p
-          className="gallery-scroll-sub"
+          className="gallery-count"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.7, delay: 0.55 }}
+          transition={{ delay: 0.35, duration: 0.5 }}
         >
-          {photos.length} photographs — scroll to explore
+          {photos.length} photographs · click to expand
         </motion.p>
-        <motion.div
-          className="gallery-scroll-hint"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.7, delay: 0.9 }}
-        >
-          <motion.span
-            animate={{ y: [0, 8, 0] }}
-            transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
-          >
-            ↓
-          </motion.span>
-        </motion.div>
-      </motion.div>
+      </div>
 
-      {/* Scroll photos */}
-      {photos.map((src, i) => (
-        <ScrollPhoto key={src} src={src} index={i} />
-      ))}
+      <div className="scroll-gallery">
+        {photos.map((src, i) => (
+          <ScrollPhoto key={src} src={src} index={i} onClick={setSelected} />
+        ))}
+      </div>
 
-      {/* Footer */}
-      <motion.div
-        className="gallery-scroll-footer"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        transition={{ duration: 1 }}
-        viewport={{ once: true }}
-      >
-        <p>End of series &mdash; {photos.length} photographs</p>
-      </motion.div>
+      <Lightbox
+        index={selected}
+        onClose={() => setSelected(null)}
+        onPrev={prev}
+        onNext={next}
+      />
     </div>
   );
 }
