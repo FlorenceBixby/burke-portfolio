@@ -105,6 +105,26 @@ function Hero() {
       />
       <div className="hero-overlay" />
 
+      {/* Floating ambient orbs */}
+      <motion.div
+        className="hero-orb"
+        style={{ width: 600, height: 600, background: '#4a7c59', top: '10%', left: '-10%' }}
+        animate={{ x: [0, 40, -20, 0], y: [0, -30, 20, 0] }}
+        transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
+      />
+      <motion.div
+        className="hero-orb"
+        style={{ width: 400, height: 400, background: '#2a4a35', top: '50%', right: '-5%' }}
+        animate={{ x: [0, -30, 15, 0], y: [0, 40, -20, 0] }}
+        transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut', delay: 3 }}
+      />
+      <motion.div
+        className="hero-orb"
+        style={{ width: 300, height: 300, background: '#4a7c59', bottom: '15%', left: '30%' }}
+        animate={{ x: [0, 20, -30, 0], y: [0, -20, 10, 0] }}
+        transition={{ duration: 26, repeat: Infinity, ease: 'easeInOut', delay: 6 }}
+      />
+
       <motion.div className="hero-content" style={{ opacity }}>
         <h1 className="hero-quote">
           <span style={{ display: 'block', overflow: 'hidden', marginBottom: '0.05em' }}>

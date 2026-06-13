@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Inter:wght@300;400;500;600&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -13,6 +13,7 @@
   --accent-glow: rgba(74,124,89,0.15);
   --border:      rgba(255,255,255,0.07);
   --serif:       'Playfair Display', Georgia, serif;
+  --display:     'Cormorant Garamond', Georgia, serif;
   --sans:        'Inter', -apple-system, sans-serif;
 }
 
@@ -137,17 +138,28 @@ button { font-family: var(--sans); cursor: pointer; border: none; outline: none;
   max-width: 1000px;
 }
 .hero-quote {
-  font-family: var(--serif);
-  font-size: clamp(3rem, 8vw, 7.5rem);
-  font-weight: 900;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(3.5rem, 9vw, 9rem);
+  font-weight: 300;
   line-height: 1.0;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.01em;
   color: var(--text);
   margin-bottom: 2rem;
 }
 .hero-quote em {
   font-style: italic;
+  font-weight: 300;
   color: var(--accent);
+}
+
+/* Floating orbs */
+.hero-orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(80px);
+  opacity: 0.18;
+  will-change: transform;
 }
 .hero-sub {
   font-size: clamp(0.95rem, 2vw, 1.15rem);
