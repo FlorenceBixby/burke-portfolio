@@ -1,6 +1,7 @@
 import { motion, useScroll, useMotionValueEvent, AnimatePresence } from 'motion/react';
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useTheme } from '../App';
 
 const socials = [
   {
@@ -51,6 +52,7 @@ const socials = [
 ];
 
 export default function Nav() {
+  const { theme, toggleTheme } = useTheme();
   const [hidden, setHidden] = useState(false);
   const [atTop, setAtTop] = useState(true);
   const [portfolioOpen, setPortfolioOpen] = useState(false);
@@ -119,6 +121,23 @@ export default function Nav() {
         </li>
         <li>
           <a href="mailto:burke.ruder@gmail.com">Contact</a>
+        </li>
+
+        {/* Theme toggle */}
+        <li>
+          <motion.button
+            className="theme-toggle"
+            onClick={toggleTheme}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {theme === 'dark' ? (
+              <><span>☀</span> Light</>
+            ) : (
+              <><span>◑</span> Dark</>
+            )}
+          </motion.button>
         </li>
 
         {/* Social icons */}
