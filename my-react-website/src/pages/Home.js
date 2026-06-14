@@ -348,6 +348,7 @@ function PhotoStrip() {
 /* ── Contact ── */
 function Contact() {
   const socials = [
+    { label: 'Email', href: 'mailto:burke.ruder@gmail.com', internal: true },
     { label: 'LinkedIn', href: 'https://www.linkedin.com/in/burke-ruder/' },
     { label: 'GitHub', href: 'https://github.com/FlorenceBixby' },
     { label: 'Instagram', href: 'https://instagram.com/burkeruder' },
@@ -362,14 +363,6 @@ function Contact() {
           Let's talk.<br /><em>I'm always curious.</em>
         </h2>
         <p className="contact-sub">Drop a line. I actually respond.</p>
-        <motion.a
-          href="mailto:burke.ruder@gmail.com"
-          className="contact-email"
-          whileHover={{ letterSpacing: '0.05em' }}
-          transition={{ duration: 0.3 }}
-        >
-          Email
-        </motion.a>
       </FadeUp>
 
       <div className="contact-socials">
@@ -377,7 +370,7 @@ function Contact() {
           <motion.a
             key={s.label}
             href={s.href}
-            target="_blank"
+            target={s.internal ? '_self' : '_blank'}
             rel="noopener noreferrer"
             className="contact-social-link"
             initial={{ opacity: 0, y: 16 }}
