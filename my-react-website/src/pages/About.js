@@ -233,6 +233,77 @@ export default function About() {
         ))}
       </div>
 
+      {/* Credentials + Domain Expertise */}
+      <div style={{ borderBottom: '1px solid var(--border)', padding: '3.5rem 5vw' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+
+          {/* Domain chips */}
+          <motion.p
+            style={{ fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '1.25rem' }}
+            initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
+          >
+            Domain Expertise
+          </motion.p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '2.5rem' }}>
+            {['Zero Trust', 'SASE', 'DDoS Protection', 'DNS Security', 'Edge Networking', 'Cloud Security', 'Enterprise SaaS', 'MEDDPICC', 'Channel Sales', 'Pipeline Development'].map((d, i) => (
+              <motion.span
+                key={d}
+                initial={{ opacity: 0, y: 8 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.04, duration: 0.4 }}
+                style={{
+                  padding: '0.35rem 0.85rem',
+                  fontSize: '0.7rem', fontWeight: 500, letterSpacing: '0.1em',
+                  textTransform: 'uppercase', color: 'var(--accent)',
+                  border: '1px solid var(--border)', borderRadius: '2px',
+                }}
+              >
+                {d}
+              </motion.span>
+            ))}
+          </div>
+
+          {/* Cert row */}
+          <motion.p
+            style={{ fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '1.25rem' }}
+            initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
+          >
+            Certifications &amp; Learning
+          </motion.p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+            {[
+              { label: 'AWS Certified Cloud Practitioner', icon: '☁', status: 'earned' },
+              { label: 'NABCEP PV Installation Professional', icon: '⚡', status: 'earned' },
+              { label: 'AWS Solutions Architect – Associate', icon: '☁', status: 'progress' },
+              { label: 'TryHackMe · SOC Level 1', icon: '🛡', status: 'progress' },
+            ].map((c, i) => (
+              <motion.span
+                key={c.label}
+                initial={{ opacity: 0, y: 8 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.07, duration: 0.5 }}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                  padding: '0.45rem 1rem',
+                  fontSize: '0.72rem', fontWeight: 500, letterSpacing: '0.06em',
+                  color: c.status === 'earned' ? 'var(--text)' : 'var(--text-muted)',
+                  background: c.status === 'earned' ? 'var(--bg3)' : 'transparent',
+                  border: c.status === 'earned' ? '1px solid var(--border)' : '1px dashed var(--border)',
+                  borderRadius: '2px',
+                }}
+              >
+                <span style={{ color: 'var(--accent)', fontSize: '0.8rem' }}>{c.icon}</span>
+                {c.status === 'progress' && <span style={{ fontSize: '0.6rem', color: 'var(--accent)' }}>●</span>}
+                {c.label}
+                {c.status === 'progress' && <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>in progress</span>}
+              </motion.span>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Bio + Experience */}
       <div style={{ padding: '6rem 5vw', maxWidth: 1100, margin: '0 auto' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5rem', alignItems: 'start' }}>
@@ -256,7 +327,8 @@ export default function About() {
             {[
               "I started my career loading package cars at UPS at 3am. No plan, just work. Over the next twelve years I touched every part of that operation — logistics, management, team-building, problem-solving under pressure. It was the best business school I could have attended.",
               "When the solar industry started to boom, I made a move into procurement. I spent several years at Lighthouse Solar building supplier relationships and managing $50M+ in materials. That chapter taught me how to think in systems, manage complexity, and make big decisions with incomplete information.",
-              "Then I bet on myself again. I joined Cloudflare — one of the fastest-growing infrastructure companies in the world — as a BDR. Within a couple of years I was a Senior AE. I've hit 100%+ quota every year, earned 4× Top Performer recognition, and I'm still learning something new every week.",
+              "Then I bet on myself again. I joined Cloudflare — one of the fastest-growing infrastructure companies in the world — as a BDR. Within a couple of years I was a Senior AE selling Zero Trust, SASE, DDoS protection, and DNS security to CISOs and CTOs at enterprise accounts. I've hit 100%+ quota every year, earned 4× Top Performer recognition, and I use MEDDPICC to run every deal.",
+              "I'm now building deeper technical fluency in cybersecurity and cloud. I hold an AWS Cloud Practitioner certification and I'm actively pursuing my AWS Solutions Architect cert and working through security operations training. The goal: bridge the gap between enterprise sales and solutions engineering.",
               "Outside of work I'm a photographer. I shoot street and urban scenes around Austin — always looking for the light, the moment, the thing you weren't supposed to see. Same instinct, different medium.",
             ].map((para, i) => (
               <motion.p

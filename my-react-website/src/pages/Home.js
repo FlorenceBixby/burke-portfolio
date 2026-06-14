@@ -184,6 +184,12 @@ function Hero() {
   );
 }
 
+/* ── domain chips ── */
+const domains = [
+  'Zero Trust', 'SASE', 'DDoS Protection', 'DNS Security',
+  'Edge Networking', 'Cloud Security', 'Enterprise SaaS', 'MEDDPICC',
+];
+
 /* ── Intro ── */
 function Intro() {
   return (
@@ -213,9 +219,69 @@ function Intro() {
           lineHeight: 1.9,
           color: 'var(--text-muted)',
           maxWidth: 620,
+          marginBottom: '2.5rem',
         }}>
-          I started my career at <strong style={{ color: 'var(--text)', fontWeight: 500 }}>UPS</strong> throwing boxes in the dark. Twelve years later I was running procurement for a solar company moving <strong style={{ color: 'var(--text)', fontWeight: 500 }}>$50M+</strong> in materials. Then I made the jump into enterprise tech — and I haven't looked back. I'm a Senior Account Executive at <strong style={{ color: 'var(--text)', fontWeight: 500 }}>Cloudflare</strong>, 4× Top Performer, and I approach every problem the same way I did at 22: with curiosity, a lot of hustle, and zero attachment to how things are "supposed" to work.
+          I started my career at <strong style={{ color: 'var(--text)', fontWeight: 500 }}>UPS</strong> throwing boxes in the dark. Twelve years later I was running procurement for a solar company moving <strong style={{ color: 'var(--text)', fontWeight: 500 }}>$50M+</strong> in materials. Then I made the jump into enterprise tech — and I haven't looked back. I'm a Senior Account Executive at <strong style={{ color: 'var(--text)', fontWeight: 500 }}>Cloudflare</strong>, 4× Top Performer, selling Zero Trust, SASE, and cloud security to CISOs and CTOs at enterprise accounts. I approach every problem with curiosity, a lot of hustle, and zero attachment to how things are "supposed" to work.
         </p>
+      </FadeUp>
+
+      {/* Domain expertise chips */}
+      <FadeUp delay={0.45}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.75rem' }}>
+          {domains.map((d, i) => (
+            <motion.span
+              key={d}
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.05 * i, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              whileHover={{ y: -2, borderColor: 'var(--accent)' }}
+              style={{
+                display: 'inline-block',
+                padding: '0.35rem 0.85rem',
+                fontSize: '0.72rem',
+                fontWeight: 500,
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                color: 'var(--accent)',
+                border: '1px solid var(--border)',
+                borderRadius: '2px',
+                cursor: 'default',
+                transition: 'border-color 0.2s',
+              }}
+            >
+              {d}
+            </motion.span>
+          ))}
+        </div>
+      </FadeUp>
+
+      {/* Cert badges */}
+      <FadeUp delay={0.55}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '1.25rem' }}>
+          <span style={{ fontSize: '0.68rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Certified:</span>
+          {[
+            { label: 'AWS Cloud Practitioner', icon: '☁' },
+            { label: 'NABCEP PV Installation', icon: '⚡' },
+          ].map(c => (
+            <span key={c.label} style={{
+              display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+              fontSize: '0.72rem', fontWeight: 500, letterSpacing: '0.06em',
+              color: 'var(--text)', padding: '0.3rem 0.75rem',
+              background: 'var(--bg3)', border: '1px solid var(--border)', borderRadius: '2px',
+            }}>
+              <span style={{ color: 'var(--accent)' }}>{c.icon}</span>{c.label}
+            </span>
+          ))}
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+            fontSize: '0.72rem', fontWeight: 500, letterSpacing: '0.06em',
+            color: 'var(--text-muted)', padding: '0.3rem 0.75rem',
+            background: 'transparent', border: '1px dashed var(--border)', borderRadius: '2px',
+          }}>
+            <span style={{ color: 'var(--accent)', fontSize: '0.6rem' }}>●</span> In progress: AWS Solutions Architect
+          </span>
+        </div>
       </FadeUp>
     </section>
   );
