@@ -117,41 +117,95 @@ export default function About() {
   return (
     <div style={{ background: 'var(--bg)', paddingTop: 64, minHeight: '100vh' }}>
 
-      {/* Hero */}
-      <div style={{ position: 'relative', height: '55vh', overflow: 'hidden', background: '#000' }}>
-        <img
-          src={`${process.env.PUBLIC_URL}/photos/photo4.jpg`}
-          alt="Burke Ruder"
-          style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.45, display: 'block' }}
-        />
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 30%, rgba(10,13,11,0.95) 100%)' }} />
-        <div style={{ position: 'absolute', bottom: '3rem', left: '5vw' }}>
+      {/* Split Panel Hero */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', minHeight: '100vh' }}>
+
+        {/* Left — photo */}
+        <motion.div
+          style={{ position: 'relative', overflow: 'hidden', background: '#0a0d0b' }}
+          initial={{ opacity: 0, x: -40 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <img
+            src={`${process.env.PUBLIC_URL}/photos/photo4.jpg`}
+            alt="Burke Ruder"
+            style={{
+              width: '100%', height: '100%',
+              objectFit: 'cover', objectPosition: 'center top',
+              display: 'block',
+            }}
+          />
+          {/* Gradient fade into dark on the right edge */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: 'linear-gradient(to right, transparent 60%, var(--bg) 100%)',
+          }} />
+          {/* Bottom fade */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: 'linear-gradient(to bottom, transparent 70%, var(--bg) 100%)',
+          }} />
+        </motion.div>
+
+        {/* Right — name + title */}
+        <motion.div
+          style={{
+            display: 'flex', flexDirection: 'column', justifyContent: 'center',
+            padding: '4rem 5vw 4rem 3rem',
+            background: 'var(--bg)',
+          }}
+          initial={{ opacity: 0, x: 40 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 1, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+        >
           <motion.p
-            style={{ fontSize: '0.7rem', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--accent)', marginBottom: '0.75rem' }}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            style={{ fontSize: '0.7rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--accent)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4, duration: 0.6 }}
           >
+            <span style={{ display: 'block', width: 28, height: 1, background: 'var(--accent)' }} />
             About
           </motion.p>
           <motion.h1
-            style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(2.5rem, 6vw, 5rem)', fontWeight: 900, color: 'var(--text)', letterSpacing: '-0.02em', lineHeight: 1 }}
+            style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(3rem, 6vw, 6rem)', fontWeight: 300, color: 'var(--text)', letterSpacing: '0.01em', lineHeight: 1.05, marginBottom: '1.5rem' }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.9, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
           >
-            Burke Ruder
+            Burke<br />Ruder
           </motion.h1>
+          <motion.div
+            style={{ width: 40, height: 1, background: 'var(--accent)', marginBottom: '1.5rem' }}
+            initial={{ scaleX: 0 }} animate={{ scaleX: 1 }}
+            style2={{ transformOrigin: 'left' }}
+            transition={{ delay: 0.5, duration: 0.6 }}
+          />
           <motion.p
-            style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.5rem', letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 300 }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
+            style={{ fontSize: '0.85rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 300, lineHeight: 2 }}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.55, duration: 0.6 }}
           >
-            Senior Account Executive · Cloudflare · Austin, TX
+            Senior Account Executive<br />
+            <span style={{ color: 'var(--accent)' }}>Cloudflare</span><br />
+            Austin, Texas
           </motion.p>
-        </div>
+          <motion.p
+            style={{ marginTop: '3rem', fontFamily: 'var(--serif)', fontSize: 'clamp(1.1rem, 2vw, 1.5rem)', fontWeight: 300, fontStyle: 'italic', color: 'var(--text-muted)', lineHeight: 1.6, maxWidth: 320 }}
+            initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          >
+            "Just curious.<br />That's the whole thing."
+          </motion.p>
+        </motion.div>
       </div>
+
+      {/* Mobile hero (stacked) */}
+      <style>{`
+        @media (max-width: 768px) {
+          .about-split { grid-template-columns: 1fr !important; }
+          .about-split > div:first-child { height: 60vw !important; min-height: 300px; }
+          .about-split > div:last-child { padding: 2.5rem 1.25rem !important; }
+        }
+      `}</style>
 
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderBottom: '1px solid var(--border)' }}>
