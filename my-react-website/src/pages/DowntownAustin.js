@@ -2,20 +2,26 @@ import { motion, useInView, AnimatePresence, useScroll, useTransform } from 'mot
 import { useRef, useState } from 'react';
 
 const photos = [
-  '/photos/3R2A5320.jpg', '/photos/3R2A5322.jpg', '/photos/3R2A5327.jpg',
-  '/photos/3R2A5329.jpg', '/photos/3R2A5330.jpg', '/photos/3R2A5331.jpg',
-  '/photos/3R2A5332.jpg', '/photos/3R2A5334.jpg', '/photos/3R2A5335.jpg',
-  '/photos/3R2A5336.jpg', '/photos/3R2A5338.jpg', '/photos/3R2A5340.jpg',
-  '/photos/3R2A5341.jpg', '/photos/3R2A5342.jpg', '/photos/3R2A5344.jpg',
-  '/photos/3R2A5345.jpg', '/photos/3R2A5346.jpg', '/photos/3R2A5347.jpg',
-  '/photos/3R2A5349.jpg', '/photos/3R2A5351.jpg', '/photos/3R2A5352.jpg',
-  '/photos/3R2A5354.jpg', '/photos/3R2A5356.jpg', '/photos/3R2A5357.jpg',
-  '/photos/3R2A5361.jpg', '/photos/3R2A5362.jpg', '/photos/3R2A5363.jpg',
-  '/photos/3R2A5365.jpg', '/photos/3R2A5370.jpg', '/photos/3R2A5372.jpg',
-  '/photos/3R2A5375.jpg', '/photos/3R2A5378.jpg', '/photos/3R2A5381.jpg',
-  '/photos/3R2A5382.jpg', '/photos/3R2A5385.jpg', '/photos/3R2A5386.jpg',
-  '/photos/3R2A5387.jpg', '/photos/3R2A5392.jpg', '/photos/3R2A5399.jpg',
-  '/photos/3R2A5403.jpg', '/photos/3R2A5406.jpg',
+  '/photos/3R2A5322.jpg',  // Street corner, person walking — Congress Ave life
+  '/photos/3R2A5338.jpg',  // Neon Virgin Mary window reflection — standout shot
+  '/photos/3R2A5334.jpg',  // Dark dramatic architecture, scattered chairs
+  '/photos/3R2A5335.jpg',  // Capitol dome with cowboy hat foreground — iconic Austin
+  '/photos/3R2A5345.jpg',  // Capitol golden hour, people crossing
+  '/photos/3R2A5365.jpg',  // Capitol through bokeh car roof — creative perspective
+  '/photos/3R2A5347.jpg',  // Capitol dark moody desaturated wide — different feel
+  '/photos/3R2A5330.jpg',  // Desnudo Coffee trailer — vibrant street life
+  '/photos/3R2A5342.jpg',  // Caroline restaurant patio — warm and inviting
+  '/photos/3R2A5362.jpg',  // Large colorful Indigenous mural — bold public art
+  '/photos/3R2A5372.jpg',  // Rainbow cowboy centaur sculpture
+  '/photos/3R2A5327.jpg',  // B&W tree-lined sidewalk — moody contrast
+  '/photos/3R2A5329.jpg',  // Construction workers, arched building — city in motion
+  '/photos/3R2A5332.jpg',  // Burger Bar on Congress — classic Austin storefront
+  '/photos/3R2A5336.jpg',  // Close-up chairs, dark plaza — moody minimalism
+  '/photos/3R2A5349.jpg',  // Paramount Theater marquee — Austin landmark
+  '/photos/3R2A5340.jpg',  // Punch Bowl Social exterior — moody dark street
+  '/photos/3R2A5378.jpg',  // Arched colonnade sidewalk — leading lines
+  '/photos/3R2A5385.jpg',  // 415 Colorado dramatic shadow lighting
+  '/photos/3R2A5399.jpg',  // Coffee shop, selective color, people — urban intimacy
 ];
 
 function ScrollPhoto({ src, index, onClick }) {
