@@ -368,7 +368,7 @@ function Contact() {
           whileHover={{ letterSpacing: '0.05em' }}
           transition={{ duration: 0.3 }}
         >
-          burke.ruder@gmail.com
+          Email
         </motion.a>
       </FadeUp>
 

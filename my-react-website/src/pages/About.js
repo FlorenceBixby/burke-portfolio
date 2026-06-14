@@ -291,7 +291,7 @@ export default function About() {
         <div>
           <p style={{ fontSize: '0.7rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Get in touch</p>
           <a href="mailto:burke.ruder@gmail.com" style={{ fontFamily: 'var(--serif)', fontSize: '1.4rem', fontWeight: 700, color: 'var(--text)', borderBottom: '1px solid var(--accent)', paddingBottom: 2 }}>
-            burke.ruder@gmail.com
+            Email Me
           </a>
         </div>
         <a href="https://www.linkedin.com/in/burke-ruder/" target="_blank" rel="noopener noreferrer"
