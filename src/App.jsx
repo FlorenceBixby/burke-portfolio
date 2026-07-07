@@ -109,8 +109,14 @@ export default function App() {
 
   const navigate = (p) => {
     setPage(p)
+    window.location.hash = p === 'home' ? '' : p
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
+
+  useEffect(() => {
+    const hash = window.location.hash.replace('#', '')
+    if (hash) setPage(hash)
+  }, [])
 
   return (
     <>
