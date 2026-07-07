@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import {
   motion,
   useScroll,
@@ -82,6 +82,60 @@ const photos = [
   '/best/3R2A5332.jpg',
 ];
 
+/* ── Text scramble ── */
+const SCRAMBLE_CHARS = '!<>-_\\/[]{}—=+*^?#';
+const SCRAMBLE_WORDS = ['curious.', 'driven.', 'restless.', 'relentless.', 'curious.'];
+
+class TextScramble {
+  constructor(el) {
+    this.el = el;
+    this.update = this.update.bind(this);
+  }
+  setText(newText) {
+    const oldText = this.el.innerText;
+    const length = Math.max(oldText.length, newText.length);
+    const promise = new Promise(r => (this.resolve = r));
+    this.queue = [];
+    for (let i = 0; i < length; i++) {
+      const from = oldText[i] || '';
+      const to = newText[i] || '';
+      const start = Math.floor(Math.random() * 20);
+      const end = start + Math.floor(Math.random() * 25);
+      this.queue.push({ from, to, start, end });
+    }
+    cancelAnimationFrame(this.frameRequest);
+    this.frame = 0;
+    this.update();
+    return promise;
+  }
+  update() {
+    let output = '', complete = 0;
+    for (let i = 0; i < this.queue.length; i++) {
+      let { from, to, start, end, char } = this.queue[i];
+      if (this.frame >= end) {
+        complete++;
+        output += to;
+      } else if (this.frame >= start) {
+        if (!char || Math.random() < 0.28) {
+          char = SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
+          this.queue[i].char = char;
+        }
+        output += `<span class="hero-scramble-dud">${char}</span>`;
+      } else {
+        output += from;
+      }
+    }
+    this.el.innerHTML = output;
+    if (complete === this.queue.length) {
+      this.resolve();
+    } else {
+      this.frameRequest = requestAnimationFrame(this.update);
+      this.frame++;
+    }
+  }
+  destroy() { cancelAnimationFrame(this.frameRequest); }
+}
+
 /* ── Hero ── */
 function Hero() {
   const ref = useRef(null);
@@ -90,8 +144,24 @@ function Hero() {
   const opacity = useTransform(scrollYProgress, [0, 0.65], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.08]);
 
-  const line1 = ['Just', 'curious.'];
+  const scrambleRef = useRef(null);
   const line2 = ["That's", 'the', 'whole', 'thing.'];
+
+  useEffect(() => {
+    const el = scrambleRef.current;
+    if (!el) return;
+    const fx = new TextScramble(el);
+    let idx = 0;
+    let timeoutId;
+    const cycle = () => {
+      fx.setText(SCRAMBLE_WORDS[idx % SCRAMBLE_WORDS.length]).then(() => {
+        timeoutId = setTimeout(cycle, 2600);
+      });
+      idx++;
+    };
+    timeoutId = setTimeout(cycle, 2000);
+    return () => { clearTimeout(timeoutId); fx.destroy(); };
+  }, []);
 
   return (
     <section className="hero" ref={ref}>
@@ -128,17 +198,22 @@ function Hero() {
       <motion.div className="hero-content" style={{ opacity }}>
         <h1 className="hero-quote">
           <span style={{ display: 'block', overflow: 'hidden', marginBottom: '0.05em' }}>
-            {line1.map((w, i) => (
-              <motion.span
-                key={w}
-                style={{ display: 'inline-block', marginRight: '0.22em' }}
-                initial={{ y: '110%', opacity: 0 }}
-                animate={{ y: '0%', opacity: 1 }}
-                transition={{ duration: 1.1, delay: 0.3 + i * 0.12, ease: [0.22, 1, 0.36, 1] }}
-              >
-                {w}
-              </motion.span>
-            ))}
+            <motion.span
+              style={{ display: 'inline-block', marginRight: '0.22em' }}
+              initial={{ y: '110%', opacity: 0 }}
+              animate={{ y: '0%', opacity: 1 }}
+              transition={{ duration: 1.1, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            >
+              Just
+            </motion.span>
+            <motion.span
+              style={{ display: 'inline-block' }}
+              initial={{ y: '110%', opacity: 0 }}
+              animate={{ y: '0%', opacity: 1 }}
+              transition={{ duration: 1.1, delay: 0.42, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <span ref={scrambleRef}>curious.</span>
+            </motion.span>
           </span>
           <span style={{ display: 'block', overflow: 'hidden' }}>
             {line2.map((w, i) => (

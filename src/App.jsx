@@ -6,6 +6,8 @@ import Portfolio from './pages/Portfolio.jsx'
 import About from './pages/About.jsx'
 import Contact from './pages/Contact.jsx'
 import Privacy from './pages/Privacy.jsx'
+import Blog from './pages/Blog.jsx'
+import Admin from './pages/Admin.jsx'
 import LogoShowcase from './pages/LogoShowcase.jsx'
 import Footer from './components/Footer.jsx'
 
@@ -141,6 +143,8 @@ export default function App() {
                   {page === 'contact'   && <Contact />}
                   {page === 'privacy'   && <Privacy />}
                   {page === 'logos'     && <LogoShowcase navigate={navigate} />}
+                  {page === 'blog'      && <Blog />}
+                  {page === 'admin'     && <Admin />}
                 </div>
               </motion.div>
             </AnimatePresence>
