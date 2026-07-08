@@ -6,6 +6,8 @@ import Portfolio from './pages/Portfolio.jsx'
 import About from './pages/About.jsx'
 import Contact from './pages/Contact.jsx'
 import Privacy from './pages/Privacy.jsx'
+import Blog from './pages/Blog.jsx'
+import Admin from './pages/Admin.jsx'
 import LogoShowcase from './pages/LogoShowcase.jsx'
 import Footer from './components/Footer.jsx'
 
@@ -107,8 +109,14 @@ export default function App() {
 
   const navigate = (p) => {
     setPage(p)
+    window.location.hash = p === 'home' ? '' : p
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
+
+  useEffect(() => {
+    const hash = window.location.hash.replace('#', '')
+    if (hash) setPage(hash)
+  }, [])
 
   return (
     <>
@@ -141,6 +149,8 @@ export default function App() {
                   {page === 'contact'   && <Contact />}
                   {page === 'privacy'   && <Privacy />}
                   {page === 'logos'     && <LogoShowcase navigate={navigate} />}
+                  {page === 'blog'      && <Blog />}
+                  {page === 'admin'     && <Admin />}
                 </div>
               </motion.div>
             </AnimatePresence>

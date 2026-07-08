@@ -65,7 +65,7 @@ export default function Contact() {
                   <div className="contact-meta-item">
                     <span className="contact-meta-label">Book directly</span>
                     <a href="https://calendly.com/burke-theinterestinggroup" target="_blank" rel="noopener noreferrer">
-                      calendly.com/burke-theinterestinggroup →
+                      calendly.com/theinterestinggroup →
                     </a>
                   </div>
                   <div className="contact-meta-item">

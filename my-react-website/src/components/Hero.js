@@ -1,6 +1,61 @@
 import { motion, useScroll, useTransform } from 'motion/react';
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import Birds from './Birds';
+
+const SCRAMBLE_WORDS = ['selling,', 'closing,', 'winning,', 'solving,', 'growing,', 'selling,'];
+const SCRAMBLE_CHARS = '!<>-_\\/[]{}—=+*^?#';
+
+class TextScramble {
+  constructor(el) {
+    this.el = el;
+    this.update = this.update.bind(this);
+  }
+  setText(newText) {
+    const oldText = this.el.innerText;
+    const length = Math.max(oldText.length, newText.length);
+    const promise = new Promise(r => (this.resolve = r));
+    this.queue = [];
+    for (let i = 0; i < length; i++) {
+      const from = oldText[i] || '';
+      const to = newText[i] || '';
+      const start = Math.floor(Math.random() * 20);
+      const end = start + Math.floor(Math.random() * 25);
+      this.queue.push({ from, to, start, end });
+    }
+    cancelAnimationFrame(this.frameRequest);
+    this.frame = 0;
+    this.update();
+    return promise;
+  }
+  update() {
+    let output = '', complete = 0;
+    for (let i = 0; i < this.queue.length; i++) {
+      let { from, to, start, end, char } = this.queue[i];
+      if (this.frame >= end) {
+        complete++;
+        output += to;
+      } else if (this.frame >= start) {
+        if (!char || Math.random() < 0.28) {
+          char = SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
+          this.queue[i].char = char;
+        }
+        output += `<span class="hero-scramble-dud">${char}</span>`;
+      } else {
+        output += from;
+      }
+    }
+    this.el.innerHTML = output;
+    if (complete === this.queue.length) {
+      this.resolve();
+    } else {
+      this.frameRequest = requestAnimationFrame(this.update);
+      this.frame++;
+    }
+  }
+  destroy() {
+    cancelAnimationFrame(this.frameRequest);
+  }
+}
 
 const words = ['Sales.', 'Operations.', 'Technology.', 'Leadership.'];
 
@@ -19,9 +74,29 @@ function AnimatedWord({ word, delay }) {
 
 export default function Hero() {
   const ref = useRef(null);
+  const scrambleRef = useRef(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] });
   const y = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
   const opacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
+
+  useEffect(() => {
+    const el = scrambleRef.current;
+    if (!el) return;
+    const fx = new TextScramble(el);
+    let idx = 0;
+    let timeoutId;
+    const cycle = () => {
+      fx.setText(SCRAMBLE_WORDS[idx % SCRAMBLE_WORDS.length]).then(() => {
+        timeoutId = setTimeout(cycle, 2600);
+      });
+      idx++;
+    };
+    timeoutId = setTimeout(cycle, 2000);
+    return () => {
+      clearTimeout(timeoutId);
+      fx.destroy();
+    };
+  }, []);
 
   const container = {
     hidden: {},
@@ -58,7 +133,10 @@ export default function Hero() {
         >
           <motion.span variants={item}>20+ years of</motion.span>{' '}
           <motion.span variants={item} className="hero-accent">building,</motion.span>{' '}
-          <motion.span variants={item}>selling, &</motion.span>{' '}
+          <motion.span variants={item}>
+            <span ref={scrambleRef}>selling,</span>
+          </motion.span>{' '}
+          <motion.span variants={item}>&amp;</motion.span>{' '}
           <motion.span variants={item} className="hero-accent">leading.</motion.span>
         </motion.h1>
 

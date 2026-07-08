@@ -1,0 +1,28 @@
+User-agent: *
+Allow: /
+Sitemap: https://theinterestinggroup.com/sitemap.xml
+
+# AI crawler rules — allow indexing, disallow training
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Googlebot-Extended
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+# Content signals
+Content-Signal: ai-train=no, search=yes, ai-input=yes

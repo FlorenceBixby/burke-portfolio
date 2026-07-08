@@ -215,6 +215,9 @@ button { font-family: var(--sans); cursor: pointer; border: none; outline: none;
   padding: 0 5vw 8vh;
   max-width: 1000px;
 }
+.hero-accent { color: var(--accent); }
+.hero-scramble-dud { color: var(--accent); }
+
 .hero-quote {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: clamp(3.5rem, 9vw, 9rem);

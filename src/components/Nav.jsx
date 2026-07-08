@@ -46,6 +46,15 @@ export default function Nav({ page, navigate }) {
             About
           </a>
         </li>
+        <li>
+          <a
+            href="#"
+            onClick={e => { e.preventDefault(); navigate('blog') }}
+            style={{ color: page === 'blog' ? 'var(--black)' : undefined, fontWeight: page === 'blog' ? 500 : undefined }}
+          >
+            Insights
+          </a>
+        </li>
       </ul>
 
       {/* CTA */}
