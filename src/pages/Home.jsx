@@ -77,7 +77,7 @@ export default function Home({ navigate }) {
           >
             <MagneticButton
               className="btn btn-dark"
-              href="https://calendly.com/burke-theinterestinggroup"
+              href="/book"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -167,7 +167,7 @@ export default function Home({ navigate }) {
             <div style={{ marginTop: 44, display: 'flex', gap: 14, flexWrap: 'wrap' }}>
               <MagneticButton
                 className="btn btn-dark"
-                href="https://calendly.com/burke-theinterestinggroup"
+                href="/book"
                 target="_blank"
                 rel="noopener noreferrer"
               >

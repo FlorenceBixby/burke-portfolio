@@ -64,13 +64,13 @@ export default function Contact() {
                   </div>
                   <div className="contact-meta-item">
                     <span className="contact-meta-label">Book directly</span>
-                    <a href="https://calendly.com/burke-theinterestinggroup" target="_blank" rel="noopener noreferrer">
-                      calendly.com/theinterestinggroup →
+                    <a href="/book" target="_blank" rel="noopener noreferrer">
+                      theinterestinggroup.com/book →
                     </a>
                   </div>
                   <div className="contact-meta-item">
-                    <span className="contact-meta-label">Based in</span>
-                    <span>Buda, TX — serving all of Texas and beyond</span>
+                    <span className="contact-meta-label">Serving</span>
+                    <span>Businesses across the US</span>
                   </div>
                 </div>
               </div>
@@ -92,7 +92,7 @@ export default function Contact() {
                       <h3>You're in good hands.</h3>
                       <p>We'll be in touch within one business day. In the meantime, feel free to book a call directly if you'd rather talk now.</p>
                       <a
-                        href="https://calendly.com/burke-theinterestinggroup"
+                        href="/book"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="btn btn-dark"

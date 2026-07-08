@@ -17,7 +17,7 @@ export default function Footer({ navigate }) {
             <MagneticButton
               className="btn btn-outline"
               style={{ borderColor: 'rgba(255,255,255,0.2)', color: '#fff' }}
-              href="https://calendly.com/burke-theinterestinggroup"
+              href="/book"
               target="_blank"
               rel="noopener noreferrer"
             >

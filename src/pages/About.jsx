@@ -48,12 +48,12 @@ export default function About({ navigate }) {
                   We fix that. We act as your outside technology advisor: evaluating options, running the selection process, negotiating the contract, and managing the vendor relationship after. You don't pay us — the vendors do. Which means our incentive is always giving you the right answer.
                 </p>
                 <p style={{ color: 'var(--gray-mid)', fontSize: 15 }}>
-                  Based in Buda, TX. Working everywhere.
+                  Working with businesses across the US.
                 </p>
                 <div style={{ marginTop: 36, display: 'flex', gap: 14, flexWrap: 'wrap' }}>
                   <MagneticButton
                     className="btn btn-dark"
-                    href="https://calendly.com/burke-theinterestinggroup"
+                    href="/book"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
