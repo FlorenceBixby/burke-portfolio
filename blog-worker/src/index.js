@@ -5,34 +5,39 @@ const CORS_HEADERS = {
 }
 
 const TOPIC_POOL = [
-  'How Austin small businesses can cut their internet bill without switching providers',
-  'VoIP vs traditional phone systems: what Texas SMBs need to know in 2025',
+  'How small businesses can cut their internet bill without switching providers',
+  'VoIP vs traditional phone systems: what SMBs need to know',
   'Why most small businesses are overpaying for cybersecurity — and what to do about it',
-  'SD-WAN explained for non-technical business owners in Texas',
-  'Cloud migration mistakes that cost Austin companies money (and how to avoid them)',
-  'How to evaluate a UCaaS provider: a checklist for Texas business owners',
+  'SD-WAN explained for non-technical business owners',
+  'Cloud migration mistakes that cost companies money (and how to avoid them)',
+  'How to evaluate a UCaaS provider: a checklist for business owners',
   'What happens when your telecom contract expires — and why you should care 90 days early',
   'The hidden costs of managing your own IT infrastructure',
-  'Contact center in the cloud: is CCaaS right for your Texas business?',
-  'How construction companies in the I-35 corridor are saving on connectivity',
+  'Contact center in the cloud: is CCaaS right for your business?',
+  'How construction companies are saving on connectivity without sacrificing reliability',
   "Fiber internet for business: when it's worth it and when it isn't",
   'Why your managed IT provider might be leaving money on the table',
-  'Cybersecurity basics every Texas small business owner should know',
+  'Cybersecurity basics every small business owner should know',
   'What is SASE and should your business care about it?',
   'How to negotiate a better deal on your next business phone system',
+  'The real cost of business internet downtime — and how to prevent it',
+  'What to ask before signing any technology contract',
+  'Fixed wireless vs fiber: which is right for your business location?',
+  'How a technology advisor is different from a vendor — and why it matters',
+  'Five signs your current IT setup is costing you more than it should',
 ]
 
 async function generatePost(topic, anthropicKey) {
-  const prompt = `You are writing a blog post for The Interesting Group (theinterestinggroup.com), a technology advisory firm based in Buda, TX that helps small and mid-size businesses source, negotiate, and manage their technology vendors — at no cost to the client (vendors pay the fees).
+  const prompt = `You are writing a blog post for The Interesting Group (theinterestinggroup.com), a technology advisory firm that helps small and mid-size businesses across the US source, negotiate, and manage their technology vendors — at no cost to the client (vendors pay the fees).
 
 Write a blog post on this topic: "${topic}"
 
 Requirements:
-- Target audience: business owners and operators at companies with 10-150 employees in Texas, especially the Austin/San Antonio I-35 corridor
+- Target audience: business owners and operators at companies with 10-150 employees, anywhere in the US
 - Tone: direct, confident, helpful — like a trusted advisor, not a salesperson
 - Length: 550-750 words
 - Structure: H1 title, 3-4 sections with H2 headers, brief conclusion with a soft CTA to book a free call
-- SEO: naturally include location keywords (Austin, Texas, San Antonio) and category keywords where relevant
+- SEO: naturally include industry and category keywords — do NOT mention specific cities or states
 - Do NOT mention specific vendor names or prices
 - Do NOT be salesy or use buzzwords like "leverage" or "synergy"
 - End with a single sentence CTA linking to the contact page
