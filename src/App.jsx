@@ -11,7 +11,7 @@ import Admin from './pages/Admin.jsx'
 import LogoShowcase from './pages/LogoShowcase.jsx'
 import Footer from './components/Footer.jsx'
 
-const ACCENT = '#2d5c3d'
+const ACCENT = '#6B1F1F'
 
 // ── Intro screen — Alamo Drafthouse style ────────────────────────────────
 // Black full-screen. "THE" drops in, "Interesting Group" fades up,

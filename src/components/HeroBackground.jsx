@@ -1,110 +1,72 @@
-import { useEffect, useRef } from 'react'
-
-const COUNT     = 72          // number of particles
-const CONNECT   = 130         // px — max distance to draw a line
-const SPEED     = 0.35        // pixels per frame
-const DOT_R     = 1.6         // dot radius
-const DOT_ALPHA = 0.22        // dot opacity
-const LINE_ALPHA = 0.09       // line max opacity (fades by distance)
-const ACCENT_RATIO = 0.12     // ~12% of dots are terracotta
-
-const DARK   = '29,29,31'
-const WARM   = '45,92,61'
+import { motion } from 'framer-motion'
 
 export default function HeroBackground() {
-  const canvasRef = useRef(null)
-
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
-
-    const dpr = window.devicePixelRatio || 1
-    let W = canvas.offsetWidth
-    let H = canvas.offsetHeight
-
-    const resize = () => {
-      W = canvas.offsetWidth
-      H = canvas.offsetHeight
-      canvas.width  = W * dpr
-      canvas.height = H * dpr
-      ctx.scale(dpr, dpr)
-    }
-    resize()
-
-    // Build particles — a small fraction are accent-colored
-    const particles = Array.from({ length: COUNT }, (_, i) => ({
-      x:  Math.random() * W,
-      y:  Math.random() * H,
-      vx: (Math.random() - 0.5) * SPEED * 2,
-      vy: (Math.random() - 0.5) * SPEED * 2,
-      warm: i < COUNT * ACCENT_RATIO,
-    }))
-
-    let raf
-    const loop = () => {
-      ctx.clearRect(0, 0, W, H)
-
-      // Connection lines first (drawn below dots)
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx   = particles[i].x - particles[j].x
-          const dy   = particles[i].y - particles[j].y
-          const dist = Math.sqrt(dx * dx + dy * dy)
-          if (dist >= CONNECT) continue
-
-          const t = 1 - dist / CONNECT          // 1 = close, 0 = far
-          const color = (particles[i].warm || particles[j].warm) ? WARM : DARK
-          ctx.beginPath()
-          ctx.strokeStyle = `rgba(${color},${(t * LINE_ALPHA).toFixed(3)})`
-          ctx.lineWidth   = 0.6
-          ctx.moveTo(particles[i].x, particles[i].y)
-          ctx.lineTo(particles[j].x, particles[j].y)
-          ctx.stroke()
-        }
-      }
-
-      // Dots
-      particles.forEach(p => {
-        ctx.beginPath()
-        ctx.arc(p.x, p.y, DOT_R, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(${p.warm ? WARM : DARK},${DOT_ALPHA})`
-        ctx.fill()
-
-        // Move
-        p.x += p.vx
-        p.y += p.vy
-
-        // Soft bounce at edges
-        if (p.x < 0)  { p.x = 0;  p.vx = Math.abs(p.vx) }
-        if (p.x > W)  { p.x = W;  p.vx = -Math.abs(p.vx) }
-        if (p.y < 0)  { p.y = 0;  p.vy = Math.abs(p.vy) }
-        if (p.y > H)  { p.y = H;  p.vy = -Math.abs(p.vy) }
-      })
-
-      raf = requestAnimationFrame(loop)
-    }
-    loop()
-
-    window.addEventListener('resize', resize)
-    return () => {
-      cancelAnimationFrame(raf)
-      window.removeEventListener('resize', resize)
-    }
-  }, [])
-
   return (
-    <canvas
-      ref={canvasRef}
+    <div
       aria-hidden="true"
-      style={{
+      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}
+    >
+      {/* Dominant shape — deep burgundy circle, cropped bottom-right */}
+      <motion.div
+        animate={{ x: [0, 22, 0], y: [0, 14, 0], scale: [1, 1.018, 1] }}
+        transition={{ duration: 30, repeat: Infinity, ease: 'easeInOut' }}
+        style={{
+          position: 'absolute',
+          bottom: '-28%', right: '-16%',
+          width: 560, height: 560,
+          borderRadius: '50%',
+          background: '#5C1A1A',
+          opacity: 0.92,
+        }}
+      />
+
+      {/* Secondary — rotated square, aged gold */}
+      <motion.div
+        animate={{ x: [0, 8, 0], y: [0, -10, 0], rotate: [12, 17, 12] }}
+        transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
+        style={{
+          position: 'absolute',
+          bottom: '30%', right: '20%',
+          width: 48, height: 48,
+          background: '#8B6914',
+          opacity: 0.85,
+        }}
+      />
+
+      {/* Small accent dot — tarnished brass */}
+      <motion.div
+        animate={{ x: [0, -12, 0], y: [0, 16, 0] }}
+        transition={{ duration: 24, repeat: Infinity, ease: 'easeInOut', delay: 5 }}
+        style={{
+          position: 'absolute',
+          top: '15%', right: '35%',
+          width: 16, height: 16,
+          borderRadius: '50%',
+          background: '#A07830',
+          opacity: 0.72,
+        }}
+      />
+
+      {/* Precision rule */}
+      <div style={{
         position: 'absolute',
-        inset: 0,
-        width: '100%',
-        height: '100%',
-        pointerEvents: 'none',
-        zIndex: 0,
-      }}
-    />
+        bottom: '19%', left: 0, right: 0,
+        height: 1,
+        background: 'linear-gradient(90deg, transparent, rgba(180,155,100,0.1) 25%, rgba(180,155,100,0.1) 58%, transparent)',
+      }} />
+
+      {/* Film grain */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        opacity: 0.04,
+        backgroundImage: `url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>")`,
+      }} />
+
+      {/* Vignette */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: 'radial-gradient(ellipse at 30% 50%, transparent 40%, rgba(5,4,2,0.65) 100%)',
+      }} />
+    </div>
   )
 }

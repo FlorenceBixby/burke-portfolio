@@ -97,7 +97,7 @@ export default function Blog() {
       <div className="container">
         <Reveal>
           <span className="eyebrow">Insights</span>
-          <h1 className="headline-lg" style={{ marginBottom: 12 }}>The TIG Brief</h1>
+          <h1 className="headline-lg" style={{ marginBottom: 12 }}>The Interesting Brief</h1>
           <p className="body-lg" style={{ marginBottom: 56, maxWidth: 560 }}>
             Practical advice on business technology — no jargon, no pitch.
           </p>
