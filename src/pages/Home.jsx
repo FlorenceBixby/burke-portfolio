@@ -16,7 +16,7 @@ const steps = [
   {
     num: '02',
     title: 'We go to market for you',
-    body: 'We evaluate hundreds of suppliers across every category, negotiate pricing, and bring you options. An honest recommendation, not a pitch.'
+    body: 'We evaluate 30+ suppliers across every category, negotiate pricing, and bring you options. An honest recommendation, not a pitch.'
   },
   {
     num: '03',

@@ -97,5 +97,5 @@ const ul = {
   paddingLeft: 20, marginBottom: 16,
 }
 const link = {
-  color: '#6B1F1F', textDecoration: 'underline',
+  color: '#2d5c3d', textDecoration: 'underline',
 }

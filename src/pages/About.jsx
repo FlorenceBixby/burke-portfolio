@@ -85,7 +85,7 @@ export default function About({ navigate }) {
             {[
               {
                 title: 'Honesty over commission.',
-                body: "We work with hundreds of suppliers across every technology category. We have no reason to push any one over another — and we won't. If the best answer is your current vendor, we'll tell you that too."
+                body: "We work with 30+ suppliers. We have no reason to push any one over another — and we won't. If the best answer is your current vendor, we'll tell you that too."
               },
               {
                 title: 'Your time is the asset.',

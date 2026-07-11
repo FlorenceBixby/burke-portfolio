@@ -4,32 +4,33 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 }
 
-const TOPIC_CATEGORIES = [
-  'internet connectivity and fiber',
-  'VoIP and business phone systems',
-  'UCaaS (unified communications)',
-  'CCaaS (contact center)',
-  'cloud infrastructure and migration',
-  'cybersecurity',
-  'SD-WAN and SASE',
-  'IT managed services',
-  'technology contract negotiation',
+const TOPIC_POOL = [
+  'How small businesses can cut their internet bill without switching providers',
+  'VoIP vs traditional phone systems: what SMBs need to know',
+  'Why most small businesses are overpaying for cybersecurity — and what to do about it',
+  'SD-WAN explained for non-technical business owners',
+  'Cloud migration mistakes that cost companies money (and how to avoid them)',
+  'How to evaluate a UCaaS provider: a checklist for business owners',
+  'What happens when your telecom contract expires — and why you should care 90 days early',
+  'The hidden costs of managing your own IT infrastructure',
+  'Contact center in the cloud: is CCaaS right for your business?',
+  'How construction companies are saving on connectivity without sacrificing reliability',
+  "Fiber internet for business: when it's worth it and when it isn't",
+  'Why your managed IT provider might be leaving money on the table',
+  'Cybersecurity basics every small business owner should know',
+  'What is SASE and should your business care about it?',
+  'How to negotiate a better deal on your next business phone system',
+  'The real cost of business internet downtime — and how to prevent it',
+  'What to ask before signing any technology contract',
+  'Fixed wireless vs fiber: which is right for your business location?',
+  'How a technology advisor is different from a vendor — and why it matters',
+  'Five signs your current IT setup is costing you more than it should',
 ]
 
-async function generatePost(anthropicKey, recentTopics) {
-  const avoidList = recentTopics.length > 0
-    ? recentTopics.map(t => `- ${t}`).join('\n')
-    : '(none yet — this is one of the first posts)'
-
+async function generatePost(topic, anthropicKey) {
   const prompt = `You are writing a blog post for The Interesting Group (theinterestinggroup.com), a technology advisory firm that helps small and mid-size businesses across the US source, negotiate, and manage their technology vendors — at no cost to the client (vendors pay the fees).
 
-Step 1 — Research: Use web search to find what's genuinely trending right now (last 30-60 days) in one of these categories, something a business owner would actually be curious about or worried about — a real news story, industry shift, new threat, or emerging technology, not an evergreen basics topic:
-${TOPIC_CATEGORIES.map(c => `- ${c}`).join('\n')}
-
-Do not write about any of these topics we've already covered recently:
-${avoidList}
-
-Step 2 — Write: Once you've identified a specific, current angle, write a blog post about it.
+Write a blog post on this topic: "${topic}"
 
 Requirements:
 - Target audience: business owners and operators at companies with 10-150 employees, anywhere in the US
@@ -41,65 +42,56 @@ Requirements:
 - Do NOT be salesy or use buzzwords like "leverage" or "synergy"
 - End with a single sentence CTA linking to the contact page
 
-Once research is complete, respond with ONLY a JSON object as your final message, with exactly these fields:
+Return a JSON object with exactly these fields:
 {
   "title": "the H1 title",
   "slug": "url-friendly-slug",
   "excerpt": "2-sentence summary for the blog listing page",
   "tags": ["tag1", "tag2", "tag3"],
-  "topic": "the specific trending topic/angle you chose, one sentence",
   "body": "the full post body in markdown"
 }`
 
-  const messages = [{ role: 'user', content: prompt }]
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': anthropicKey,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 2048,
+      messages: [{ role: 'user', content: prompt }],
+    }),
+  })
 
-  for (let i = 0; i < 4; i++) {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': anthropicKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 4096,
-        tools: [{ type: 'web_search_20260209', name: 'web_search' }],
-        messages,
-      }),
-    })
-
-    const data = await response.json()
-
-    if (data.stop_reason === 'pause_turn') {
-      messages.push({ role: 'assistant', content: data.content })
-      continue
-    }
-
-    const text = data.content.filter(b => b.type === 'text').map(b => b.text).join('\n')
-    const jsonMatch = text.match(/\{[\s\S]*\}/)
-    return JSON.parse(jsonMatch[0])
-  }
-
-  throw new Error('Post generation did not complete after multiple search iterations')
+  const data = await response.json()
+  const text = data.content[0].text
+  const jsonMatch = text.match(/\{[\s\S]*\}/)
+  return JSON.parse(jsonMatch[0])
 }
 
 async function handleCron(env) {
   const usedKeys = await env.BLOG_KV.list({ prefix: 'used-topic:' })
-  const recentTopics = usedKeys.keys.map(k => k.name.replace('used-topic:', ''))
+  const usedTopics = new Set(usedKeys.keys.map(k => k.name.replace('used-topic:', '')))
+  const available = TOPIC_POOL.filter(t => !usedTopics.has(t))
+  const topic = available.length > 0
+    ? available[Math.floor(Math.random() * available.length)]
+    : TOPIC_POOL[Math.floor(Math.random() * TOPIC_POOL.length)]
 
-  const post = await generatePost(env.ANTHROPIC_API_KEY, recentTopics)
+  const post = await generatePost(topic, env.ANTHROPIC_API_KEY)
   const id = `post-${Date.now()}`
   const draft = {
     id,
     ...post,
     status: 'draft',
+    topic,
     createdAt: new Date().toISOString(),
     publishedAt: null,
   }
 
   await env.BLOG_KV.put(`draft:${id}`, JSON.stringify(draft))
-  await env.BLOG_KV.put(`used-topic:${post.topic}`, '1')
+  await env.BLOG_KV.put(`used-topic:${topic}`, '1')
   console.log(`Draft created: ${post.title}`)
 }
 
