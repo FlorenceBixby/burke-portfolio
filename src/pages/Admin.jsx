@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import renderPostBody from '../utils/renderPostBody.jsx'
 
 const API = 'https://tig-blog-agent.burke-ruder.workers.dev'
 
@@ -175,8 +176,8 @@ export default function Admin() {
                       style={{ overflow: 'hidden' }}
                     >
                       <div style={{ padding: '0 24px 24px', borderTop: '1px solid var(--gray-border)' }}>
-                        <div style={{ paddingTop: 20, fontSize: 14, lineHeight: 1.8, color: 'var(--gray-dark)', whiteSpace: 'pre-wrap', maxHeight: 480, overflowY: 'auto', marginBottom: 20 }}>
-                          {draft.body}
+                        <div style={{ paddingTop: 20, fontSize: 14, lineHeight: 1.8, color: 'var(--gray-dark)', maxHeight: 480, overflowY: 'auto', marginBottom: 20 }}>
+                          {renderPostBody(draft.body)}
                         </div>
                         <div style={{ display: 'flex', gap: 12 }}>
                           <button className="btn btn-dark" onClick={() => approve(draft.id)}>

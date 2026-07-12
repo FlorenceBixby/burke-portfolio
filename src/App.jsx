@@ -100,6 +100,7 @@ function Loader() {
 
 export default function App() {
   const [page, setPage] = useState('home')
+  const [blogSlug, setBlogSlug] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -115,7 +116,11 @@ export default function App() {
 
   useEffect(() => {
     const hash = window.location.hash.replace('#', '')
-    if (hash) setPage(hash)
+    if (hash) {
+      const [base, ...rest] = hash.split('/')
+      setPage(base)
+      if (base === 'blog' && rest.length) setBlogSlug(rest.join('/'))
+    }
   }, [])
 
   return (
@@ -149,7 +154,7 @@ export default function App() {
                   {page === 'contact'   && <Contact />}
                   {page === 'privacy'   && <Privacy />}
                   {page === 'logos'     && <LogoShowcase navigate={navigate} />}
-                  {page === 'blog'      && <Blog />}
+                  {page === 'blog'      && <Blog initialSlug={blogSlug} />}
                   {page === 'admin'     && <Admin />}
                 </div>
               </motion.div>

@@ -5,26 +5,26 @@ const CORS_HEADERS = {
 }
 
 const TOPIC_POOL = [
-  'How small businesses can cut their internet bill without switching providers',
-  'VoIP vs traditional phone systems: what SMBs need to know',
-  'Why most small businesses are overpaying for cybersecurity — and what to do about it',
-  'SD-WAN explained for non-technical business owners',
-  'Cloud migration mistakes that cost companies money (and how to avoid them)',
-  'How to evaluate a UCaaS provider: a checklist for business owners',
-  'What happens when your telecom contract expires — and why you should care 90 days early',
-  'The hidden costs of managing your own IT infrastructure',
-  'Contact center in the cloud: is CCaaS right for your business?',
-  'How construction companies are saving on connectivity without sacrificing reliability',
-  "Fiber internet for business: when it's worth it and when it isn't",
-  'Why your managed IT provider might be leaving money on the table',
-  'Cybersecurity basics every small business owner should know',
-  'What is SASE and should your business care about it?',
-  'How to negotiate a better deal on your next business phone system',
-  'The real cost of business internet downtime — and how to prevent it',
-  'What to ask before signing any technology contract',
-  'Fixed wireless vs fiber: which is right for your business location?',
-  'How a technology advisor is different from a vendor — and why it matters',
-  'Five signs your current IT setup is costing you more than it should',
+  'How the right technology stack becomes a competitive advantage, not just a cost center',
+  'Five technology upgrades that pay for themselves within a year',
+  'What fast-growing companies do differently with their technology vendors',
+  'How better connectivity translates directly into team productivity',
+  'The ROI case for moving your phone system to the cloud',
+  'How automating routine IT tasks frees your team for higher-value work',
+  'What separates a technology investment from a technology expense',
+  'Building a technology roadmap that scales with your growth',
+  'Why the fastest-growing SMBs treat vendor management as a competitive edge',
+  'The productivity case for consolidating your business communications tools',
+  'How to calculate the real ROI of your technology contracts',
+  'What efficient IT operations actually look like at a growing company',
+  'How SD-WAN improves performance for distributed and multi-location teams',
+  'The connection between reliable technology and a better customer experience',
+  'How to negotiate technology contracts that scale with you, not against you',
+  'Why some businesses get more value from the same technology spend',
+  'How the right managed IT partner increases your team’s output',
+  'What to look for in a technology advisor who actually drives growth',
+  'How cloud migration can boost performance, not just cut costs',
+  'The efficiency gains hiding in your current technology contracts',
 ]
 
 async function generatePost(topic, anthropicKey) {
@@ -35,8 +35,12 @@ Write a blog post on this topic: "${topic}"
 Requirements:
 - Target audience: business owners and operators at companies with 10-150 employees, anywhere in the US
 - Tone: direct, confident, helpful — like a trusted advisor, not a salesperson
+- Angle: frame the topic around revenue, productivity, and efficiency gains — what businesses get by investing well. Do NOT use fear, threat, or urgency-based framing (no "hackers are coming for you," no scare statistics, no doom-and-gloom hooks). Growth and opportunity, not risk avoidance
+- Impact bar: every point should be a high-leverage move — meaningful ROI relative to the effort required. Cost-cutting and minor efficiency tweaks can appear as supporting detail, but should never be the main point of the post, and never center on trivial savings that aren't worth a business owner's time (e.g., a small per-seat price difference across a software subscription). The main argument should always be about a real, needle-moving business outcome
 - Length: 550-750 words
 - Structure: H1 title, 3-4 sections with H2 headers, brief conclusion with a soft CTA to book a free call
+- Write every section as clean, flowing prose paragraphs. Do NOT use bullet points, numbered lists, dashes as list markers, or any other list formatting anywhere in the body — express everything in full sentences, the way a well-written article or op-ed reads
+- Do NOT use emojis, asterisks, or other symbols for emphasis
 - SEO: naturally include industry and category keywords — do NOT mention specific cities or states
 - Do NOT mention specific vendor names or prices
 - Do NOT be salesy or use buzzwords like "leverage" or "synergy"
@@ -171,6 +175,17 @@ async function handleRequest(request, env) {
     const id = path.replace('/api/admin/draft/', '')
     await env.BLOG_KV.delete(`draft:${id}`)
     return json({ success: true })
+  }
+
+  // POST /api/admin/regenerate/:id — rewrite a draft's content with the current prompt, same topic
+  if (request.method === 'POST' && path.startsWith('/api/admin/regenerate/')) {
+    const id = path.replace('/api/admin/regenerate/', '')
+    const existing = await env.BLOG_KV.get(`draft:${id}`, 'json')
+    if (!existing) return json({ error: 'Draft not found' }, 404)
+    const post = await generatePost(existing.topic, env.ANTHROPIC_API_KEY)
+    const draft = { ...existing, ...post, createdAt: new Date().toISOString() }
+    await env.BLOG_KV.put(`draft:${id}`, JSON.stringify(draft))
+    return json({ success: true, post: draft })
   }
 
   // POST /api/admin/generate — manually trigger a post generation
