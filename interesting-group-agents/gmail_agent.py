@@ -31,8 +31,12 @@ SCOPES = [
 ]
 
 
-def _get_gmail_service():
-    """Authenticate and return a Gmail API service object."""
+def _get_gmail_service(credentials_path: Path = None, token_path: Path = None):
+    """Authenticate and return a Gmail API service object.
+
+    Pass credentials_path/token_path to authenticate a different account
+    (e.g. a personal Gmail) without touching the default TIG credentials.
+    """
     try:
         from google.oauth2.credentials import Credentials
         from google.auth.transport.requests import Request
@@ -44,10 +48,13 @@ def _get_gmail_service():
             "  pip3 install google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client"
         )
 
+    credentials_file = Path(credentials_path) if credentials_path else CREDENTIALS_FILE
+    token_file = Path(token_path) if token_path else TOKEN_FILE
+
     creds = None
 
-    if TOKEN_FILE.exists():
-        with open(TOKEN_FILE, "r") as f:
+    if token_file.exists():
+        with open(token_file, "r") as f:
             token_data = json.load(f)
         creds = Credentials.from_authorized_user_info(token_data, SCOPES)
 
@@ -55,15 +62,15 @@ def _get_gmail_service():
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            if not CREDENTIALS_FILE.exists():
+            if not credentials_file.exists():
                 raise FileNotFoundError(
-                    f"Gmail credentials not found at {CREDENTIALS_FILE}\n"
+                    f"Gmail credentials not found at {credentials_file}\n"
                     "Follow the setup instructions in gmail_agent.py"
                 )
-            flow = InstalledAppFlow.from_client_secrets_file(str(CREDENTIALS_FILE), SCOPES)
+            flow = InstalledAppFlow.from_client_secrets_file(str(credentials_file), SCOPES)
             creds = flow.run_local_server(port=0)
 
-        with open(TOKEN_FILE, "w") as f:
+        with open(token_file, "w") as f:
             f.write(creds.to_json())
 
     return build("gmail", "v1", credentials=creds)
@@ -184,12 +191,14 @@ def check_replies(since_days: int = 2) -> list:
     return replies
 
 
-def create_threaded_draft(to_email: str, subject: str, body: str, thread_id: str) -> str:
+def create_threaded_draft(to_email: str, subject: str, body: str, thread_id: str, service=None) -> str:
     """
     Create a Gmail draft as a reply in an existing thread.
-    Returns draft ID.
+    Returns draft ID. Pass an already-authenticated `service` to target a
+    non-default account (e.g. a personal Gmail) instead of the TIG default.
     """
-    service = _get_gmail_service()
+    if service is None:
+        service = _get_gmail_service()
 
     message = MIMEMultipart()
     message["to"] = to_email
@@ -209,15 +218,25 @@ if __name__ == "__main__":
     import sys
 
     if "--setup" in sys.argv:
+        # Optional overrides so a second account (e.g. personal Gmail) can be
+        # authorized without clobbering the default gmail_token.json:
+        #   python3 gmail_agent.py --setup --credentials gmail_credentials_personal.json --token gmail_token_personal.json
+        def _arg_after(flag):
+            return sys.argv[sys.argv.index(flag) + 1] if flag in sys.argv else None
+
+        creds_override = _arg_after("--credentials")
+        token_override = _arg_after("--token")
+
         print("Starting Gmail OAuth setup...")
-        print("A browser window will open — log in with burke.ruder@gmail.com")
-        service = _get_gmail_service()
+        print("A browser window will open — log in with the Google account you want to connect")
+        service = _get_gmail_service(credentials_path=creds_override, token_path=token_override)
         profile = service.users().getProfile(userId="me").execute()
         print(f"\nConnected as: {profile['emailAddress']}")
-        print(f"Token saved to: {TOKEN_FILE}")
+        print(f"Token saved to: {Path(token_override) if token_override else TOKEN_FILE}")
     else:
         print("Gmail Agent")
         print("  --setup   Run OAuth flow and save credentials")
+        print("            (add --credentials <file> --token <file> to set up a second account)")
         print("\nTo set up Gmail:")
         print("  1. Follow instructions at top of this file")
         print("  2. Save credentials JSON as gmail_credentials.json")
