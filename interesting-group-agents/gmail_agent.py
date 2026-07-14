@@ -58,7 +58,13 @@ def _get_credentials(credentials_path: Path = None, token_path: Path = None, sco
     if token_file.exists():
         with open(token_file, "r") as f:
             token_data = json.load(f)
-        creds = Credentials.from_authorized_user_info(token_data, requested_scopes)
+        # A refresh_token is only valid for the scopes it was originally
+        # granted under — if we're now requesting scopes it doesn't already
+        # cover (e.g. adding Calendar to a Gmail-only token), refreshing
+        # fails with invalid_scope. Only reuse it when it already covers
+        # everything requested; otherwise fall through to a fresh consent.
+        if set(requested_scopes) <= set(token_data.get('scopes') or []):
+            creds = Credentials.from_authorized_user_info(token_data, requested_scopes)
 
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
