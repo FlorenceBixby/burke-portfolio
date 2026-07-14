@@ -146,6 +146,7 @@ burke@theinterestinggroup.com"""
 def run_mailbox_manager():
     log('=== MAILBOX MANAGER ===')
     service = _get_gmail_service()
+    log(f'Authenticated as: {service.users().getProfile(userId="me").execute()["emailAddress"]}')
 
     # Fetch up to 100 inbox messages
     result = service.users().messages().list(
