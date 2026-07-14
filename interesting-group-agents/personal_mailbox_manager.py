@@ -45,16 +45,24 @@ SYSTEM_LABELS = {
     "IMPORTANT", "CHAT",
 }
 
+# Senders where any reply must happen in their own portal/app, never by
+# email — Claude gets this guidance too, but this is a hard override so a
+# misclassification never produces a draft for these.
+NO_REPLY_DOMAINS = [
+    "onemedical.com", "care.onemedical",
+]
+
 CLASSIFY_SYSTEM_PROMPT = """You triage one email at a time from Burke's personal Gmail inbox (burke.ruder@gmail.com).
 
 For each email, decide:
 1. category — one of: needs_response, marketing, bill, notification, newsletter, spam
-   - needs_response: a real person (or a business matter) is waiting on Burke to reply, decide, or act.
+   - needs_response: a real person is waiting on Burke to reply BY EMAIL, or a business matter needs Burke's decision/action that an email reply can address.
    - marketing: promotional content, sales pitches, product announcements.
    - bill: statements, invoices, payment confirmations, receipts — informational, no reply needed.
-   - notification: automated alerts, shipping updates, account/security notices, calendar invites already handled, etc.
+   - notification: automated alerts, shipping updates, account/security notices, calendar invites already handled, portal/app messages (patient portals, bank secure messaging, etc. — anything where the real reply happens inside that service's own app/website, not by replying to the email), etc.
    - newsletter: subscribed digests/content updates.
    - spam: unsolicited junk, phishing-looking, or clearly unwanted.
+   Important: if a message says "log in to view/reply" or is a notification that a portal message exists, that is notification, NOT needs_response — Burke only wants email drafts for things he'd actually reply to by email.
 2. archive — true unless category is needs_response (needs_response should stay visible in the inbox).
 3. existing_label — the name of one label from the "Existing labels" list below if it clearly fits, else null.
 4. new_label_suggestion — only if nothing existing fits AND this email is worth being able to find again later (e.g. a real bill, a warranty, a receipt worth keeping) — a short, well-organized folder name (e.g. "Bills", "Receipts", "Travel"). Prefer reusing a close existing label over creating a near-duplicate. Null for anything disposable like typical marketing/spam.
@@ -158,11 +166,46 @@ def run_personal_mailbox_manager():
             log(f'  Skipped (classification error) {sender[:50] or msg["id"]}: {e}')
             continue
 
+        if any(d in sender.lower() for d in NO_REPLY_DOMAINS):
+            classification['category'] = 'notification'
+            classification['archive'] = True
+            classification['draft_reply'] = None
+
         category = classification.get('category')
+
+        # Handle needs_response drafting first — the archive decision below
+        # depends on whether a draft actually exists (not just whether we
+        # intended to make one), so a failed draft never leaves a thread
+        # silently archived with nothing for Burke to act on.
+        has_draft = False
+        if category == 'needs_response' and classification.get('draft_reply'):
+            if thread_id in drafted_threads:
+                has_draft = True
+            elif _thread_has_reply_or_draft(service, thread_id, thread_reply_cache):
+                has_draft = True  # already handled in a previous run
+            else:
+                to_email = re.search(r'<(.+?)>', sender).group(1) if '<' in sender else sender
+                try:
+                    draft_id = create_threaded_draft(
+                        to_email=to_email,
+                        subject=subject if subject.startswith('Re:') else f'Re: {subject}',
+                        body=classification['draft_reply'],
+                        thread_id=thread_id,
+                        service=service,
+                    )
+                    log(f'    -> Draft created: {draft_id}')
+                    drafted += 1
+                    drafted_threads.add(thread_id)
+                    has_draft = True
+                except Exception as e:
+                    log(f'  Draft failed: {e}')
+
         add_labels = []
         remove_labels = []
 
-        if classification.get('archive'):
+        # A needs_response thread with a draft waiting in Drafts has been
+        # handled — archive it too so it doesn't linger in the inbox.
+        if classification.get('archive') or has_draft:
             remove_labels = ['INBOX']
             archived += 1
 
@@ -197,23 +240,6 @@ def run_personal_mailbox_manager():
             service.users().messages().modify(userId='me', id=msg['id'], body=body_req).execute()
 
         log(f'  {category}: {sender[:50]} | {subject[:50]}')
-
-        if category == 'needs_response' and classification.get('draft_reply') and thread_id not in drafted_threads:
-            if not _thread_has_reply_or_draft(service, thread_id, thread_reply_cache):
-                to_email = re.search(r'<(.+?)>', sender).group(1) if '<' in sender else sender
-                try:
-                    draft_id = create_threaded_draft(
-                        to_email=to_email,
-                        subject=subject if subject.startswith('Re:') else f'Re: {subject}',
-                        body=classification['draft_reply'],
-                        thread_id=thread_id,
-                        service=service,
-                    )
-                    log(f'    -> Draft created: {draft_id}')
-                    drafted += 1
-                    drafted_threads.add(thread_id)
-                except Exception as e:
-                    log(f'  Draft failed: {e}')
 
     log(f'Done — archived: {archived}, labeled: {labeled}, drafts created: {drafted}, labels created: {labels_created}')
     return {'archived': archived, 'labeled': labeled, 'drafted': drafted, 'labels_created': labels_created}
