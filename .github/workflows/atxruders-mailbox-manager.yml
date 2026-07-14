@@ -1,4 +1,4 @@
-name: Personal Mailbox Manager
+name: atxruders Mailbox Manager
 
 on:
   schedule:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  personal-mailbox-manager:
+  atxruders-mailbox-manager:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -33,7 +33,8 @@ jobs:
           FAMILY_CALENDAR_ID=${{ secrets.FAMILY_CALENDAR_ID }}
           EOF
           echo '${{ secrets.GMAIL_CREDENTIALS_PERSONAL }}' > gmail_credentials_personal.json
+          echo '${{ secrets.GMAIL_TOKEN_ATXRUDERS }}' > gmail_token_atxruders.json
           echo '${{ secrets.GMAIL_TOKEN_PERSONAL }}' > gmail_token_personal.json
 
-      - name: Run personal mailbox manager
-        run: python personal_mailbox_manager.py
+      - name: Run atxruders mailbox manager
+        run: python atxruders_mailbox_manager.py

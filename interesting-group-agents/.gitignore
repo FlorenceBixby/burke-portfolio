@@ -6,6 +6,7 @@ gmail_token.json
 gmail_credentials.json
 gmail_token_personal.json
 gmail_credentials_personal.json
+gmail_token_atxruders.json
 
 # Ignore logs but keep state files
 output/
