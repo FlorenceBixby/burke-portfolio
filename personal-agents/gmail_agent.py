@@ -96,37 +96,6 @@ def _get_gmail_service(credentials_path: Path = None, token_path: Path = None):
     return build("gmail", "v1", credentials=creds)
 
 
-def send_email(to_email: str, subject: str, body: str, html: bool = False,
-                credentials_path: Path = None, token_path: Path = None,
-                from_name: str = None) -> str:
-    """
-    Send an email immediately (not a draft). Returns the sent message ID.
-    Pass credentials_path/token_path to send from a non-default account
-    (e.g. gmail_credentials_personal.json / gmail_token_personal.json),
-    which must already have been authorized with the gmail.send scope.
-    Pass from_name to set a display name instead of the account's own
-    name — the underlying address is unchanged, only what recipients see
-    as the sender name.
-    """
-    service = _get_gmail_service(credentials_path, token_path)
-
-    message = MIMEMultipart()
-    message["to"] = to_email
-    message["subject"] = subject
-    if from_name:
-        profile = service.users().getProfile(userId="me").execute()
-        message["from"] = f'{from_name} <{profile["emailAddress"]}>'
-    message.attach(MIMEText(body, "html" if html else "plain"))
-
-    raw = base64.urlsafe_b64encode(message.as_bytes()).decode()
-    sent = service.users().messages().send(
-        userId="me",
-        body={"raw": raw},
-    ).execute()
-
-    return sent["id"]
-
-
 def _extract_body(payload: dict) -> str:
     """Recursively extract plain text body from a Gmail message payload."""
     if payload.get("mimeType") == "text/plain":
