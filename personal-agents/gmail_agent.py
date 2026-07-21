@@ -96,66 +96,35 @@ def _get_gmail_service(credentials_path: Path = None, token_path: Path = None):
     return build("gmail", "v1", credentials=creds)
 
 
-def create_draft(to_email: str, subject: str, body: str, prospect_name: str = "") -> str:
+def send_email(to_email: str, subject: str, body: str, html: bool = False,
+                credentials_path: Path = None, token_path: Path = None,
+                from_name: str = None) -> str:
     """
-    Create a Gmail draft. Returns the draft ID.
-    The email is NOT sent — Burke reviews and sends manually.
+    Send an email immediately (not a draft). Returns the sent message ID.
+    Pass credentials_path/token_path to send from a non-default account
+    (e.g. gmail_credentials_personal.json / gmail_token_personal.json),
+    which must already have been authorized with the gmail.send scope.
+    Pass from_name to set a display name instead of the account's own
+    name — the underlying address is unchanged, only what recipients see
+    as the sender name.
     """
-    service = _get_gmail_service()
+    service = _get_gmail_service(credentials_path, token_path)
 
     message = MIMEMultipart()
     message["to"] = to_email
     message["subject"] = subject
-    message.attach(MIMEText(body, "plain"))
+    if from_name:
+        profile = service.users().getProfile(userId="me").execute()
+        message["from"] = f'{from_name} <{profile["emailAddress"]}>'
+    message.attach(MIMEText(body, "html" if html else "plain"))
 
     raw = base64.urlsafe_b64encode(message.as_bytes()).decode()
-    draft = service.users().drafts().create(
+    sent = service.users().messages().send(
         userId="me",
-        body={"message": {"raw": raw}},
+        body={"raw": raw},
     ).execute()
 
-    return draft["id"]
-
-
-def create_drafts_for_prospects(prospects: list) -> list:
-    """
-    Create Gmail drafts for all A-tier prospects that have a revealed email.
-    Returns prospects list with gmail_draft_id added where applicable.
-    """
-    service = _get_gmail_service()
-    results = []
-    drafted = 0
-    skipped = 0
-
-    print("\nCreating Gmail drafts...")
-
-    for prospect in prospects:
-        email = prospect.get("email")
-        outreach = prospect.get("outreach", {})
-
-        if not email or not outreach:
-            skipped += 1
-            results.append(prospect)
-            continue
-
-        try:
-            draft_id = create_draft(
-                to_email=email,
-                subject=outreach.get("subject", ""),
-                body=outreach.get("body", ""),
-                prospect_name=prospect.get("first_name", ""),
-            )
-            print(f"  ✓ Draft created: {prospect.get('first_name')} @ {prospect.get('company')}")
-            drafted += 1
-            results.append({**prospect, "gmail_draft_id": draft_id})
-
-        except Exception as e:
-            print(f"  ✗ Draft failed for {prospect.get('first_name')}: {e}")
-            results.append(prospect)
-
-    print(f"\nGmail drafts: {drafted} created, {skipped} skipped (no email address)")
-    print("Review and send drafts at mail.google.com → Drafts")
-    return results
+    return sent["id"]
 
 
 def _extract_body(payload: dict) -> str:
