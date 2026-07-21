@@ -1,3 +1,0 @@
-User-agent: *
-Allow: /
-Sitemap: https://theinterestinggroup.com/sitemap.xml
