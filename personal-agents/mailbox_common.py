@@ -36,6 +36,19 @@ NO_REPLY_DOMAINS = [
     "onemedical.com", "care.onemedical",
 ]
 
+# calendar_only mode (added 2026-09-05, personal_mailbox_manager.py) — Burke found
+# the full triage below (auto-archiving marketing/bills/notifications, drafting
+# replies) was causing him to miss real emails; he wants his inbox left alone now,
+# with the ONLY automated action being calendar-event extraction. This prompt only
+# ever asks for that one thing — no category, no archive decision, no labels, no
+# draft — so a bug in this mode can't accidentally reintroduce any of that.
+CALENDAR_ONLY_SYSTEM_PROMPT = """You scan one email at a time from a Gmail inbox, looking ONLY for real-world events, deadlines, or dates worth having on a personal calendar — e.g. "pajama day" buried in a school's monthly newsletter, a parent-teacher conference date, an appointment, a due date. This can be buried anywhere in the email, including fine print in a newsletter or notification that isn't otherwise about an event.
+
+Respond with ONLY a JSON object, no other text:
+{"calendar_events": [{"title": "...", "date": "YYYY-MM-DD", "time": "HH:MM" or null for all-day, "location": "..." or null, "description": "..." or null}]}
+Empty list [] if nothing calendar-worthy. Today's date is __TODAY__ — resolve relative dates ("next Friday", "the 15th") against that.
+"""
+
 CLASSIFY_SYSTEM_PROMPT_HEAD = """You triage one email at a time from a Gmail inbox.__MAILBOX_CONTEXT__
 
 For each email, decide:
@@ -113,6 +126,30 @@ Body:
     return json.loads(match.group(0))
 
 
+def extract_calendar_events_with_claude(client: Anthropic, sender: str, subject: str, snippet: str, body: str) -> dict:
+    """calendar_only mode's classifier — see CALENDAR_ONLY_SYSTEM_PROMPT. Never asked
+    to make an archive/label/draft decision, so there's nothing here to accidentally
+    apply to the inbox even if this function is called."""
+    system_prompt = CALENDAR_ONLY_SYSTEM_PROMPT.replace('__TODAY__', datetime.now().strftime('%Y-%m-%d'))
+    user_content = f"""From: {sender}
+Subject: {subject}
+Snippet: {snippet}
+Body:
+{body[:3000]}
+"""
+    response = client.messages.create(
+        model=CLAUDE_MODEL,
+        max_tokens=768,
+        system=system_prompt,
+        messages=[{"role": "user", "content": user_content}],
+    )
+    text = response.content[0].text
+    match = re.search(r'\{.*\}', text, re.DOTALL)
+    if not match:
+        raise ValueError(f"No JSON found in Claude response: {text[:200]}")
+    return json.loads(match.group(0))
+
+
 def run_mailbox_manager(
     credentials_path,
     token_path,
@@ -121,19 +158,30 @@ def run_mailbox_manager(
     grace_period_hours: float = 0,
     calendar_service=None,
     calendar_id: str = None,
+    calendar_only: bool = False,
 ):
+    """
+    calendar_only=True (personal_mailbox_manager.py, 2026-09-05): does nothing but
+    read the inbox and extract calendar events — no classification, no archiving,
+    no labels, no drafts. The inbox is left exactly as Burke left it. Everything
+    below that touches archive/label/draft state is skipped entirely in this mode,
+    not just left with nothing to do — see the `if not calendar_only:` guards.
+    """
     log = make_logger(log_path)
-    log('=== MAILBOX MANAGER ===')
+    log('=== MAILBOX MANAGER ===' + (' (calendar-only mode)' if calendar_only else ''))
 
     anthropic_key = os.environ['ANTHROPIC_API_KEY']
     client = Anthropic(api_key=anthropic_key)
 
     service = _get_gmail_service(credentials_path=credentials_path, token_path=token_path)
 
-    existing_labels = service.users().labels().list(userId='me').execute().get('labels', [])
-    user_labels = [l for l in existing_labels if l.get('type') == 'user']
-    label_name_to_id = {l['name']: l['id'] for l in user_labels}
-    label_name_to_id_lower = {name.lower(): lid for name, lid in label_name_to_id.items()}
+    label_name_to_id = {}
+    label_name_to_id_lower = {}
+    if not calendar_only:
+        existing_labels = service.users().labels().list(userId='me').execute().get('labels', [])
+        user_labels = [l for l in existing_labels if l.get('type') == 'user']
+        label_name_to_id = {l['name']: l['id'] for l in user_labels}
+        label_name_to_id_lower = {name.lower(): lid for name, lid in label_name_to_id.items()}
 
     result = service.users().messages().list(
         userId='me', labelIds=['INBOX'], maxResults=100
@@ -173,58 +221,63 @@ def run_mailbox_manager(
             thread_id = m.get('threadId')
             body = _extract_body(m['payload'])
 
-            classification = classify_with_claude(
-                client, sender, subject, snippet, body, list(label_name_to_id.keys()), mailbox_context
-            )
+            if calendar_only:
+                classification = extract_calendar_events_with_claude(client, sender, subject, snippet, body)
+            else:
+                classification = classify_with_claude(
+                    client, sender, subject, snippet, body, list(label_name_to_id.keys()), mailbox_context
+                )
         except Exception as e:
             log(f'  Skipped (classification error) {sender[:50] or msg["id"]}: {e}')
             continue
 
-        if any(d in sender.lower() for d in NO_REPLY_DOMAINS):
-            classification['category'] = 'notification'
-            classification['archive'] = True
-            classification['draft_reply'] = None
-
-        category = classification.get('category')
-
-        # Handle needs_response drafting first — the archive decision below
-        # depends on whether a draft actually exists (not just whether we
-        # intended to make one), so a failed draft never leaves a thread
-        # silently archived with nothing to act on.
-        has_draft = False
-        if category == 'needs_response' and classification.get('draft_reply'):
-            if thread_id in drafted_threads:
-                has_draft = True
-            elif _thread_has_reply_or_draft(service, thread_id, thread_reply_cache):
-                has_draft = True  # already handled in a previous run
-            else:
-                to_email = re.search(r'<(.+?)>', sender).group(1) if '<' in sender else sender
-                try:
-                    draft_id = create_threaded_draft(
-                        to_email=to_email,
-                        subject=subject if subject.startswith('Re:') else f'Re: {subject}',
-                        body=classification['draft_reply'],
-                        thread_id=thread_id,
-                        service=service,
-                    )
-                    log(f'    -> Draft created: {draft_id}')
-                    drafted += 1
-                    drafted_threads.add(thread_id)
-                    has_draft = True
-                except Exception as e:
-                    log(f'  Draft failed: {e}')
-
+        category = None
         add_labels = []
         remove_labels = []
 
-        # A needs_response thread with a draft waiting in Drafts has been
-        # handled — archive it too so it doesn't linger in the inbox.
-        if classification.get('archive') or has_draft:
-            remove_labels = ['INBOX']
-            archived += 1
+        if not calendar_only:
+            if any(d in sender.lower() for d in NO_REPLY_DOMAINS):
+                classification['category'] = 'notification'
+                classification['archive'] = True
+                classification['draft_reply'] = None
 
-        existing_label = classification.get('existing_label')
-        new_label_suggestion = classification.get('new_label_suggestion')
+            category = classification.get('category')
+
+            # Handle needs_response drafting first — the archive decision below
+            # depends on whether a draft actually exists (not just whether we
+            # intended to make one), so a failed draft never leaves a thread
+            # silently archived with nothing to act on.
+            has_draft = False
+            if category == 'needs_response' and classification.get('draft_reply'):
+                if thread_id in drafted_threads:
+                    has_draft = True
+                elif _thread_has_reply_or_draft(service, thread_id, thread_reply_cache):
+                    has_draft = True  # already handled in a previous run
+                else:
+                    to_email = re.search(r'<(.+?)>', sender).group(1) if '<' in sender else sender
+                    try:
+                        draft_id = create_threaded_draft(
+                            to_email=to_email,
+                            subject=subject if subject.startswith('Re:') else f'Re: {subject}',
+                            body=classification['draft_reply'],
+                            thread_id=thread_id,
+                            service=service,
+                        )
+                        log(f'    -> Draft created: {draft_id}')
+                        drafted += 1
+                        drafted_threads.add(thread_id)
+                        has_draft = True
+                    except Exception as e:
+                        log(f'  Draft failed: {e}')
+
+            # A needs_response thread with a draft waiting in Drafts has been
+            # handled — archive it too so it doesn't linger in the inbox.
+            if classification.get('archive') or has_draft:
+                remove_labels = ['INBOX']
+                archived += 1
+
+        existing_label = classification.get('existing_label') if not calendar_only else None
+        new_label_suggestion = classification.get('new_label_suggestion') if not calendar_only else None
 
         if existing_label and existing_label.lower() in label_name_to_id_lower:
             add_labels.append(label_name_to_id_lower[existing_label.lower()])
@@ -266,12 +319,18 @@ def run_mailbox_manager(
                 except Exception as e:
                     log(f'  Calendar event failed for "{event.get("title")}": {e}')
 
-        log(f'  {category}: {sender[:50]} | {subject[:50]}')
+        n_events = len(classification.get('calendar_events') or [])
+        if calendar_only:
+            log(f'  {"(event found)" if n_events else "(no events)"}: {sender[:50]} | {subject[:50]}')
+        else:
+            log(f'  {category}: {sender[:50]} | {subject[:50]}')
 
     log(
-        f'Done — archived: {archived}, labeled: {labeled}, drafts created: {drafted}, '
-        f'labels created: {labels_created}, calendar events created: {events_created}, '
-        f'skipped (grace period): {skipped_grace}'
+        (f'Done — calendar events created: {events_created}, skipped (grace period): {skipped_grace}'
+         if calendar_only else
+         f'Done — archived: {archived}, labeled: {labeled}, drafts created: {drafted}, '
+         f'labels created: {labels_created}, calendar events created: {events_created}, '
+         f'skipped (grace period): {skipped_grace}')
     )
     return {
         'archived': archived, 'labeled': labeled, 'drafted': drafted,

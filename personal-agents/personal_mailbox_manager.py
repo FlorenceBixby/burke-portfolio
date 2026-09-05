@@ -1,11 +1,18 @@
 """
 Personal Mailbox Manager — burke.ruder@gmail.com
-Runs daily. Archives/labels marketing, bills, and notifications; drafts
-replies (never sends) only for threads that genuinely need a response.
-Also extracts calendar-worthy events onto the Family Events calendar.
 
-See mailbox_common.py for the shared triage/archive/draft/calendar logic
-used by both this and atxruders_mailbox_manager.py.
+Calendar-only mode as of 2026-09-05: Burke found the prior full triage (auto-
+archiving marketing/bills/notifications, drafting replies) was causing him to
+miss real emails, and asked to drop all of that. This script now does exactly
+one thing — reads the inbox and extracts calendar-worthy events onto the
+Family Events calendar. It never archives, labels, or drafts anything; the
+inbox is left exactly as Burke left it. atxruders_mailbox_manager.py (the
+shared family inbox) is unchanged and still does the full triage — only this
+mailbox was asked to change.
+
+See mailbox_common.py's calendar_only param / extract_calendar_events_with_claude()
+for the shared logic. The full triage code path (classify_with_claude, drafting,
+labeling) is still there and still used by atxruders_mailbox_manager.py.
 
 Setup (one-time):
   See gmail_agent.py's docstring for the general OAuth flow. To connect
@@ -47,4 +54,5 @@ if __name__ == '__main__':
         grace_period_hours=0,
         calendar_service=calendar_service,
         calendar_id=FAMILY_CALENDAR_ID,
+        calendar_only=True,
     )
