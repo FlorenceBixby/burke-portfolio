@@ -1,0 +1,35 @@
+name: Ironman Training Calendar Sync
+
+on:
+  schedule:
+    - cron: '30 14 * * *'   # 2:30 PM UTC = ~9:30 AM CT (CDT; adjust if daylight saving matters) — after the day's "today" coaching session is expected to be in D1
+  workflow_dispatch:
+
+jobs:
+  training-calendar-sync:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: personal-agents
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: personal-agents/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Write secrets to disk
+        run: |
+          echo '${{ secrets.GMAIL_CREDENTIALS_PERSONAL }}' > gmail_credentials_personal.json
+          echo '${{ secrets.GMAIL_TOKEN_PERSONAL }}' > gmail_token_personal.json
+
+      - name: Sync today's training session to the primary calendar
+        run: python training_calendar_sync.py
