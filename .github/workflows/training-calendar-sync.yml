@@ -33,3 +33,15 @@ jobs:
 
       - name: Sync today's training session to the primary calendar
         run: python training_calendar_sync.py
+
+      - name: Report to Burke's Chief of Staff
+        if: always()
+        env:
+          COS_SECRET: ${{ secrets.COS_ESCALATION_SECRET }}
+        run: |
+          [ -n "$COS_SECRET" ] || exit 0
+          if [ "${{ job.status }}" = "success" ]; then
+            curl -s -o /dev/null -X POST https://chief-of-staff.burke-ruder.workers.dev/heartbeat -H "X-Escalation-Secret: $COS_SECRET" -H "Content-Type: application/json" -d '{"agent":"sailing_master","status":"ok","summary":"run succeeded"}'
+          else
+            curl -s -o /dev/null -X POST https://chief-of-staff.burke-ruder.workers.dev/escalate -H "X-Escalation-Secret: $COS_SECRET" -H "Content-Type: application/json" -d '{"agent":"sailing_master","message":"GitHub Actions run failed: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}'
+          fi
