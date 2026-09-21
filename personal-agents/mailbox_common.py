@@ -183,11 +183,16 @@ def run_mailbox_manager(
         label_name_to_id = {l['name']: l['id'] for l in user_labels}
         label_name_to_id_lower = {name.lower(): lid for name, lid in label_name_to_id.items()}
 
-    result = service.users().messages().list(
-        userId='me', labelIds=['INBOX'], maxResults=100
-    ).execute()
+    # Calendar-only mode never archives, so the inbox never shrinks and a
+    # plain INBOX scan re-sent the same 50-70 emails to Claude every day
+    # (48 -> 66 calls/day over one week, all repeats). Only look at what
+    # arrived since the last daily run, with a day of overlap for safety.
+    list_kwargs = {'userId': 'me', 'labelIds': ['INBOX'], 'maxResults': 100}
+    if calendar_only:
+        list_kwargs['q'] = 'newer_than:2d'
+    result = service.users().messages().list(**list_kwargs).execute()
     messages = result.get('messages', [])
-    log(f'Inbox messages: {len(messages)}')
+    log(f'Inbox messages to scan: {len(messages)}' + (' (last 2 days only)' if calendar_only else ''))
 
     archived = 0
     labeled = 0
