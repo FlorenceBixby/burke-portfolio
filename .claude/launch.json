@@ -1,0 +1,32 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "sunfield-dev",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "cd /Users/burkeruder/dnd-table && export CLOUDFLARE_API_TOKEN=$(security find-generic-password -a burke -s cf-claude-write -w) CLOUDFLARE_ACCOUNT_ID=39c192c934290776b0b406805133fa4b && npx wrangler dev --port 8787"
+      ],
+      "port": 8787
+    },
+    {
+      "name": "whale-watcher-dev",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "cd /Users/burkeruder/whale-watcher && npx wrangler dev --port 8788"
+      ],
+      "port": 8788
+    },
+    {
+      "name": "brendan-dev",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "cd /Users/burkeruder/brendans-home-services && npx wrangler dev --port 8789"
+      ],
+      "port": 8789
+    }
+  ]
+}
