@@ -50,20 +50,14 @@ STATE_FILE = Path(__file__).parent / "output" / "bill_forwarder_state.json"
 # The scan is deliberately broad; --dry-run shows which ones actually hit so
 # the list can be trimmed to Burke's real providers.
 CARRIERS = {
-    "att":          ("AT&T",          ["att.com", "att-mail.com", "e.att.com"],            []),
-    "spectrum":     ("Spectrum",      ["spectrumemails.com", "spectrum.com", "spectrum.net", "charter.com"],     []),
-    "google_fiber": ("Google Fiber",  ["fiber.google.com", "google.com"],                  ["fiber"]),
+    # Phone only — Burke's Cloudflare reimbursement doesn't cover internet (2026-09-28).
+    "att":          ("AT&T",          ["att.com", "att-mail.com", "e.att.com", "att.net", "emails.att.com"], []),
     "verizon":      ("Verizon",       ["verizon.com", "verizonwireless.com", "vzw.com"],   []),
     "tmobile":      ("T-Mobile",      ["t-mobile.com", "tmobile.com"],                     []),
-    "xfinity":      ("Xfinity",       ["xfinity.com", "comcast.com", "comcast.net"],       []),
-    "astound":      ("Astound/Grande",["astound.com", "grande.com", "rcn.com"],            []),
-    "frontier":     ("Frontier",      ["frontier.com"],                                    []),
     "mint":         ("Mint Mobile",   ["mintmobile.com"],                                  []),
     "visible":      ("Visible",       ["visible.com"],                                     []),
-    "us_cellular":  ("US Cellular",   ["uscellular.com"],                                  []),
     "cricket":      ("Cricket",       ["cricketwireless.com"],                             []),
-    "starlink":     ("Starlink",      ["starlink.com"],                                    []),
-    "tachus":       ("Tachus",        ["tachus.com"],                                      []),
+    "google_fi":    ("Google Fi",     ["fi.google.com"],                                   ["fi"]),
 }
 BILL_WORDS = '(bill OR statement OR invoice OR "amount due" OR autopay OR "payment scheduled" OR "is ready")'
 
@@ -210,7 +204,8 @@ def discover(service, lookback):
     """--discover: list every sender domain with a bill-looking email, so the
     CARRIERS table can be matched to Burke's real providers."""
     from collections import Counter
-    q = f"{BILL_WORDS} newer_than:{lookback}d -in:trash -in:spam"
+    q = os.environ.get("DISCOVER_QUERY") or f"{BILL_WORDS} newer_than:{lookback}d -in:trash -in:spam"
+    log(f"discover query: {q}")
     res = service.users().messages().list(userId="me", q=q, maxResults=150).execute()
     counts, example = Counter(), {}
     for m in res.get("messages", []):
@@ -219,7 +214,7 @@ def discover(service, lookback):
         dom = h.get("from", "").split("@")[-1].strip(">")
         counts[dom] += 1
         example.setdefault(dom, h.get("subject", "")[:80])
-    log(f"discover: {sum(counts.values())} bill-looking emails in {lookback}d")
+    log(f"discover: {sum(counts.values())} matching emails")
     for dom, n in counts.most_common(40):
         log(f"  {n:3} {dom:38} {example[dom]}")
 
