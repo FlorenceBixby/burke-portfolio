@@ -47,9 +47,10 @@ jobs:
       - name: Run
         env:
           WORK_EMAIL: ${{ secrets.WORK_EMAIL }}
+          DISCOVER_QUERY: ${{ inputs.query }}
         run: |
           if [ "${{ inputs.discover }}" = "true" ]; then
-            DISCOVER_QUERY="${{ inputs.query }}" LOOKBACK_DAYS=60 python bill_forwarder.py --discover
+            LOOKBACK_DAYS=60 python bill_forwarder.py --discover
           elif [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.dry_run }}" = "true" ]; then
             python bill_forwarder.py --dry-run
           else
