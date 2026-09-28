@@ -38,6 +38,7 @@ jobs:
         run: |
           echo '${{ secrets.GMAIL_CREDENTIALS_PERSONAL }}' > gmail_credentials_personal.json
           echo '${{ secrets.GMAIL_TOKEN_PERSONAL }}' > gmail_token_personal.json
+          echo '${{ secrets.GMAIL_TOKEN_ATXRUDERS }}' > gmail_token_atxruders.json
 
       - name: Run
         env:

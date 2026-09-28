@@ -6,10 +6,9 @@ bill email from each carrier in his personal Gmail and sends it to his work
 address so he can expense it. Built 2026-09-28.
 
 How it decides what to send, per carrier (most recent matching email wins):
-  1. PDF attached          → forward the email with the PDF attached.
-  2. No PDF, "bill ready"  → send a summary (amount + due date pulled from the
-                             email text, link to the carrier's portal) and
-                             flag that the PDF still has to be downloaded.
+  1. PDF attached          → send a short cover email with the PDF attached.
+  2. No PDF (Spectrum)     → re-send the carrier's original email untouched,
+                             subject prefixed with carrier/month/amount.
 A carrier that has already been sent for the current billing month is skipped
 (state lives in output/bill_forwarder_state.json, committed by the workflow).
 
@@ -39,7 +38,12 @@ from gmail_agent import _get_gmail_service, _extract_body
 load_dotenv()
 
 CREDENTIALS_FILE = Path(__file__).parent / "gmail_credentials_personal.json"
-TOKEN_FILE = Path(__file__).parent / "gmail_token_personal.json"
+# Both household inboxes. Spectrum bills land in atxruders@ (found 2026-09-28);
+# a token file that's missing is skipped so a local run with one token works.
+ACCOUNTS = [
+    ("burke.ruder@gmail.com", Path(__file__).parent / "gmail_token_personal.json"),
+    ("atxruders@gmail.com",   Path(__file__).parent / "gmail_token_atxruders.json"),
+]
 STATE_FILE = Path(__file__).parent / "output" / "bill_forwarder_state.json"
 
 # Carriers we look for. key → (label, sender-domain fragments, extra subject words).
@@ -47,7 +51,7 @@ STATE_FILE = Path(__file__).parent / "output" / "bill_forwarder_state.json"
 # the list can be trimmed to Burke's real providers.
 CARRIERS = {
     "att":          ("AT&T",          ["att.com", "att-mail.com", "e.att.com"],            []),
-    "spectrum":     ("Spectrum",      ["spectrum.com", "spectrum.net", "charter.com"],     []),
+    "spectrum":     ("Spectrum",      ["spectrumemails.com", "spectrum.com", "spectrum.net", "charter.com"],     []),
     "google_fiber": ("Google Fiber",  ["fiber.google.com", "google.com"],                  ["fiber"]),
     "verizon":      ("Verizon",       ["verizon.com", "verizonwireless.com", "vzw.com"],   []),
     "tmobile":      ("T-Mobile",      ["t-mobile.com", "tmobile.com"],                     []),
@@ -64,7 +68,7 @@ CARRIERS = {
 BILL_WORDS = '(bill OR statement OR invoice OR "amount due" OR autopay OR "payment scheduled" OR "is ready")'
 
 AMOUNT_RE = re.compile(r"\$\s?(\d{1,4}(?:,\d{3})*(?:\.\d{2})?)")
-DUE_RE = re.compile(r"(?:due|auto-?pay(?:ment)?(?: date| scheduled)?|will be (?:paid|charged|drafted))[^$\n]{0,40}?(\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.? \d{1,2}(?:, \d{4})?|\d{1,2}/\d{1,2}(?:/\d{2,4})?)", re.I)
+DUE_RE = re.compile(r"(?:due|auto[- ]?pay(?:ment)?(?: date| scheduled)?|will be (?:paid|charged|drafted))[^$\n]{0,40}?(\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.? \d{1,2}(?:, \d{4})?|\d{1,2}/\d{1,2}(?:/\d{2,4})?)", re.I)
 LINK_RE = re.compile(r"https?://[^\s\">)]+")
 
 
@@ -113,7 +117,8 @@ def find_candidates(service, lookback):
                 "pdfs": pdfs, "amount": _first(AMOUNT_RE, body), "due": _first(DUE_RE, body),
                 "link": _portal_link(body, domains),
             }
-            if best is None or cand["internal"] > best["internal"] or (cand["pdfs"] and not best["pdfs"]):
+            cand["rank"] = (bool(cand["pdfs"]), bool(re.search(r"statement|bill is ready|invoice", subj, re.I)), cand["internal"])
+            if best is None or cand["rank"] > best["rank"]:
                 best = cand
         found[key] = best
     return found
@@ -155,6 +160,23 @@ def _walk_pdfs(payload):
 
 def billing_month(cand):
     return datetime.fromtimestamp(cand["internal"] / 1000, tz=timezone.utc).strftime("%Y-%m")
+
+
+def forward_raw(service, cand, to_addr, from_addr):
+    """Re-send the carrier's original email to the work address, content untouched.
+    Reviewers get the carrier-branded statement, not a paraphrase."""
+    import email
+    from email import policy
+    raw = service.users().messages().get(userId="me", id=cand["id"], format="raw").execute()["raw"]
+    msg = email.message_from_bytes(base64.urlsafe_b64decode(raw), policy=policy.default)
+    for h in ("To", "Cc", "Bcc", "From", "Reply-To", "Message-ID", "DKIM-Signature", "Return-Path", "Received", "List-Unsubscribe", "List-Unsubscribe-Post"):
+        del msg[h]
+    msg["From"] = from_addr
+    msg["To"] = to_addr
+    orig_subject = cand["subject"]
+    del msg["Subject"]
+    msg["Subject"] = f"Fwd: {cand['label']} bill {billing_month(cand)}" + (f" ${cand['amount']}" if cand["amount"] else "") + f" — {orig_subject}"
+    return {"raw": base64.urlsafe_b64encode(msg.as_bytes()).decode()}
 
 
 def build_email(service, cand, to_addr):
@@ -205,8 +227,10 @@ def discover(service, lookback):
 def main():
     dry = "--dry-run" in sys.argv
     if "--discover" in sys.argv:
-        service = _get_gmail_service(credentials_path=CREDENTIALS_FILE, token_path=TOKEN_FILE)
-        discover(service, int(os.environ.get("LOOKBACK_DAYS", "60")))
+        for addr, token in ACCOUNTS:
+            if token.exists():
+                log(f"== {addr}")
+                discover(_get_gmail_service(credentials_path=CREDENTIALS_FILE, token_path=token), int(os.environ.get("LOOKBACK_DAYS", "60")))
         return
     lookback = int(os.environ.get("LOOKBACK_DAYS", "40"))
     to_addr = os.environ.get("WORK_EMAIL", "").strip()
@@ -214,29 +238,34 @@ def main():
         log("WORK_EMAIL secret is not set; scanning only, nothing will be sent.")
         dry = True
 
-    service = _get_gmail_service(credentials_path=CREDENTIALS_FILE, token_path=TOKEN_FILE)
     state = load_state()
-    found = find_candidates(service, lookback)
-    if not found:
-        log("No carrier bill emails found in the lookback window.")
-        return
-
     sent_any = False
-    for key, cand in found.items():
-        month = billing_month(cand)
-        status = "PDF" if cand["pdfs"] else "no PDF"
-        log(f"{cand['label']:<14} {month}  {status:<7} amount={cand['amount']} due={cand['due']}  from={cand['from']}  subj={cand['subject'][:70]}")
-        if state["sent"].get(key) == month:
-            log(f"  already sent for {month}, skipping")
+    any_found = False
+    for addr, token in ACCOUNTS:
+        if not token.exists():
+            log(f"{addr}: no token file, skipping")
             continue
-        if dry:
-            log(f"  would send → {to_addr or '(WORK_EMAIL unset)'}")
-            continue
-        body = build_email(service, cand, to_addr)
-        service.users().messages().send(userId="me", body=body).execute()
-        state["sent"][key] = month
-        sent_any = True
-        log(f"  sent → {to_addr}")
+        service = _get_gmail_service(credentials_path=CREDENTIALS_FILE, token_path=token)
+        found = find_candidates(service, lookback)
+        log(f"{addr}: {len(found)} carrier(s) matched")
+        for key, cand in found.items():
+            any_found = True
+            month = billing_month(cand)
+            status = "PDF" if cand["pdfs"] else "no PDF"
+            log(f"  {cand['label']:<14} {month}  {status:<7} amount={cand['amount']} due={cand['due']}  subj={cand['subject'][:70]}")
+            if state["sent"].get(key) == month:
+                log(f"    already sent for {month}, skipping")
+                continue
+            if dry:
+                log(f"    would forward → {to_addr or '(WORK_EMAIL unset)'}")
+                continue
+            body = build_email(service, cand, to_addr) if cand["pdfs"] else forward_raw(service, cand, to_addr, addr)
+            service.users().messages().send(userId="me", body=body).execute()
+            state["sent"][key] = month
+            sent_any = True
+            log(f"    sent → {to_addr}")
+    if not any_found:
+        log("No carrier bill emails found in the lookback window.")
     if sent_any:
         save_state(state)
 
