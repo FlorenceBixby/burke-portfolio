@@ -1,0 +1,67 @@
+name: Bill Forwarder (internet + phone → work email)
+
+on:
+  schedule:
+    - cron: '0 14 3 * *'   # 3rd of the month, 9 AM CT — after the carriers' late-month bill emails land
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Scan and list candidates without sending"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  forward-bills:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: personal-agents
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: personal-agents/requirements.txt
+
+      - run: pip install -r requirements.txt
+
+      - name: Write secrets to disk
+        run: |
+          echo '${{ secrets.GMAIL_CREDENTIALS_PERSONAL }}' > gmail_credentials_personal.json
+          echo '${{ secrets.GMAIL_TOKEN_PERSONAL }}' > gmail_token_personal.json
+
+      - name: Run
+        env:
+          WORK_EMAIL: ${{ secrets.WORK_EMAIL }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.dry_run }}" = "true" ]; then
+            python bill_forwarder.py --dry-run
+          else
+            python bill_forwarder.py
+          fi
+
+      - name: Persist sent-state
+        if: github.event_name == 'schedule' || inputs.dry_run == false
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          git config user.name "bill-forwarder"
+          git config user.email "actions@github.com"
+          git add personal-agents/output/bill_forwarder_state.json 2>/dev/null || exit 0
+          git diff --cached --quiet || git commit -m "bill-forwarder: record sent bills" && git push
+
+      - name: Report to Burke's Chief of Staff
+        if: always()
+        env:
+          COS_SECRET: ${{ secrets.COS_ESCALATION_SECRET }}
+        run: |
+          [ -n "$COS_SECRET" ] || exit 0
+          if [ "${{ job.status }}" = "success" ]; then
+            curl -s -o /dev/null -X POST https://chief-of-staff.burke-ruder.workers.dev/heartbeat -H "X-Escalation-Secret: $COS_SECRET" -H "Content-Type: application/json" -d '{"agent":"bill_forwarder","status":"ok","summary":"run succeeded"}'
+          else
+            curl -s -o /dev/null -X POST https://chief-of-staff.burke-ruder.workers.dev/escalate -H "X-Escalation-Secret: $COS_SECRET" -H "Content-Type: application/json" -d '{"agent":"bill_forwarder","message":"GitHub Actions run failed: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}'
+          fi
