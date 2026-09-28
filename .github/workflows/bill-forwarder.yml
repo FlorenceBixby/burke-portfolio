@@ -9,6 +9,10 @@ on:
         description: "Scan and list candidates without sending"
         type: boolean
         default: true
+      discover:
+        description: "List every bill-looking sender (read-only)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -39,7 +43,9 @@ jobs:
         env:
           WORK_EMAIL: ${{ secrets.WORK_EMAIL }}
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.dry_run }}" = "true" ]; then
+          if [ "${{ inputs.discover }}" = "true" ]; then
+            LOOKBACK_DAYS=60 python bill_forwarder.py --discover
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.dry_run }}" = "true" ]; then
             python bill_forwarder.py --dry-run
           else
             python bill_forwarder.py

@@ -184,8 +184,30 @@ def build_email(service, cand, to_addr):
     return {"raw": base64.urlsafe_b64encode(msg.as_bytes()).decode()}
 
 
+def discover(service, lookback):
+    """--discover: list every sender domain with a bill-looking email, so the
+    CARRIERS table can be matched to Burke's real providers."""
+    from collections import Counter
+    q = f"{BILL_WORDS} newer_than:{lookback}d -in:trash -in:spam"
+    res = service.users().messages().list(userId="me", q=q, maxResults=150).execute()
+    counts, example = Counter(), {}
+    for m in res.get("messages", []):
+        meta = service.users().messages().get(userId="me", id=m["id"], format="metadata", metadataHeaders=["From", "Subject"]).execute()
+        h = {x["name"].lower(): x["value"] for x in meta["payload"].get("headers", [])}
+        dom = h.get("from", "").split("@")[-1].strip(">")
+        counts[dom] += 1
+        example.setdefault(dom, h.get("subject", "")[:80])
+    log(f"discover: {sum(counts.values())} bill-looking emails in {lookback}d")
+    for dom, n in counts.most_common(40):
+        log(f"  {n:3} {dom:38} {example[dom]}")
+
+
 def main():
     dry = "--dry-run" in sys.argv
+    if "--discover" in sys.argv:
+        service = _get_gmail_service(credentials_path=CREDENTIALS_FILE, token_path=TOKEN_FILE)
+        discover(service, int(os.environ.get("LOOKBACK_DAYS", "60")))
+        return
     lookback = int(os.environ.get("LOOKBACK_DAYS", "40"))
     to_addr = os.environ.get("WORK_EMAIL", "").strip()
     if not dry and not to_addr:
