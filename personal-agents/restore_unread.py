@@ -18,8 +18,28 @@ QUERY = "is:unread -in:inbox -in:spam -in:trash -in:sent -in:draft"
 DRY_RUN = os.environ.get("DRY_RUN") == "1"
 
 
+def report_filters(service):
+    """Read-only: list Gmail filters that skip the inbox or apply labels, so we
+    can see what keeps routing mail out of the inbox."""
+    try:
+        labels = {l["id"]: l["name"] for l in service.users().labels().list(userId="me").execute().get("labels", [])}
+        filters = service.users().settings().filters().list(userId="me").execute().get("filter", [])
+    except Exception as e:
+        print(f"[{ACCOUNT}] couldn't read filters: {e}")
+        return
+    movers = [f for f in filters if "INBOX" in f.get("action", {}).get("removeLabelIds", []) or f.get("action", {}).get("addLabelIds")]
+    print(f"[{ACCOUNT}] {len(filters)} Gmail filters, {len(movers)} skip the inbox or add a label:")
+    for f in movers:
+        a = f.get("action", {})
+        print(f"  FILTER {f['id']}: {f.get('criteria')} -> add {[labels.get(x, x) for x in a.get('addLabelIds', [])]} remove {[labels.get(x, x) for x in a.get('removeLabelIds', [])]}")
+    # Where the unread-outside-inbox mail is sitting, by label
+    from collections import Counter
+    return labels
+
+
 def main():
     service = _get_gmail_service(credentials_path=CREDENTIALS_FILE, token_path=TOKEN_FILE)
+    report_filters(service)
     ids = []
     page_token = None
     while True:
