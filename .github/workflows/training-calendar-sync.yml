@@ -2,7 +2,9 @@ name: Ironman Training Calendar Sync
 
 on:
   schedule:
-    - cron: '30 14 * * *'   # 2:30 PM UTC = ~9:30 AM CT (CDT; adjust if daylight saving matters) — after the day's "today" coaching session is expected to be in D1
+    # Hourly, ~7am-10pm CT (CDT): picks up the morning coaching session, then
+    # moves the event whenever Bela schedules or reschedules it.
+    - cron: '15 0-3,12-23 * * *'
   workflow_dispatch:
 
 jobs:
