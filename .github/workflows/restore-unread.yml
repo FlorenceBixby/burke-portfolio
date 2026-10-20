@@ -1,7 +1,8 @@
-name: atxruders Restore Unread to Inbox
+name: Restore Unread to Inbox (both inboxes)
 
-# One-off, manual only. Undoes the archiving the (now retired) atxruders
-# mailbox manager did: every unread message it moved out of the inbox goes back.
+# Manual only. Moves every unread message that's sitting in a folder/label
+# (outside the inbox) back into the inbox, for burke.ruder@ and atxruders@.
+# Labels stay on as tags; nothing is deleted or marked read.
 
 on:
   workflow_dispatch:
@@ -13,6 +14,10 @@ on:
 jobs:
   restore:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        account: [personal, atxruders]
     defaults:
       run:
         working-directory: personal-agents
@@ -27,8 +32,10 @@ jobs:
       - name: Write credentials to disk
         run: |
           echo '${{ secrets.GMAIL_CREDENTIALS_PERSONAL }}' > gmail_credentials_personal.json
+          echo '${{ secrets.GMAIL_TOKEN_PERSONAL }}' > gmail_token_personal.json
           echo '${{ secrets.GMAIL_TOKEN_ATXRUDERS }}' > gmail_token_atxruders.json
       - name: Restore unread messages to the inbox
         env:
           DRY_RUN: ${{ github.event.inputs.dry_run }}
-        run: python atxruders_restore_unread.py
+          ACCOUNT: ${{ matrix.account }}
+        run: python restore_unread.py

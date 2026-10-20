@@ -1,5 +1,5 @@
 """
-Personal Mailbox Manager — burke.ruder@gmail.com
+Personal Mailbox Manager — burke.ruder@gmail.com + atxruders@gmail.com (calendar-only)
 
 Calendar-only mode as of 2026-09-05: Burke found the prior full triage (auto-
 archiving marketing/bills/notifications, drafting replies) was causing him to
@@ -37,6 +37,10 @@ from calendar_agent import _get_calendar_service
 
 CREDENTIALS_FILE = Path(__file__).parent / "gmail_credentials_personal.json"
 TOKEN_FILE = Path(__file__).parent / "gmail_token_personal.json"
+# 2026-10-20: Burke asked for this to be the ONLY email automation, covering both
+# his inbox and the shared family inbox (atxruders@). The atxruders full-triage
+# manager was deleted; both inboxes now get calendar-only scanning, nothing moved.
+ATXRUDERS_TOKEN_FILE = Path(__file__).parent / "gmail_token_atxruders.json"
 LOG_FILE = str(Path(__file__).parent / "output" / "personal_mailbox.log")
 
 FAMILY_CALENDAR_ID = os.environ.get('FAMILY_CALENDAR_ID')
@@ -47,12 +51,24 @@ if __name__ == '__main__':
     if FAMILY_CALENDAR_ID:
         calendar_service = _get_calendar_service(credentials_path=CREDENTIALS_FILE, token_path=TOKEN_FILE)
 
-    run_mailbox_manager(
-        credentials_path=CREDENTIALS_FILE,
-        token_path=TOKEN_FILE,
-        log_path=LOG_FILE,
-        grace_period_hours=0,
-        calendar_service=calendar_service,
-        calendar_id=FAMILY_CALENDAR_ID,
-        calendar_only=True,
-    )
+    failures = []
+    for label, token in (("burke.ruder@gmail.com", TOKEN_FILE), ("atxruders@gmail.com", ATXRUDERS_TOKEN_FILE)):
+        if not token.exists():
+            print(f"{label}: no token file, skipping")
+            continue
+        print(f"===== {label} =====")
+        try:
+            run_mailbox_manager(
+                credentials_path=CREDENTIALS_FILE,
+                token_path=token,
+                log_path=LOG_FILE,
+                grace_period_hours=0,
+                calendar_service=calendar_service,
+                calendar_id=FAMILY_CALENDAR_ID,
+                calendar_only=True,
+            )
+        except Exception as e:  # one inbox's expired token shouldn't stop the other
+            print(f"{label}: FAILED — {e}")
+            failures.append(label)
+    if failures:
+        raise SystemExit(f"Calendar scan failed for: {', '.join(failures)}")

@@ -1,4 +1,4 @@
-name: Personal Mailbox Manager
+name: Calendar Events from Email (burke.ruder + atxruders)
 
 on:
   schedule:
@@ -35,6 +35,7 @@ jobs:
           EOF
           echo '${{ secrets.GMAIL_CREDENTIALS_PERSONAL }}' > gmail_credentials_personal.json
           echo '${{ secrets.GMAIL_TOKEN_PERSONAL }}' > gmail_token_personal.json
+          echo '${{ secrets.GMAIL_TOKEN_ATXRUDERS }}' > gmail_token_atxruders.json
 
       - name: Run personal mailbox manager
         run: python personal_mailbox_manager.py

@@ -1,6 +1,6 @@
 """
-One-off: put every unread message that the mailbox manager archived back in
-atxruders@gmail.com's inbox. Labels it applied are left in place as tags —
+Put every unread message that's sitting outside the inbox (archived or in a
+folder/label) back in the inbox. ACCOUNT=personal (burke.ruder@) or atxruders. Labels it applied are left in place as tags —
 Gmail labels aren't exclusive, so an email can be in the inbox and labeled.
 
 DRY_RUN=1 lists what would change without touching anything.
@@ -12,7 +12,8 @@ from pathlib import Path
 from gmail_agent import _get_gmail_service
 
 CREDENTIALS_FILE = Path(__file__).parent / "gmail_credentials_personal.json"
-TOKEN_FILE = Path(__file__).parent / "gmail_token_atxruders.json"
+ACCOUNT = os.environ.get("ACCOUNT", "atxruders")
+TOKEN_FILE = Path(__file__).parent / f"gmail_token_{ACCOUNT}.json"
 QUERY = "is:unread -in:inbox -in:spam -in:trash -in:sent -in:draft"
 DRY_RUN = os.environ.get("DRY_RUN") == "1"
 
@@ -27,7 +28,7 @@ def main():
         page_token = resp.get("nextPageToken")
         if not page_token:
             break
-    print(f"{len(ids)} unread messages outside the inbox")
+    print(f"[{ACCOUNT}] {len(ids)} unread messages outside the inbox")
 
     for mid in ids[:15]:
         msg = service.users().messages().get(userId="me", id=mid, format="metadata", metadataHeaders=["From", "Subject"]).execute()
