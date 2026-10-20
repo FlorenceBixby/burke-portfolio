@@ -32,6 +32,8 @@ SCOPES = [
 # Used only for tokens that also need to write to a Google Calendar
 # (currently just burke.ruder@gmail.com's personal token).
 CALENDAR_SCOPES = SCOPES + ["https://www.googleapis.com/auth/calendar"]
+# Needed only to read/edit Gmail filters (fix_filters.py). Request with --settings.
+SETTINGS_SCOPE = "https://www.googleapis.com/auth/gmail.settings.basic"
 
 
 def _get_credentials(credentials_path: Path = None, token_path: Path = None, scopes: list = None):
@@ -186,7 +188,9 @@ if __name__ == "__main__":
 
         creds_override = _arg_after("--credentials")
         token_override = _arg_after("--token")
-        scopes = CALENDAR_SCOPES if "--calendar" in sys.argv else SCOPES
+        scopes = list(CALENDAR_SCOPES if "--calendar" in sys.argv else SCOPES)
+        if "--settings" in sys.argv:
+            scopes.append(SETTINGS_SCOPE)
 
         from googleapiclient.discovery import build
 
@@ -196,7 +200,7 @@ if __name__ == "__main__":
         service = build("gmail", "v1", credentials=creds)
         profile = service.users().getProfile(userId="me").execute()
         print(f"\nConnected as: {profile['emailAddress']}")
-        print(f"Scopes: {'Gmail + Calendar' if scopes is CALENDAR_SCOPES else 'Gmail only'}")
+        print(f"Scopes: {', '.join(x.rsplit('/', 1)[-1] for x in scopes)}")
         print(f"Token saved to: {Path(token_override) if token_override else TOKEN_FILE}")
     else:
         print("Gmail Agent")
