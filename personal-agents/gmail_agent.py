@@ -78,7 +78,12 @@ def _get_credentials(credentials_path: Path = None, token_path: Path = None, sco
                     "Follow the setup instructions in gmail_agent.py"
                 )
             flow = InstalledAppFlow.from_client_secrets_file(str(credentials_file), requested_scopes)
-            creds = flow.run_local_server(port=0)
+            # Always show the account picker: two Gmail accounts share this
+            # client, and a silent default has handed back the wrong one.
+            # GMAIL_LOGIN_HINT pre-selects the right account on Google's page.
+            hint = os.environ.get("GMAIL_LOGIN_HINT")
+            extra = {"login_hint": hint} if hint else {}
+            creds = flow.run_local_server(port=0, prompt="select_account consent", **extra)
 
         with open(token_file, "w") as f:
             f.write(creds.to_json())
