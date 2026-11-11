@@ -5,7 +5,9 @@ message ID (stored in each event's private extended properties) so the
 same extracted event never gets inserted twice across daily runs.
 """
 
+import re
 from datetime import datetime, timedelta
+from difflib import SequenceMatcher
 from pathlib import Path
 
 from gmail_agent import _get_credentials, CALENDAR_SCOPES
@@ -78,21 +80,52 @@ def upsert_event(service, calendar_id: str, event: dict, source_msg_id: str):
     return 'updated'
 
 
-def create_event_if_new(service, calendar_id: str, event: dict, source_msg_id: str):
+def _norm_title(title: str) -> str:
+    return re.sub(r'[^a-z0-9]+', ' ', (title or '').lower()).strip()
+
+
+def _same_day_twin(service, calendar_id: str, event: dict):
+    """An event already on `event`'s date with (nearly) the same title, e.g.
+    ClassDojo's "New event" email and its "5 days until" reminder describing
+    the same thing. Same date only, so a real multi-day run of
+    identically-named events ("No School" Mon + Tue) isn't collapsed."""
+    day = datetime.strptime(event['date'], '%Y-%m-%d')
+    items = service.events().list(
+        calendarId=calendar_id, singleEvents=True,
+        timeMin=(day - timedelta(hours=12)).strftime('%Y-%m-%dT%H:%M:%SZ'),
+        timeMax=(day + timedelta(hours=36)).strftime('%Y-%m-%dT%H:%M:%SZ'),
+    ).execute().get('items', [])
+    want = _norm_title(event['title'])
+    for it in items:
+        start = it['start'].get('date') or it['start'].get('dateTime', '')[:10]
+        if start != event['date']:
+            continue
+        have = _norm_title(it.get('summary'))
+        if have == want or SequenceMatcher(None, have, want).ratio() >= 0.85:
+            return it
+    return None
+
+
+def create_event_if_new(service, calendar_id: str, event: dict, source_msg_id: str, invite: str = None):
     """Insert `event` unless one derived from `source_msg_id` already exists
-    on the calendar. `event` needs `title` and `date` (YYYY-MM-DD), and may
-    include `time` (HH:MM, 24h) for a timed event, plus optional `location`
-    and `description`. Returns the created event ID, or None if skipped as
-    a duplicate.
+    on the calendar, or another email already put the same event on that
+    date. `event` needs `title` and `date` (YYYY-MM-DD), and may include
+    `time` (HH:MM, 24h) for a timed event, plus optional `location` and
+    `description`. `invite` adds that address as a guest and emails it the
+    invite. Returns the created event ID, or None if skipped as a duplicate.
     """
     existing = service.events().list(
         calendarId=calendar_id,
         privateExtendedProperty=f"source_msg_id={source_msg_id}",
         maxResults=1,
     ).execute()
-    if existing.get('items'):
+    if existing.get('items') or _same_day_twin(service, calendar_id, event):
         return None
 
     body = _event_body(event, source_msg_id)
-    created = service.events().insert(calendarId=calendar_id, body=body).execute()
+    if invite:
+        body['attendees'] = [{'email': invite}]
+    created = service.events().insert(
+        calendarId=calendar_id, body=body, sendUpdates='all' if invite else 'none'
+    ).execute()
     return created['id']

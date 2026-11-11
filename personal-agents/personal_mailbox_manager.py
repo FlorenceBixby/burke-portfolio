@@ -44,6 +44,9 @@ ATXRUDERS_TOKEN_FILE = Path(__file__).parent / "gmail_token_atxruders.json"
 LOG_FILE = str(Path(__file__).parent / "output" / "personal_mailbox.log")
 
 FAMILY_CALENDAR_ID = os.environ.get('FAMILY_CALENDAR_ID')
+# 2026-11-11: Burke wants kids' events (school, ClassDojo, youth sports) on his
+# work calendar too, as invites. Address kept in a secret since this repo is public.
+WORK_INVITE_EMAIL = os.environ.get('WORK_INVITE_EMAIL')
 
 
 if __name__ == '__main__':
@@ -66,6 +69,7 @@ if __name__ == '__main__':
                 calendar_service=calendar_service,
                 calendar_id=FAMILY_CALENDAR_ID,
                 calendar_only=True,
+                invite_email=WORK_INVITE_EMAIL,
             )
         except Exception as e:  # one inbox's expired token shouldn't stop the other
             print(f"{label}: FAILED — {e}")

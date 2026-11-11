@@ -10,6 +10,7 @@ import os
 import re
 import json
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 from anthropic import Anthropic
 from dotenv import load_dotenv
@@ -20,6 +21,7 @@ from calendar_agent import create_event_if_new
 load_dotenv()
 
 CLAUDE_MODEL = "claude-sonnet-4-6"
+CENTRAL = ZoneInfo("America/Chicago")
 
 # Gmail system labels that aren't real user "folders" — never offered to
 # Claude as an existing-label option, never created, never removed except
@@ -45,8 +47,10 @@ NO_REPLY_DOMAINS = [
 CALENDAR_ONLY_SYSTEM_PROMPT = """You scan one email at a time from a Gmail inbox, looking ONLY for real-world events, deadlines, or dates worth having on a personal calendar — e.g. "pajama day" buried in a school's monthly newsletter, a parent-teacher conference date, an appointment, a due date. This can be buried anywhere in the email, including fine print in a newsletter or notification that isn't otherwise about an event.
 
 Respond with ONLY a JSON object, no other text:
-{"calendar_events": [{"title": "...", "date": "YYYY-MM-DD", "time": "HH:MM" or null for all-day, "location": "..." or null, "description": "..." or null}]}
-Empty list [] if nothing calendar-worthy. Today's date is __TODAY__ — resolve relative dates ("next Friday", "the 15th") against that.
+{"calendar_events": [{"title": "...", "date": "YYYY-MM-DD", "time": "HH:MM" or null for all-day, "location": "..." or null, "description": "..." or null, "kids": true/false}]}
+Empty list [] if nothing calendar-worthy. Not calendar-worthy: order/delivery confirmations, receipts, sales and promo end dates, subscription or membership renewals/expirations.
+"kids": true when the event is about Burke's kids — their school (ClassDojo, teachers, Sunfield Elementary, PTA), youth sports, or kids' activities; false otherwise.
+This email was sent on __SENT__ (today is __TODAY__). Resolve relative dates ("tomorrow", "next Friday", "the 15th") against the SENT date, not today.
 """
 
 CLASSIFY_SYSTEM_PROMPT_HEAD = """You triage one email at a time from a Gmail inbox.__MAILBOX_CONTEXT__
@@ -126,11 +130,12 @@ Body:
     return json.loads(match.group(0))
 
 
-def extract_calendar_events_with_claude(client: Anthropic, sender: str, subject: str, snippet: str, body: str) -> dict:
+def extract_calendar_events_with_claude(client: Anthropic, sender: str, subject: str, snippet: str, body: str, sent: str = None) -> dict:
     """calendar_only mode's classifier — see CALENDAR_ONLY_SYSTEM_PROMPT. Never asked
     to make an archive/label/draft decision, so there's nothing here to accidentally
     apply to the inbox even if this function is called."""
-    system_prompt = CALENDAR_ONLY_SYSTEM_PROMPT.replace('__TODAY__', datetime.now().strftime('%Y-%m-%d'))
+    today = datetime.now(CENTRAL).strftime('%Y-%m-%d (%A)')
+    system_prompt = CALENDAR_ONLY_SYSTEM_PROMPT.replace('__TODAY__', today).replace('__SENT__', sent or today)
     user_content = f"""From: {sender}
 Subject: {subject}
 Snippet: {snippet}
@@ -159,6 +164,7 @@ def run_mailbox_manager(
     calendar_service=None,
     calendar_id: str = None,
     calendar_only: bool = False,
+    invite_email: str = None,
 ):
     """
     calendar_only=True (personal_mailbox_manager.py, 2026-09-05): does nothing but
@@ -227,7 +233,8 @@ def run_mailbox_manager(
             body = _extract_body(m['payload'])
 
             if calendar_only:
-                classification = extract_calendar_events_with_claude(client, sender, subject, snippet, body)
+                sent = datetime.fromtimestamp(int(m.get('internalDate', '0')) / 1000, CENTRAL).strftime('%Y-%m-%d (%A)')
+                classification = extract_calendar_events_with_claude(client, sender, subject, snippet, body, sent)
             else:
                 classification = classify_with_claude(
                     client, sender, subject, snippet, body, list(label_name_to_id.keys()), mailbox_context
@@ -315,12 +322,13 @@ def run_mailbox_manager(
             for event in classification.get('calendar_events') or []:
                 try:
                     if event.get('title') and event.get('date'):
+                        invite = invite_email if event.get('kids') else None
                         created_id = create_event_if_new(
-                            calendar_service, calendar_id, event, source_msg_id=msg['id']
+                            calendar_service, calendar_id, event, source_msg_id=msg['id'], invite=invite
                         )
                         if created_id:
                             events_created += 1
-                            log(f'    -> Calendar event created: {event["title"]} ({event["date"]})')
+                            log(f'    -> Calendar event created: {event["title"]} ({event["date"]})' + (' + work invite' if invite else ''))
                 except Exception as e:
                     log(f'  Calendar event failed for "{event.get("title")}": {e}')
 

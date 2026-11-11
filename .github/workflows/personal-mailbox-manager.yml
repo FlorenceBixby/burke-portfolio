@@ -32,6 +32,7 @@ jobs:
           ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }}
           ANTHROPIC_BASE_URL=https://gateway.ai.cloudflare.com/v1/39c192c934290776b0b406805133fa4b/personal-mailbox/anthropic
           FAMILY_CALENDAR_ID=${{ secrets.FAMILY_CALENDAR_ID }}
+          WORK_INVITE_EMAIL=${{ secrets.WORK_INVITE_EMAIL }}
           EOF
           echo '${{ secrets.GMAIL_CREDENTIALS_PERSONAL }}' > gmail_credentials_personal.json
           echo '${{ secrets.GMAIL_TOKEN_PERSONAL }}' > gmail_token_personal.json
