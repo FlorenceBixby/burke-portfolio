@@ -25,9 +25,10 @@ up, not just TIG. Don't
 just silently mention it in passing text — this whole mechanism exists because passive
 mentions get missed, same as the email did.
 
-Once Burke answers: reviews launch via `cro_agent.py --launch <id>` (or `--reject`),
-system issues get decided via the ops dashboard's Approvals tab or directly against
-`system_issues.burke_decision`/`actioned` in D1 if it's faster to just do it.
+Once Burke answers: system issues get decided via the ops dashboard's Approvals tab or
+directly against `system_issues.burke_decision`/`actioned` in D1 if it's faster to just do
+it. (`cro_agent.py` was deleted in the 2026-11-11 TIG restart — outbound is now one
+Instantly campaign Claude builds on demand, so `cro_reviews` should stay empty.)
 
 Caveat that's real and was flagged when this was designed: this only fires when an
 active session actually runs the check — it's not a push notification. If a pending
